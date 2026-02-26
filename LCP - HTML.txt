@@ -22,6 +22,9 @@
         .card-shadow-lg {
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
+        html {
+            scroll-behavior: smooth;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -104,6 +107,260 @@
             );
         };
 
+        // Pricing Page Component
+        const PricingPage = ({ onNavigate }) => {
+            const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' or 'annual'
+
+            const plans = [
+                {
+                    name: 'Basic',
+                    monthlyPrice: 9,
+                    annualPrice: 90,
+                    description: 'Essential estate organization',
+                    features: [
+                        'Asset storage',
+                        'Legal document upload',
+                        'Trusted contacts',
+                        'Basic activity monitoring'
+                    ],
+                    color: 'blue',
+                    icon: 'shield',
+                },
+                {
+                    name: 'Premium',
+                    monthlyPrice: 19,
+                    annualPrice: 190,
+                    description: 'Advanced protection and insights',
+                    features: [
+                        'Advanced trigger logic',
+                        'Digital asset manager',
+                        'AI estate summary',
+                        'Multi-recipient disclosure control',
+                        'Audit logs'
+                    ],
+                    color: 'purple',
+                    icon: 'crown',
+                    popular: true
+                },
+                {
+                    name: 'Family',
+                    monthlyPrice: 29,
+                    annualPrice: 290,
+                    description: 'Complete family protection',
+                    features: [
+                        'Up to 4 users',
+                        'Shared family vault',
+                        'Cross-visibility options'
+                    ],
+                    color: 'green',
+                    icon: 'users'
+                }
+            ];
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Navigation */}
+                    <nav className="bg-white border-b sticky top-0 z-50">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
+                                        <i data-lucide="shield" className="w-6 h-6 text-white"></i>
+                                    </div>
+                                    <span className="text-xl font-bold text-gray-900">Life Continuity</span>
+                                </div>
+                                <div className="hidden md:flex items-center gap-8">
+                                    <button onClick={() => onNavigate('home')} className="text-gray-600 hover:text-gray-900">Home</button>
+                                    <a href="#how-it-works" className="text-gray-600 hover:text-gray-900">How It Works</a>
+                                    <a href="#features" className="text-gray-600 hover:text-gray-900">Features</a>
+                                    <a href="#security" className="text-gray-600 hover:text-gray-900">Security</a>
+                                    <button onClick={() => onNavigate('pricing')} className="text-blue-900 font-semibold">Pricing</button>
+                                    <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900">Sign In</button>
+                                    <button onClick={() => onNavigate('signup')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
+                                        Get Started
+                                    </button>
+                                </div>
+                                {/* Mobile menu button */}
+                                <button className="md:hidden text-gray-600 hover:text-gray-900">
+                                    <i data-lucide="menu" className="w-6 h-6"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Pricing Header */}
+                    <div className="bg-gradient-to-b from-blue-50 to-white py-16">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                                Simple, Transparent Pricing
+                            </h1>
+                            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                                Choose the plan that fits your family's needs. All plans include bank-level security and conditional disclosure.
+                            </p>
+                            
+                            {/* Billing Toggle */}
+                            <div className="flex items-center justify-center gap-4 mb-12">
+                                <button
+                                    onClick={() => setBillingCycle('monthly')}
+                                    className={`px-6 py-2 rounded-lg font-semibold transition ${
+                                        billingCycle === 'monthly'
+                                            ? 'bg-blue-900 text-white'
+                                            : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                                    }`}
+                                >
+                                    Monthly
+                                </button>
+                                <button
+                                    onClick={() => setBillingCycle('annual')}
+                                    className={`px-6 py-2 rounded-lg font-semibold transition ${
+                                        billingCycle === 'annual'
+                                            ? 'bg-blue-900 text-white'
+                                            : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                                    }`}
+                                >
+                                    Annual <span className="text-sm opacity-75">(Save up to 17%)</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Pricing Cards */}
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+                        <div className="grid md:grid-cols-3 gap-8">
+                            {plans.map((plan) => {
+                                const price = billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice;
+                                const period = billingCycle === 'monthly' ? 'month' : 'year';
+                                const savings = billingCycle === 'annual' && plan.annualPrice < plan.monthlyPrice * 12 
+                                    ? Math.round((1 - plan.annualPrice / (plan.monthlyPrice * 12)) * 100) 
+                                    : 0;
+
+                                return (
+                                    <div
+                                        key={plan.name}
+                                        className={`relative bg-white rounded-2xl card-shadow-lg overflow-hidden transition hover:scale-105 ${
+                                            plan.popular ? 'ring-2 ring-blue-500 shadow-xl' : ''
+                                        }`}
+                                    >
+                                        {plan.popular && (
+                                            <div className="absolute top-0 right-0 bg-blue-500 text-white px-4 py-1 rounded-bl-lg text-sm font-semibold">
+                                                Most Popular
+                                            </div>
+                                        )}
+                                        
+                                        <div className="p-8">
+                                            <div className={`w-14 h-14 bg-${plan.color}-100 rounded-xl flex items-center justify-center mb-6`}>
+                                                <i data-lucide={plan.icon} className={`w-8 h-8 text-${plan.color}-600`}></i>
+                                            </div>
+                                            
+                                            <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                                            <p className="text-gray-600 mb-4">{plan.description}</p>
+                                            
+                                            <div className="mb-6">
+                                                <span className="text-4xl font-bold text-gray-900">${price}</span>
+                                                <span className="text-gray-600 ml-2">/{period}</span>
+                                                {billingCycle === 'annual' && savings > 0 && (
+                                                    <p className="text-sm text-green-600 mt-1">Save {savings}% vs monthly</p>
+                                                )}
+                                            </div>
+                                            
+                                            <ul className="space-y-3 mb-8">
+                                                {plan.features.map((feature, idx) => (
+                                                    <li key={idx} className="flex items-start gap-3">
+                                                        <i data-lucide="check-circle" className={`w-5 h-5 text-${plan.color}-600 flex-shrink-0 mt-0.5`}></i>
+                                                        <span className="text-gray-700">{feature}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            
+                                            <button className={`w-full bg-${plan.color}-600 text-white py-3 rounded-lg font-semibold hover:bg-${plan.color}-700 transition`}>
+                                                Choose {plan.name}
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Annual Discount Summary */}
+                        <div className="mt-16 bg-blue-50 rounded-2xl p-8 text-center">
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Annual Discount Plans</h3>
+                            <p className="text-gray-600 mb-6">Save more with upfront annual billing</p>
+                            <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+                                <div className="bg-white rounded-xl p-4">
+                                    <p className="font-semibold text-gray-900">Basic</p>
+                                    <p className="text-2xl font-bold text-blue-900">$90<span className="text-sm text-gray-600 font-normal">/year</span></p>
+                                    <p className="text-sm text-green-600">Save $18</p>
+                                </div>
+                                <div className="bg-white rounded-xl p-4">
+                                    <p className="font-semibold text-gray-900">Premium</p>
+                                    <p className="text-2xl font-bold text-blue-900">$190<span className="text-sm text-gray-600 font-normal">/year</span></p>
+                                    <p className="text-sm text-green-600">Save $38</p>
+                                </div>
+                                <div className="bg-white rounded-xl p-4">
+                                    <p className="font-semibold text-gray-900">Family</p>
+                                    <p className="text-2xl font-bold text-blue-900">$290<span className="text-sm text-gray-600 font-normal">/year</span></p>
+                                    <p className="text-sm text-green-600">Save $58</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Legal Disclaimer in Pricing */}
+                        <div className="mt-12">
+                            <LegalDisclaimer variant="box" />
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-gray-900 text-white py-12">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="grid md:grid-cols-4 gap-8 mb-8">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                            <i data-lucide="shield" className="w-5 h-5 text-white"></i>
+                                        </div>
+                                        <span className="font-bold">Life Continuity</span>
+                                    </div>
+                                    <p className="text-gray-400 text-sm">Clarity When It Matters</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold mb-4">Product</h4>
+                                    <div className="space-y-2 text-gray-400 text-sm">
+                                        <p className="hover:text-white cursor-pointer">How It Works</p>
+                                        <p className="hover:text-white cursor-pointer">Features</p>
+                                        <p className="hover:text-white cursor-pointer">Security</p>
+                                        <p className="hover:text-white cursor-pointer">Pricing</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold mb-4">Legal</h4>
+                                    <div className="space-y-2 text-gray-400 text-sm">
+                                        <p className="hover:text-white cursor-pointer">Privacy Policy</p>
+                                        <p className="hover:text-white cursor-pointer">Terms of Service</p>
+                                        <p className="hover:text-white cursor-pointer">Legal Disclaimer</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold mb-4">Support</h4>
+                                    <div className="space-y-2 text-gray-400 text-sm">
+                                        <p className="hover:text-white cursor-pointer">Help Center</p>
+                                        <p className="hover:text-white cursor-pointer">Contact Us</p>
+                                        <p className="hover:text-white cursor-pointer">FAQ</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
+                                <p className="mb-2">© 2026 Life Continuity. All rights reserved.</p>
+                                <p className="text-xs">
+                                    <strong>Important:</strong> Life Continuity does not replace, override, or supersede a legally executed Will or estate document.
+                                </p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
         // Home Page Component
         const HomePage = ({ onNavigate, onGetStarted }) => {
             return (
@@ -122,11 +379,16 @@
                                     <a href="#how-it-works" className="text-gray-600 hover:text-gray-900">How It Works</a>
                                     <a href="#features" className="text-gray-600 hover:text-gray-900">Features</a>
                                     <a href="#security" className="text-gray-600 hover:text-gray-900">Security</a>
+                                    <button onClick={() => onNavigate('pricing')} className="text-blue-900 font-semibold hover:text-blue-800">Pricing</button>
                                     <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900">Sign In</button>
                                     <button onClick={onGetStarted} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
                                         Get Started
                                     </button>
                                 </div>
+                                {/* Mobile menu button */}
+                                <button className="md:hidden text-gray-600 hover:text-gray-900">
+                                    <i data-lucide="menu" className="w-6 h-6"></i>
+                                </button>
                             </div>
                         </div>
                     </nav>
@@ -1439,6 +1701,9 @@
                 }
                 if (currentPage === 'login') {
                     return <LoginPage onNavigate={handleNavigate} onLogin={handleLogin} />;
+                }
+                if (currentPage === 'pricing') {
+                    return <PricingPage onNavigate={handleNavigate} />;
                 }
                 return <HomePage onNavigate={handleNavigate} onGetStarted={handleGetStarted} />;
             }

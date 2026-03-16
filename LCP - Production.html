@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Continuity - Production</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .card-shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Production Data Store (no demo data)
+        const productionData = {
+            user: {
+                name: "",
+                email: "",
+                mfaEnabled: false,
+                lastCheckIn: null,
+                nextCheckIn: null,
+                status: "Active"
+            },
+            assets: [],
+            legalDocs: [],
+            trustedPeople: [],
+            digitalAssets: [],
+            estatePlanner: {
+                personal: { fullName: "", dob: "", address: "" },
+                executor: { name: "", relationship: "", phone: "", backup: "" },
+                guardians: { primary: "", backup: "", notes: "" },
+                allocation: "",
+                specialInstructions: "",
+                funeral: ""
+            }
+        };
+
+        // Legal Disclaimer Component
+        const LegalDisclaimer = ({ variant = "banner" }) => {
+            if (variant === "banner") {
+                return (
+                    <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-6">
+                        <div className="flex items-start">
+                            <i data-lucide="alert-triangle" className="text-amber-600 w-5 h-5 mt-0.5 mr-3 flex-shrink-0"></i>
+                            <div className="text-sm text-amber-800">
+                                <p className="font-semibold mb-1">Important Legal Notice</p>
+                                <p>Life Continuity is a secure organization and conditional disclosure platform. <strong>It does not replace, override, or supersede a legally executed Will or estate document.</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="bg-gray-100 border border-gray-300 rounded-lg p-6 text-center">
+                    <i data-lucide="shield-alert" className="w-12 h-12 text-blue-900 mx-auto mb-3"></i>
+                    <h3 className="font-bold text-lg text-gray-900 mb-2">Legal Disclaimer</h3>
+                    <p className="text-sm text-gray-700 mb-4">
+                        Life Continuity is a secure organization and conditional disclosure platform. 
+                        <strong className="block mt-2">It does not replace, override, or supersede a legally executed Will or estate document.</strong>
+                    </p>
+                    <p className="text-xs text-gray-600">
+                        Always consult with a licensed estate planning attorney for legal advice.
+                    </p>
+                </div>
+            );
+        };
+
+        // Pricing Page Component
+        const PricingPage = ({ onNavigate }) => {
+            const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' or 'annual'
+
+            const plans = [
+                {
+                    name: 'Basic',
+                    monthlyPrice: 9,
+                    annualPrice: 90,
+                    description: 'Essential estate organization',
+                    features: [
+                        'Asset storage',
+                        'Legal document upload',
+                        'Trusted contacts',
+                        'Basic activity monitoring'
+                    ],
+                    color: 'blue',
+                    icon: 'shield',
+                },
+                {
+                    name: 'Premium',
+                    monthlyPrice: 19,
+                    annualPrice: 190,
+                    description: 'Advanced protection and insights',
+                    features: [
+                        'Advanced trigger logic',
+                        'Digital asset manager',
+                        'AI estate summary',
+                        'Multi-recipient disclosure control',
+                        'Audit logs'
+                    ],
+                    color: 'purple',
+                    icon: 'crown',
+                    popular: true
+                },
+                {
+                    name: 'Family',
+                    monthlyPrice: 29,
+                    annualPrice: 290,
+                    description: 'Complete family protection',
+                    features: [
+                        'Up to 4 users',
+                        'Shared family vault',
+                        'Cross-visibility options'
+                    ],
+                    color: 'green',
+                    icon: 'users'
+                }
+            ];
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Navigation */}
+                    <nav className="bg-white border-b sticky top-0 z-50">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
+                                        <i data-lucide="shield" className="w-6 h-6 text-white"></i>
+                                    </div>
+                                    <span className="text-xl font-bold text-gray-900">Life Continuity</span>
+                                </div>
+                                <div className="hidden md:flex items-center gap-8">
+                                    <button onClick={() => onNavigate('home')} className="text-gray-600 hover:text-gray-900">Home</button>
+                                    <a href="#how-it-works" className="text-gray-600 hover:text-gray-900">How It Works</a>
+                                    <a href="#features" className="text-gray-600 hover:text-gray-900">Features</a>
+                                    <a href="#security" className="text-gray-600 hover:text-gray-900">Security</a>
+                                    <button onClick={() => onNavigate('pricing')} className="text-blue-900 font-semibold">Pricing</button>
+                                    <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900">Sign In</button>
+                                    <button onClick={() => onNavigate('signup')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
+                                        Get Started
+                                    </button>
+                                </div>
+                                {/* Mobile menu button */}
+                                <button className="md:hidden text-gray-600 hover:text-gray-900">
+                                    <i data-lucide="menu" className="w-6 h-6"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Pricing Header */}
+                    <div className="bg-gradient-to-b from-blue-50 to-white py-16">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                                Simple, Transparent Pricing
+                            </h1>
+                            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                                Choose the plan that fits your family's needs. All plans include bank-level security and conditional disclosure.
+                            </p>
+                            
+                            {/* Billing Toggle */}
+                            <div className="flex items-center justify-center gap-4 mb-12">
+                                <button
+                                    onClick={() => setBillingCycle('monthly')}
+                                    className={`px-6 py-2 rounded-lg font-semibold transition ${
+                                        billingCycle === 'monthly'
+                                            ? 'bg-blue-900 text-white'
+                                            : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                                    }`}
+                                >
+                                    Monthly
+                                </button>
+                                <button
+                                    onClick={() => setBillingCycle('annual')}
+                                    className={`px-6 py-2 rounded-lg font-semibold transition ${
+                                        billingCycle === 'annual'
+                                            ? 'bg-blue-900 text-white'
+                                            : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                                    }`}
+                                >
+                                    Annual <span className="text-sm opacity-75">(Save up to 17%)</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Pricing Cards */}
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+                        <div className="grid md:grid-cols-3 gap-8">
+                            {plans.map((plan) => {
+                                const price = billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice;
+                                const period = billingCycle === 'monthly' ? 'month' : 'year';
+                                const savings = billingCycle === 'annual' && plan.annualPrice < plan.monthlyPrice * 12 
+                                    ? Math.round((1 - plan.annualPrice / (plan.monthlyPrice * 12)) * 100) 
+                                    : 0;
+
+                                return (
+                                    <div
+                                        key={plan.name}
+                                        className={`relative bg-white rounded-2xl card-shadow-lg overflow-hidden transition hover:scale-105 ${
+                                            plan.popular ? 'ring-2 ring-blue-500 shadow-xl' : ''
+                                        }`}
+                                    >
+                                        {plan.popular && (
+                                            <div className="absolute top-0 right-0 bg-blue-500 text-white px-4 py-1 rounded-bl-lg text-sm font-semibold">
+                                                Most Popular
+                                            </div>
+                                        )}
+                                        
+                                        <div className="p-8">
+                                            <div className={`w-14 h-14 bg-${plan.color}-100 rounded-xl flex items-center justify-center mb-6`}>
+                                                <i data-lucide={plan.icon} className={`w-8 h-8 text-${plan.color}-600`}></i>
+                                            </div>
+                                            
+                                            <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                                            <p className="text-gray-600 mb-4">{plan.description}</p>
+                                            
+                                            <div className="mb-6">
+                                                <span className="text-4xl font-bold text-gray-900">${price}</span>
+                                                <span className="text-gray-600 ml-2">/{period}</span>
+                                                {billingCycle === 'annual' && savings > 0 && (
+                                                    <p className="text-sm text-green-600 mt-1">Save {savings}% vs monthly</p>
+                                                )}
+                                            </div>
+                                            
+                                            <ul className="space-y-3 mb-8">
+                                                {plan.features.map((feature, idx) => (
+                                                    <li key={idx} className="flex items-start gap-3">
+                                                        <i data-lucide="check-circle" className={`w-5 h-5 text-${plan.color}-600 flex-shrink-0 mt-0.5`}></i>
+                                                        <span className="text-gray-700">{feature}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            
+                                            <button className={`w-full bg-${plan.color}-600 text-white py-3 rounded-lg font-semibold hover:bg-${plan.color}-700 transition`}>
+                                                Choose {plan.name}
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Annual Discount Summary */}
+                        <div className="mt-16 bg-blue-50 rounded-2xl p-8 text-center">
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Annual Discount Plans</h3>
+                            <p className="text-gray-600 mb-6">Save more with upfront annual billing</p>
+                            <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+                                <div className="bg-white rounded-xl p-4">
+                                    <p className="font-semibold text-gray-900">Basic</p>
+                                    <p className="text-2xl font-bold text-blue-900">$90<span className="text-sm text-gray-600 font-normal">/year</span></p>
+                                    <p className="text-sm text-green-600">Save $18</p>
+                                </div>
+                                <div className="bg-white rounded-xl p-4">
+                                    <p className="font-semibold text-gray-900">Premium</p>
+                                    <p className="text-2xl font-bold text-blue-900">$190<span className="text-sm text-gray-600 font-normal">/year</span></p>
+                                    <p className="text-sm text-green-600">Save $38</p>
+                                </div>
+                                <div className="bg-white rounded-xl p-4">
+                                    <p className="font-semibold text-gray-900">Family</p>
+                                    <p className="text-2xl font-bold text-blue-900">$290<span className="text-sm text-gray-600 font-normal">/year</span></p>
+                                    <p className="text-sm text-green-600">Save $58</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Legal Disclaimer in Pricing */}
+                        <div className="mt-12">
+                            <LegalDisclaimer variant="box" />
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-gray-900 text-white py-12">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="grid md:grid-cols-4 gap-8 mb-8">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                            <i data-lucide="shield" className="w-5 h-5 text-white"></i>
+                                        </div>
+                                        <span className="font-bold">Life Continuity</span>
+                                    </div>
+                                    <p className="text-gray-400 text-sm">Clarity When It Matters</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold mb-4">Product</h4>
+                                    <div className="space-y-2 text-gray-400 text-sm">
+                                        <button onClick={() => onNavigate('home', '#how-it-works')} className="block hover:text-white transition text-left w-full">How It Works</button>
+                                        <button onClick={() => onNavigate('home', '#features')} className="block hover:text-white transition text-left w-full">Features</button>
+                                        <button onClick={() => onNavigate('home', '#security')} className="block hover:text-white transition text-left w-full">Security</button>
+                                        <button onClick={() => onNavigate('pricing')} className="block hover:text-white transition text-left w-full">Pricing</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold mb-4">Legal</h4>
+                                    <div className="space-y-2 text-gray-400 text-sm">
+                                        <a href="#legal" className="block hover:text-white transition">Privacy Policy</a>
+                                        <a href="#legal" className="block hover:text-white transition">Terms of Service</a>
+                                        <a href="#legal" className="block hover:text-white transition">Legal Disclaimer</a>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold mb-4">Support</h4>
+                                    <div className="space-y-2 text-gray-400 text-sm">
+                                        <a href="#support" className="block hover:text-white transition">Help Center</a>
+                                        <a href="#support" className="block hover:text-white transition">Contact Us</a>
+                                        <a href="#support" className="block hover:text-white transition">FAQ</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
+                                <p className="mb-2">© 2026 Life Continuity. All rights reserved.</p>
+                                <p className="text-xs">
+                                    <strong>Important:</strong> Life Continuity does not replace, override, or supersede a legally executed Will or estate document.
+                                </p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        // Home Page Component
+        const HomePage = ({ onNavigate, onGetStarted }) => {
+            return (
+                <div className="min-h-screen">
+                    {/* Navigation */}
+                    <nav className="bg-white border-b sticky top-0 z-50">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
+                                        <i data-lucide="shield" className="w-6 h-6 text-white"></i>
+                                    </div>
+                                    <span className="text-xl font-bold text-gray-900">Life Continuity</span>
+                                </div>
+                                <div className="hidden md:flex items-center gap-8">
+                                    <a href="#how-it-works" className="text-gray-600 hover:text-gray-900">How It Works</a>
+                                    <a href="#features" className="text-gray-600 hover:text-gray-900">Features</a>
+                                    <a href="#security" className="text-gray-600 hover:text-gray-900">Security</a>
+                                    <button onClick={() => onNavigate('pricing')} className="text-blue-900 font-semibold hover:text-blue-800">Pricing</button>
+                                    <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900">Sign In</button>
+                                    <button onClick={onGetStarted} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
+                                        Get Started
+                                    </button>
+                                </div>
+                                {/* Mobile menu button */}
+                                <button className="md:hidden text-gray-600 hover:text-gray-900">
+                                    <i data-lucide="menu" className="w-6 h-6"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Hero Section */}
+                    <section className="gradient-bg text-white py-20">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+                                Clarity When It Matters
+                            </h1>
+                            <p className="text-xl md:text-2xl mb-4 text-blue-100 max-w-3xl mx-auto">
+                                Secure estate organization and conditional disclosure for life's unexpected moments
+                            </p>
+                            <p className="text-lg text-blue-200 mb-8 max-w-2xl mx-auto">
+                                Prepared. Protected. Connected.
+                            </p>
+                            <button onClick={onGetStarted} className="bg-white text-blue-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 transition shadow-lg">
+                                Start Your Plan
+                            </button>
+                        </div>
+                    </section>
+
+                    {/* How It Works */}
+                    <section id="how-it-works" className="py-20 bg-white">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <h2 className="text-4xl font-bold text-center mb-4 text-gray-900">How It Works</h2>
+                            <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+                                Simple, secure, and structured continuity planning in four steps
+                            </p>
+                            <div className="grid md:grid-cols-4 gap-8">
+                                <div className="text-center">
+                                    <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i data-lucide="folder-open" className="w-10 h-10 text-blue-900"></i>
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-2 text-gray-900">1. Organize</h3>
+                                    <p className="text-gray-600">Store estate information, legal documents, and digital asset instructions securely</p>
+                                </div>
+                                <div className="text-center">
+                                    <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i data-lucide="users" className="w-10 h-10 text-blue-900"></i>
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-2 text-gray-900">2. Assign Contacts</h3>
+                                    <p className="text-gray-600">Designate executors, trusted contacts, and beneficiaries with role-based access</p>
+                                </div>
+                                <div className="text-center">
+                                    <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i data-lucide="bell" className="w-10 h-10 text-blue-900"></i>
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-2 text-gray-900">3. Set Triggers</h3>
+                                    <p className="text-gray-600">Configure activity monitoring with multi-factor verification safeguards</p>
+                                </div>
+                                <div className="text-center">
+                                    <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i data-lucide="check-circle" className="w-10 h-10 text-blue-900"></i>
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-2 text-gray-900">4. Conditional Disclosure</h3>
+                                    <p className="text-gray-600">Pre-authorized information released only after verified trigger conditions</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Features */}
+                    <section id="features" className="py-20 bg-gray-50">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <h2 className="text-4xl font-bold text-center mb-12 text-gray-900">Complete Estate Organization</h2>
+                            <div className="grid md:grid-cols-3 gap-8">
+                                {[
+                                    { icon: "shield", title: "Secure Vault", desc: "End-to-end encrypted storage for all critical documents and information" },
+                                    { icon: "file-text", title: "Estate Planner", desc: "Guided legal-style inputs for comprehensive estate organization" },
+                                    { icon: "building", title: "Asset Management", desc: "Track real estate, accounts, investments, and business interests" },
+                                    { icon: "smartphone", title: "Digital Life Manager", desc: "Organize social media, email, subscriptions, and crypto assets" },
+                                    { icon: "users-round", title: "Trusted People", desc: "Role-based access for executors, contacts, and beneficiaries" },
+                                    { icon: "activity", title: "Life Signal Monitoring", desc: "Customizable check-ins with multi-stage escalation safeguards" }
+                                ].map((feature, idx) => (
+                                    <div key={idx} className="bg-white p-6 rounded-xl card-shadow">
+                                        <i data-lucide={feature.icon} className="w-12 h-12 text-blue-900 mb-4"></i>
+                                        <h3 className="text-xl font-bold mb-2 text-gray-900">{feature.title}</h3>
+                                        <p className="text-gray-600">{feature.desc}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Security */}
+                    <section id="security" className="py-20 bg-white">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="grid md:grid-cols-2 gap-12 items-center">
+                                <div>
+                                    <h2 className="text-4xl font-bold mb-6 text-gray-900">Bank-Level Security</h2>
+                                    <p className="text-lg text-gray-600 mb-8">
+                                        Your most sensitive information deserves the highest level of protection
+                                    </p>
+                                    <div className="space-y-4">
+                                        {[
+                                            { icon: "lock", title: "End-to-End Encryption", desc: "Client-side encryption before upload ensures we never see your data" },
+                                            { icon: "key", title: "Zero-Knowledge Storage", desc: "Split-key encryption model means even we can't access your vault" },
+                                            { icon: "shield-check", title: "Multi-Factor Authentication", desc: "Required for all critical actions and disclosure events" },
+                                            { icon: "scroll", title: "Immutable Audit Logs", desc: "Every access attempt and trigger event is permanently recorded" }
+                                        ].map((item, idx) => (
+                                            <div key={idx} className="flex gap-4">
+                                                <i data-lucide={item.icon} className="w-6 h-6 text-blue-900 flex-shrink-0 mt-1"></i>
+                                                <div>
+                                                    <h3 className="font-bold text-gray-900">{item.title}</h3>
+                                                    <p className="text-gray-600 text-sm">{item.desc}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="bg-gray-50 p-8 rounded-xl">
+                                    <LegalDisclaimer variant="box" />
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Footer */}
+                    <footer className="bg-gray-900 text-white py-12">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="grid md:grid-cols-4 gap-8 mb-8">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                            <i data-lucide="shield" className="w-5 h-5 text-white"></i>
+                                        </div>
+                                        <span className="font-bold">Life Continuity</span>
+                                    </div>
+                                    <p className="text-gray-400 text-sm">Clarity When It Matters</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold mb-4">Product</h4>
+                                    <div className="space-y-2 text-gray-400 text-sm">
+                                        <a href="#how-it-works" className="block hover:text-white transition">How It Works</a>
+                                        <a href="#features" className="block hover:text-white transition">Features</a>
+                                        <a href="#security" className="block hover:text-white transition">Security</a>
+                                        <button onClick={() => onNavigate('pricing')} className="block hover:text-white transition text-left w-full">Pricing</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold mb-4">Legal</h4>
+                                    <div className="space-y-2 text-gray-400 text-sm">
+                                        <a href="#legal" className="block hover:text-white transition">Privacy Policy</a>
+                                        <a href="#legal" className="block hover:text-white transition">Terms of Service</a>
+                                        <a href="#legal" className="block hover:text-white transition">Legal Disclaimer</a>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold mb-4">Support</h4>
+                                    <div className="space-y-2 text-gray-400 text-sm">
+                                        <a href="#support" className="block hover:text-white transition">Help Center</a>
+                                        <a href="#support" className="block hover:text-white transition">Contact Us</a>
+                                        <a href="#support" className="block hover:text-white transition">FAQ</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
+                                <p className="mb-2">© 2026 Life Continuity. All rights reserved.</p>
+                                <p className="text-xs">
+                                    <strong>Important:</strong> Life Continuity does not replace, override, or supersede a legally executed Will or estate document.
+                                </p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        // Signup Page Component
+        const SignupPage = ({ onNavigate, onSignup }) => {
+            const [formData, setFormData] = useState({
+                name: '',
+                email: '',
+                password: '',
+                province: '',
+                agreedToDisclaimer: false
+            });
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (formData.agreedToDisclaimer) {
+                    onSignup(formData.name);
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+                    <div className="max-w-md w-full">
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="shield" className="w-10 h-10 text-white"></i>
+                            </div>
+                            <h2 className="text-3xl font-bold text-gray-900">Create Your Account</h2>
+                            <p className="text-gray-600 mt-2">Start organizing your estate today</p>
+                        </div>
+
+                        <div className="bg-white rounded-xl card-shadow-lg p-8">
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                                    <input
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="John Anderson"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                                    <input
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="john@email.com"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                                    <input
+                                        type="password"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="••••••••"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Province / State</label>
+                                    <select
+                                        value={formData.province}
+                                        onChange={(e) => setFormData({...formData, province: e.target.value})}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        required
+                                    >
+                                        <option value="">Select Province/State</option>
+                                        <option value="AB">Alberta</option>
+                                        <option value="BC">British Columbia</option>
+                                        <option value="ON">Ontario</option>
+                                        <option value="QC">Quebec</option>
+                                    </select>
+                                </div>
+
+                                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                    <label className="flex items-start gap-3 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.agreedToDisclaimer}
+                                            onChange={(e) => setFormData({...formData, agreedToDisclaimer: e.target.checked})}
+                                            className="mt-1"
+                                            required
+                                        />
+                                        <span className="text-sm text-gray-700">
+                                            I understand that Life Continuity <strong>does not replace, override, or supersede a legally executed Will or estate document</strong>, and is for information organization and conditional disclosure only.
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                    disabled={!formData.agreedToDisclaimer}
+                                >
+                                    Create Account
+                                </button>
+                            </form>
+
+                            <p className="text-center text-sm text-gray-600 mt-6">
+                                Already have an account?{' '}
+                                <button onClick={() => onNavigate('login')} className="text-blue-900 font-semibold hover:underline">
+                                    Sign In
+                                </button>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Login Page Component
+        const LoginPage = ({ onNavigate, onLogin }) => {
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onLogin();
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+                    <div className="max-w-md w-full">
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="shield" className="w-10 h-10 text-white"></i>
+                            </div>
+                            <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
+                            <p className="text-gray-600 mt-2">Sign in to your Life Continuity account</p>
+                        </div>
+
+                        <div className="bg-white rounded-xl card-shadow-lg p-8">
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="john@email.com"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="••••••••"
+                                        required
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <label className="flex items-center gap-2">
+                                        <input type="checkbox" className="rounded" />
+                                        <span className="text-sm text-gray-600">Remember me</span>
+                                    </label>
+                                    <button type="button" className="text-sm text-blue-900 hover:underline">
+                                        Forgot password?
+                                    </button>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition"
+                                >
+                                    Sign In
+                                </button>
+                            </form>
+
+                            <p className="text-center text-sm text-gray-600 mt-6">
+                                Don't have an account?{' '}
+                                <button onClick={() => onNavigate('signup')} className="text-blue-900 font-semibold hover:underline">
+                                    Sign Up
+                                </button>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Dashboard Component
+        const Dashboard = ({ onNavigate, userDisplayName = "" }) => {
+            const user = productionData.user;
+            const statusColor = user.status === 'Active' ? 'green' : user.status === 'Escalation' ? 'red' : 'yellow';
+            const firstName = userDisplayName ? userDisplayName.trim().split(/\s+/)[0] : "there";
+            const assetCount = productionData.assets.length;
+            const totalValue = productionData.assets.reduce((sum, a) => sum + (a.value || 0), 0);
+            const verifiedCount = productionData.trustedPeople.filter(p => p.verified).length;
+
+            return (
+                <div>
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {firstName}</h1>
+                        <p className="text-gray-600">Your estate continuity dashboard</p>
+                    </div>
+
+                    <LegalDisclaimer />
+
+                    {/* Status Cards */}
+                    <div className="grid md:grid-cols-4 gap-6 mb-8">
+                        <div className="bg-white rounded-xl card-shadow p-6">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-gray-600 text-sm">Status</span>
+                                <div className={`w-3 h-3 rounded-full bg-${statusColor}-500`}></div>
+                            </div>
+                            <p className="text-2xl font-bold text-gray-900">{user.status}</p>
+                            <p className="text-xs text-gray-500 mt-1">All systems monitoring</p>
+                        </div>
+
+                        <div className="bg-white rounded-xl card-shadow p-6">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-gray-600 text-sm">Next Check-In</span>
+                                <i data-lucide="calendar" className="w-4 h-4 text-gray-400"></i>
+                            </div>
+                            <p className="text-2xl font-bold text-gray-900">{user.nextCheckIn ? 'Scheduled' : 'Not set'}</p>
+                            <p className="text-xs text-gray-500 mt-1">{user.nextCheckIn ? new Date(user.nextCheckIn).toLocaleDateString() : 'Configure in Activity Monitoring'}</p>
+                        </div>
+
+                        <div className="bg-white rounded-xl card-shadow p-6">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-gray-600 text-sm">Total Assets</span>
+                                <i data-lucide="building" className="w-4 h-4 text-gray-400"></i>
+                            </div>
+                            <p className="text-2xl font-bold text-gray-900">{assetCount}</p>
+                            <p className="text-xs text-gray-500 mt-1">{assetCount === 0 ? 'Add assets to get started' : `$${totalValue >= 1000 ? (totalValue / 1000).toFixed(0) + 'K' : totalValue} total value`}</p>
+                        </div>
+
+                        <div className="bg-white rounded-xl card-shadow p-6">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-gray-600 text-sm">Trusted People</span>
+                                <i data-lucide="users" className="w-4 h-4 text-gray-400"></i>
+                            </div>
+                            <p className="text-2xl font-bold text-gray-900">{productionData.trustedPeople.length}</p>
+                            <p className="text-xs text-gray-500 mt-1">{productionData.trustedPeople.length === 0 ? 'Add trusted contacts' : `${verifiedCount} verified`}</p>
+                        </div>
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div className="bg-white rounded-xl card-shadow p-6 mb-8">
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+                        <div className="grid md:grid-cols-3 gap-4">
+                            <button onClick={() => onNavigate('assets')} className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left">
+                                <i data-lucide="plus" className="w-6 h-6 text-blue-900"></i>
+                                <div>
+                                    <p className="font-semibold text-gray-900">Add Asset</p>
+                                    <p className="text-sm text-gray-600">Track a new property or account</p>
+                                </div>
+                            </button>
+                            <button onClick={() => onNavigate('legal')} className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left">
+                                <i data-lucide="upload" className="w-6 h-6 text-blue-900"></i>
+                                <div>
+                                    <p className="font-semibold text-gray-900">Upload Document</p>
+                                    <p className="text-sm text-gray-600">Add legal documents</p>
+                                </div>
+                            </button>
+                            <button onClick={() => onNavigate('activity')} className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left">
+                                <i data-lucide="check-circle" className="w-6 h-6 text-blue-900"></i>
+                                <div>
+                                    <p className="font-semibold text-gray-900">Check In Now</p>
+                                    <p className="text-sm text-gray-600">Confirm your status</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Recent Activity */}
+                    <div className="bg-white rounded-xl card-shadow p-6">
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
+                        <div className="space-y-3">
+                            {productionData.assets.length === 0 && productionData.trustedPeople.length === 0 ? (
+                                <div className="text-center py-8 text-gray-500">
+                                    <i data-lucide="inbox" className="w-12 h-12 mx-auto mb-3 text-gray-400"></i>
+                                    <p className="font-semibold text-gray-700">No activity yet</p>
+                                    <p className="text-sm">Add assets, upload documents, or invite trusted people to get started.</p>
+                                </div>
+                            ) : (
+                                <div className="text-center py-4 text-gray-500 text-sm">
+                                    Activity will appear here as you use the platform.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Assets Page Component  
+        const AssetsPage = () => {
+            const [selectedCategory, setSelectedCategory] = useState('All');
+            const categories = ['All', 'Real Estate', 'Bank Accounts', 'Investment Accounts', 'Business Interests'];
+
+            const filteredAssets = selectedCategory === 'All' 
+                ? productionData.assets 
+                : productionData.assets.filter(a => a.category === selectedCategory);
+
+            return (
+                <div>
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Assets & Liabilities</h1>
+                            <p className="text-gray-600">Comprehensive inventory of your estate</p>
+                        </div>
+                        <button className="flex items-center gap-2 bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition">
+                            <i data-lucide="plus" className="w-5 h-5"></i>
+                            Add Asset
+                        </button>
+                    </div>
+
+                    <LegalDisclaimer />
+
+                    {/* Category Filter */}
+                    <div className="flex gap-2 mb-6 overflow-x-auto">
+                        {categories.map(cat => (
+                            <button
+                                key={cat}
+                                onClick={() => setSelectedCategory(cat)}
+                                className={`px-4 py-2 rounded-lg whitespace-nowrap transition ${
+                                    selectedCategory === cat
+                                        ? 'bg-blue-900 text-white'
+                                        : 'bg-white text-gray-700 hover:bg-gray-50 card-shadow'
+                                }`}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Assets Grid */}
+                    <div className="grid gap-4">
+                        {filteredAssets.length === 0 ? (
+                            <div className="bg-white rounded-xl card-shadow p-12 text-center">
+                                <i data-lucide="building" className="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">No assets yet</h3>
+                                <p className="text-gray-600 mb-6 max-w-md mx-auto">Add real estate, bank accounts, investments, or business interests to build your estate inventory.</p>
+                                <button className="inline-flex items-center gap-2 bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition">
+                                    <i data-lucide="plus" className="w-5 h-5"></i>
+                                    Add Asset
+                                </button>
+                            </div>
+                        ) : filteredAssets.map(asset => (
+                            <div key={asset.id} className="bg-white rounded-xl card-shadow p-6">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <i data-lucide="building" className="w-5 h-5 text-blue-900"></i>
+                                            <h3 className="text-xl font-bold text-gray-900">{asset.title}</h3>
+                                        </div>
+                                        <p className="text-gray-600 mb-3">{asset.category}</p>
+                                        <div className="grid md:grid-cols-3 gap-4 text-sm">
+                                            <div>
+                                                <p className="text-gray-500 mb-1">Value</p>
+                                                <p className="font-semibold text-gray-900">${asset.value.toLocaleString()}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-gray-500 mb-1">Location/Account</p>
+                                                <p className="font-semibold text-gray-900">{asset.location}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-gray-500 mb-1">Beneficiary</p>
+                                                <p className="font-semibold text-gray-900">{asset.beneficiary}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="inline-block px-3 py-1 bg-blue-100 text-blue-900 text-xs font-semibold rounded-full">
+                                            {asset.type}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // Legal Documents Page
+        const LegalDocumentsPage = () => {
+            return (
+                <div>
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Legal Documents</h1>
+                            <p className="text-gray-600">Secure storage for critical estate documents</p>
+                        </div>
+                        <button className="flex items-center gap-2 bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition">
+                            <i data-lucide="upload" className="w-5 h-5"></i>
+                            Upload Document
+                        </button>
+                    </div>
+
+                    <LegalDisclaimer />
+
+                    {/* Document Types Grid */}
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                        {[
+                            { type: 'Will', uploaded: productionData.legalDocs.some(d => d.type === 'Will') },
+                            { type: 'Power of Attorney', uploaded: productionData.legalDocs.some(d => d.type === 'Power of Attorney') },
+                            { type: 'Living Will', uploaded: productionData.legalDocs.some(d => d.type === 'Living Will') },
+                            { type: 'Trust Documents', uploaded: productionData.legalDocs.some(d => d.type === 'Trust Documents') },
+                            { type: 'Insurance Policies', uploaded: productionData.legalDocs.some(d => d.type === 'Insurance Policies') },
+                            { type: 'Property Deeds', uploaded: productionData.legalDocs.some(d => d.type === 'Property Deeds') }
+                        ].map((doc, idx) => (
+                            <div key={idx} className={`p-6 rounded-xl border-2 transition ${
+                                doc.uploaded 
+                                    ? 'bg-green-50 border-green-200' 
+                                    : 'bg-white border-gray-200 hover:border-blue-300'
+                            }`}>
+                                <div className="flex items-center justify-between mb-3">
+                                    <i data-lucide="file-text" className={`w-6 h-6 ${doc.uploaded ? 'text-green-600' : 'text-gray-400'}`}></i>
+                                    {doc.uploaded && <i data-lucide="check-circle" className="w-5 h-5 text-green-600"></i>}
+                                </div>
+                                <h3 className="font-bold text-gray-900">{doc.type}</h3>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    {doc.uploaded ? 'Uploaded' : 'Not uploaded'}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Uploaded Documents List */}
+                    <div className="bg-white rounded-xl card-shadow p-6">
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">Uploaded Documents</h2>
+                        <div className="space-y-3">
+                            {productionData.legalDocs.length === 0 ? (
+                                <div className="text-center py-12 text-gray-500">
+                                    <i data-lucide="file-text" className="w-16 h-16 mx-auto mb-4 text-gray-300"></i>
+                                    <p className="font-semibold text-gray-700 mb-2">No documents uploaded</p>
+                                    <p className="text-sm mb-4">Upload your Will, Power of Attorney, and other estate documents to store them securely.</p>
+                                    <button className="inline-flex items-center gap-2 bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition">
+                                        <i data-lucide="upload" className="w-5 h-5"></i>
+                                        Upload Document
+                                    </button>
+                                </div>
+                            ) : productionData.legalDocs.map(doc => (
+                                <div key={doc.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                    <div className="flex items-center gap-4">
+                                        <i data-lucide="file-text" className="w-6 h-6 text-blue-900"></i>
+                                        <div>
+                                            <p className="font-semibold text-gray-900">{doc.name}</p>
+                                            <p className="text-sm text-gray-600">{doc.type} • {doc.size} • Uploaded {doc.uploaded}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button className="p-2 hover:bg-gray-100 rounded-lg transition">
+                                            <i data-lucide="download" className="w-5 h-5 text-gray-600"></i>
+                                        </button>
+                                        <button className="p-2 hover:bg-gray-100 rounded-lg transition">
+                                            <i data-lucide="eye" className="w-5 h-5 text-gray-600"></i>
+                                        </button>
+                                        <button className="p-2 hover:bg-red-50 rounded-lg transition">
+                                            <i data-lucide="trash-2" className="w-5 h-5 text-red-600"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Trusted People Page
+        const TrustedPeoplePage = () => {
+            return (
+                <div>
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Trusted People</h1>
+                            <p className="text-gray-600">Manage access and roles for your estate</p>
+                        </div>
+                        <button className="flex items-center gap-2 bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition">
+                            <i data-lucide="user-plus" className="w-5 h-5"></i>
+                            Add Person
+                        </button>
+                    </div>
+
+                    <LegalDisclaimer />
+
+                    {/* Role Overview */}
+                    <div className="grid md:grid-cols-4 gap-4 mb-8">
+                        {[
+                            { role: 'Executor', count: productionData.trustedPeople.filter(p => p.role === 'Executor').length, color: 'blue', desc: 'Full access after trigger' },
+                            { role: 'Trusted Contact', count: productionData.trustedPeople.filter(p => p.role === 'Trusted Contact').length, color: 'green', desc: 'Concern verification only' },
+                            { role: 'Legal Advisor', count: productionData.trustedPeople.filter(p => p.role === 'Legal Advisor').length, color: 'purple', desc: 'Legal documents access' },
+                            { role: 'Beneficiary', count: productionData.trustedPeople.filter(p => p.role === 'Beneficiary').length, color: 'orange', desc: 'View only post-trigger' }
+                        ].map((item, idx) => (
+                            <div key={idx} className={`bg-${item.color}-50 border-2 border-${item.color}-200 rounded-xl p-4`}>
+                                <h3 className="font-bold text-gray-900 mb-1">{item.role}</h3>
+                                <p className={`text-3xl font-bold text-${item.color}-900 mb-1`}>{item.count}</p>
+                                <p className="text-xs text-gray-600">{item.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* People List */}
+                    <div className="bg-white rounded-xl card-shadow p-6">
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">Your Trusted People</h2>
+                        <div className="space-y-4">
+                            {productionData.trustedPeople.length === 0 ? (
+                                <div className="text-center py-12 text-gray-500">
+                                    <i data-lucide="users" className="w-16 h-16 mx-auto mb-4 text-gray-300"></i>
+                                    <p className="font-semibold text-gray-700 mb-2">No trusted people yet</p>
+                                    <p className="text-sm mb-4">Add executors, trusted contacts, and beneficiaries to manage access to your estate.</p>
+                                    <button className="inline-flex items-center gap-2 bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition">
+                                        <i data-lucide="user-plus" className="w-5 h-5"></i>
+                                        Add Person
+                                    </button>
+                                </div>
+                            ) : productionData.trustedPeople.map(person => (
+                                <div key={person.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <i data-lucide="user" className="w-6 h-6 text-blue-900"></i>
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <p className="font-semibold text-gray-900">{person.name}</p>
+                                                {person.verified && (
+                                                    <span className="flex items-center gap-1 text-xs text-green-600">
+                                                        <i data-lucide="check-circle" className="w-3 h-3"></i>
+                                                        Verified
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-gray-600">{person.role}</p>
+                                            <p className="text-xs text-gray-500">{person.email} • {person.phone}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-semibold text-gray-700 mb-1">{person.accessLevel}</p>
+                                        <button className="text-sm text-blue-900 hover:underline">Edit Access</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Digital Life Manager Page
+        const DigitalLifePage = () => {
+            return (
+                <div>
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Digital Life Manager</h1>
+                            <p className="text-gray-600">Organize and secure your digital legacy</p>
+                        </div>
+                        <button className="flex items-center gap-2 bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition">
+                            <i data-lucide="plus" className="w-5 h-5"></i>
+                            Add Platform
+                        </button>
+                    </div>
+
+                    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                        <div className="flex items-start gap-3">
+                            <i data-lucide="info" className="w-5 h-5 text-blue-600 mt-0.5"></i>
+                            <div className="text-sm text-blue-900">
+                                <p className="font-semibold mb-1">No Passwords Stored</p>
+                                <p>We only store instructions and contact information. Never store passwords, private keys, or recovery phrases directly.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Categories */}
+                    <div className="grid md:grid-cols-3 gap-4 mb-8">
+                        {[
+                            { icon: 'mail', category: 'Email', count: productionData.digitalAssets.filter(a => a.category === 'Email').length },
+                            { icon: 'globe', category: 'Social Media', count: productionData.digitalAssets.filter(a => a.category === 'Social Media').length },
+                            { icon: 'bitcoin', category: 'Crypto Wallets', count: productionData.digitalAssets.filter(a => a.category === 'Crypto Wallet' || a.category === 'Crypto Wallets').length },
+                            { icon: 'cloud', category: 'Cloud Storage', count: productionData.digitalAssets.filter(a => a.category === 'Cloud Storage').length },
+                            { icon: 'credit-card', category: 'Subscriptions', count: productionData.digitalAssets.filter(a => a.category === 'Subscriptions').length },
+                            { icon: 'server', category: 'Domains', count: productionData.digitalAssets.filter(a => a.category === 'Domains').length }
+                        ].map((item, idx) => (
+                            <div key={idx} className="bg-white rounded-xl card-shadow p-6 hover:shadow-lg transition">
+                                <i data-lucide={item.icon} className="w-8 h-8 text-blue-900 mb-3"></i>
+                                <h3 className="font-bold text-gray-900 mb-1">{item.category}</h3>
+                                <p className="text-2xl font-bold text-blue-900">{item.count}</p>
+                                <p className="text-xs text-gray-600 mt-1">platforms</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Digital Assets List */}
+                    <div className="bg-white rounded-xl card-shadow p-6">
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">Your Digital Assets</h2>
+                        <div className="space-y-3">
+                            {productionData.digitalAssets.length === 0 ? (
+                                <div className="text-center py-12 text-gray-500">
+                                    <i data-lucide="smartphone" className="w-16 h-16 mx-auto mb-4 text-gray-300"></i>
+                                    <p className="font-semibold text-gray-700 mb-2">No digital assets added</p>
+                                    <p className="text-sm mb-4">Add email, social media, crypto, and cloud accounts with instructions for your executor.</p>
+                                    <button className="inline-flex items-center gap-2 bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition">
+                                        <i data-lucide="plus" className="w-5 h-5"></i>
+                                        Add Platform
+                                    </button>
+                                </div>
+                            ) : productionData.digitalAssets.map(asset => (
+                                <div key={asset.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h3 className="font-bold text-gray-900 mb-1">{asset.platform}</h3>
+                                            <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                                                {asset.category}
+                                            </span>
+                                        </div>
+                                        <span className="text-xs text-gray-600">{asset.trigger}</span>
+                                    </div>
+                                    <div className="grid md:grid-cols-2 gap-3 text-sm">
+                                        <div>
+                                            <p className="text-gray-500 mb-1">Instructions</p>
+                                            <p className="text-gray-900">{asset.instructions}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-gray-500 mb-1">Contact/Recovery</p>
+                                            <p className="text-gray-900">{asset.contact}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Activity Monitoring Page
+        const ActivityPage = () => {
+            return (
+                <div>
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Activity Monitoring</h1>
+                            <p className="text-gray-600">Life signal check-ins and status management</p>
+                        </div>
+                        <button className="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition">
+                            <i data-lucide="check-circle" className="w-5 h-5"></i>
+                            Check In Now
+                        </button>
+                    </div>
+
+                    {/* Status Banner */}
+                    <div className="bg-green-50 border-2 border-green-200 rounded-xl p-6 mb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center">
+                                <i data-lucide="check-circle" className="w-8 h-8 text-white"></i>
+                            </div>
+                            <div className="flex-1">
+                                <h2 className="text-2xl font-bold text-gray-900 mb-1">Status: Active</h2>
+                                <p className="text-gray-600">All monitoring systems operational. Next check-in due in 28 days.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Check-in Configuration */}
+                    <div className="grid md:grid-cols-2 gap-6 mb-8">
+                        <div className="bg-white rounded-xl card-shadow p-6">
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">Check-in Schedule</h3>
+                            <div className="space-y-4">
+                                {[
+                                    { type: 'Email', frequency: 'Every 30 days', status: 'Active' },
+                                    { type: 'SMS', frequency: 'Every 60 days', status: 'Active' },
+                                    { type: 'App Login', frequency: 'Continuous monitoring', status: 'Active' }
+                                ].map((item, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <p className="font-semibold text-gray-900">{item.type}</p>
+                                            <p className="text-sm text-gray-600">{item.frequency}</p>
+                                        </div>
+                                        <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                                            {item.status}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-xl card-shadow p-6">
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">Trigger Settings</h3>
+                            <div className="space-y-4">
+                                <div className="p-3 border-2 border-blue-200 rounded-lg">
+                                    <p className="font-semibold text-gray-900 mb-2">Inactivity Period</p>
+                                    <p className="text-sm text-gray-600 mb-1">Trigger after: <strong>90 days</strong> of no response</p>
+                                    <button className="text-sm text-blue-900 hover:underline">Edit</button>
+                                </div>
+                                <div className="p-3 border-2 border-blue-200 rounded-lg">
+                                    <p className="font-semibold text-gray-900 mb-2">Grace Period</p>
+                                    <p className="text-sm text-gray-600 mb-1">Additional time: <strong>14 days</strong> after first escalation</p>
+                                    <button className="text-sm text-blue-900 hover:underline">Edit</button>
+                                </div>
+                                <div className="p-3 border-2 border-blue-200 rounded-lg">
+                                    <p className="font-semibold text-gray-900 mb-2">Trusted Contact Verification</p>
+                                    <p className="text-sm text-gray-600 mb-1">Required: <strong>2 of 3</strong> confirmations</p>
+                                    <button className="text-sm text-blue-900 hover:underline">Edit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Escalation Flow Diagram */}
+                    <div className="bg-white rounded-xl card-shadow p-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-6">Escalation Flow</h3>
+                        <div className="space-y-4">
+                            {[
+                                { stage: '1. Missed Check-In Detected', desc: 'System sends automated reminder (email + in-app)', icon: 'bell', color: 'yellow' },
+                                { stage: '2. Grace Period Initiated', desc: 'Countdown begins; user can still check in to reset', icon: 'clock', color: 'orange' },
+                                { stage: '3. Second Missed Check-In', desc: 'Trusted contact notified with concern verification prompt', icon: 'alert-triangle', color: 'orange' },
+                                { stage: '4. Trusted Contact Confirmation', desc: 'Contact confirms concern or requests delay', icon: 'users', color: 'red' },
+                                { stage: '5. System Review Stage', desc: 'Multi-factor verification of all conditions', icon: 'shield-check', color: 'red' },
+                                { stage: '6. Disclosure Preview Triggered', desc: 'User (if reactivated) or admin can review pending disclosure', icon: 'eye', color: 'purple' },
+                                { stage: '7. Controlled Disclosure', desc: 'Pre-authorized data released to recipients', icon: 'unlock', color: 'blue' }
+                            ].map((step, idx) => (
+                                <div key={idx} className="flex items-start gap-4">
+                                    <div className={`w-10 h-10 bg-${step.color}-100 rounded-full flex items-center justify-center flex-shrink-0`}>
+                                        <i data-lucide={step.icon} className={`w-5 h-5 text-${step.color}-600`}></i>
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="font-semibold text-gray-900 mb-1">{step.stage}</p>
+                                        <p className="text-sm text-gray-600">{step.desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Estate Planner Page
+        const EstatePlannerPage = () => {
+            const planner = productionData.estatePlanner;
+            const place = (v) => (v && String(v).trim()) ? v : 'Not set';
+
+            return (
+                <div>
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Estate Planner</h1>
+                            <p className="text-gray-600">Guided legal-style inputs for comprehensive planning</p>
+                        </div>
+                        <button className="flex items-center gap-2 bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition">
+                            <i data-lucide="download" className="w-5 h-5"></i>
+                            Export Summary PDF
+                        </button>
+                    </div>
+
+                    <LegalDisclaimer />
+
+                    {/* Planning Sections */}
+                    <div className="space-y-6">
+                        {/* Personal Information */}
+                        <div className="bg-white rounded-xl card-shadow p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold text-gray-900">Personal Information</h3>
+                                <button className="text-sm text-blue-900 hover:underline">Edit</button>
+                            </div>
+                            <div className="grid md:grid-cols-3 gap-4">
+                                <div>
+                                    <p className="text-sm text-gray-500 mb-1">Full Legal Name</p>
+                                    <p className={`font-semibold ${!planner.personal.fullName ? 'text-gray-400' : 'text-gray-900'}`}>{place(planner.personal.fullName)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500 mb-1">Date of Birth</p>
+                                    <p className={`font-semibold ${!planner.personal.dob ? 'text-gray-400' : 'text-gray-900'}`}>{place(planner.personal.dob)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500 mb-1">Address</p>
+                                    <p className={`font-semibold ${!planner.personal.address ? 'text-gray-400' : 'text-gray-900'}`}>{place(planner.personal.address)}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Executor */}
+                        <div className="bg-white rounded-xl card-shadow p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold text-gray-900">Executor Information</h3>
+                                <button className="text-sm text-blue-900 hover:underline">Edit</button>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-sm text-gray-500 mb-1">Primary Executor</p>
+                                    <p className={`font-semibold ${!planner.executor.name ? 'text-gray-400' : 'text-gray-900'}`}>{place(planner.executor.name)}</p>
+                                    <p className="text-sm text-gray-600">{(planner.executor.relationship || planner.executor.phone) ? [planner.executor.relationship, planner.executor.phone].filter(Boolean).join(' • ') : '—'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500 mb-1">Backup Executor</p>
+                                    <p className={`font-semibold ${!planner.executor.backup ? 'text-gray-400' : 'text-gray-900'}`}>{place(planner.executor.backup)}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Guardians */}
+                        <div className="bg-white rounded-xl card-shadow p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold text-gray-900">Guardians (Minor Children)</h3>
+                                <button className="text-sm text-blue-900 hover:underline">Edit</button>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm text-gray-500 mb-1">Primary Guardian</p>
+                                        <p className={`font-semibold ${!planner.guardians.primary ? 'text-gray-400' : 'text-gray-900'}`}>{place(planner.guardians.primary)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500 mb-1">Backup Guardian</p>
+                                        <p className={`font-semibold ${!planner.guardians.backup ? 'text-gray-400' : 'text-gray-900'}`}>{place(planner.guardians.backup)}</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500 mb-1">Notes</p>
+                                    <p className={`text-gray-900 ${!planner.guardians.notes ? 'text-gray-400' : ''}`}>{place(planner.guardians.notes)}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Asset Allocation */}
+                        <div className="bg-white rounded-xl card-shadow p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold text-gray-900">Asset Allocation Preferences</h3>
+                                <button className="text-sm text-blue-900 hover:underline">Edit</button>
+                            </div>
+                            <p className={`leading-relaxed ${!planner.allocation ? 'text-gray-400' : 'text-gray-900'}`}>{place(planner.allocation)}</p>
+                        </div>
+
+                        {/* Special Instructions */}
+                        <div className="bg-white rounded-xl card-shadow p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold text-gray-900">Special Instructions</h3>
+                                <button className="text-sm text-blue-900 hover:underline">Edit</button>
+                            </div>
+                            <p className={`leading-relaxed ${!planner.specialInstructions ? 'text-gray-400' : 'text-gray-900'}`}>{place(planner.specialInstructions)}</p>
+                        </div>
+
+                        {/* Funeral Preferences */}
+                        <div className="bg-white rounded-xl card-shadow p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold text-gray-900">Funeral Preferences</h3>
+                                <button className="text-sm text-blue-900 hover:underline">Edit</button>
+                            </div>
+                            <p className={`leading-relaxed ${!planner.funeral ? 'text-gray-400' : 'text-gray-900'}`}>{place(planner.funeral)}</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Trigger Management Page
+        const TriggersPage = () => {
+            return (
+                <div>
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Trigger Management</h1>
+                        <p className="text-gray-600">Configure conditional disclosure triggers and safeguards</p>
+                    </div>
+
+                    <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-6">
+                        <div className="flex items-start gap-3">
+                            <i data-lucide="shield-alert" className="w-5 h-5 text-amber-600 mt-0.5"></i>
+                            <div className="text-sm text-amber-900">
+                                <p className="font-semibold mb-1">Multi-Layer Protection</p>
+                                <p>All triggers require multi-factor confirmation. Disclosure is never automatic without safeguards.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Trigger Types */}
+                    <div className="bg-white rounded-xl card-shadow p-6 mb-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4">Trigger Types</h3>
+                        <div className="space-y-3">
+                            {[
+                                { type: 'Missed Check-ins', desc: 'Automated detection after configured inactivity period', enabled: true },
+                                { type: 'Manual Emergency Activation', desc: 'User-initiated immediate escalation', enabled: true },
+                                { type: 'Trusted Contact Concern', desc: 'Concern submission by designated contacts', enabled: true },
+                                { type: 'Multi-Factor Confirmation', desc: 'Required before any disclosure', enabled: true }
+                            ].map((trigger, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                                    <div>
+                                        <p className="font-semibold text-gray-900">{trigger.type}</p>
+                                        <p className="text-sm text-gray-600">{trigger.desc}</p>
+                                    </div>
+                                    <div className={`w-12 h-6 rounded-full ${trigger.enabled ? 'bg-green-500' : 'bg-gray-300'} relative`}>
+                                        <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition ${trigger.enabled ? 'right-0.5' : 'left-0.5'}`}></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Pre-Activation Requirements */}
+                    <div className="bg-white rounded-xl card-shadow p-6 mb-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4">Pre-Activation Requirements</h3>
+                        <div className="grid md:grid-cols-3 gap-4">
+                            <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                                <i data-lucide="eye" className="w-8 h-8 text-blue-900 mb-3"></i>
+                                <h4 className="font-bold text-gray-900 mb-2">Disclosure Preview</h4>
+                                <p className="text-sm text-gray-600">Full transparency of what will be released and to whom</p>
+                            </div>
+                            <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                                <i data-lucide="shield-check" className="w-8 h-8 text-blue-900 mb-3"></i>
+                                <h4 className="font-bold text-gray-900 mb-2">MFA Confirmation</h4>
+                                <p className="text-sm text-gray-600">Multi-factor authentication required before release</p>
+                            </div>
+                            <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                                <i data-lucide="scroll" className="w-8 h-8 text-blue-900 mb-3"></i>
+                                <h4 className="font-bold text-gray-900 mb-2">Immutable Log</h4>
+                                <p className="text-sm text-gray-600">All trigger actions permanently recorded</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Trigger Event Log */}
+                    <div className="bg-white rounded-xl card-shadow p-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4">Trigger Event Log</h3>
+                        <div className="text-center py-12">
+                            <i data-lucide="check-circle" className="w-16 h-16 text-green-600 mx-auto mb-4"></i>
+                            <p className="text-lg font-semibold text-gray-900 mb-2">No Trigger Events Detected</p>
+                            <p className="text-gray-600">Your account is active and all signals are healthy</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Disclosure Preview Page (production: no active trigger by default)
+        const DisclosurePreviewPage = () => {
+            const hasActiveTrigger = false; // In production, no demo trigger
+            const docs = productionData.legalDocs;
+            const assets = productionData.assets;
+            const recipients = productionData.trustedPeople;
+
+            return (
+                <div>
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Disclosure Preview</h1>
+                        <p className="text-gray-600">Review what will be released before confirmation</p>
+                    </div>
+
+                    {!hasActiveTrigger ? (
+                        <>
+                            <div className="bg-green-50 border-2 border-green-200 rounded-xl p-6 mb-6">
+                                <div className="flex items-start gap-4">
+                                    <i data-lucide="check-circle" className="w-8 h-8 text-green-600 flex-shrink-0"></i>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-green-900 mb-2">No Active Disclosure</h3>
+                                        <p className="text-green-800">
+                                            There is no disclosure trigger in progress. When a trigger is activated (e.g. after missed check-ins and verification), you will see a preview here of what will be released and to whom.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-xl card-shadow p-12 text-center">
+                                <i data-lucide="eye" className="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+                                <p className="text-gray-600 max-w-md mx-auto">Add legal documents, assets, and trusted people to define what would be disclosed in a trigger event. You can review the trigger flow in Activity Monitoring and Trigger Management.</p>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6 mb-6">
+                                <div className="flex items-start gap-4">
+                                    <i data-lucide="alert-triangle" className="w-8 h-8 text-red-600 flex-shrink-0"></i>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-red-900 mb-2">Trigger Event in Progress</h3>
+                                        <p className="text-red-800 mb-3">
+                                            A disclosure trigger has been activated. This preview shows exactly what information will be released and to whom.
+                                        </p>
+                                        <p className="text-sm text-red-700">
+                                            <strong>Time remaining to override:</strong> 48 hours
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-xl card-shadow p-6 mb-6">
+                                <h3 className="text-xl font-bold text-gray-900 mb-4">Information to be Released</h3>
+                                <div className="space-y-4">
+                                    {docs.length > 0 && (
+                                        <div className="p-4 border-2 border-gray-200 rounded-lg">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <h4 className="font-bold text-gray-900">Legal Documents</h4>
+                                                <span className="text-sm text-gray-600">{docs.length} document(s)</span>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {docs.map(d => (
+                                                    <div key={d.id} className="flex items-center gap-2 text-sm text-gray-700">
+                                                        <i data-lucide="file-text" className="w-4 h-4"></i>
+                                                        <span>{d.name}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {assets.length > 0 && (
+                                        <div className="p-4 border-2 border-gray-200 rounded-lg">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <h4 className="font-bold text-gray-900">Asset Information</h4>
+                                                <span className="text-sm text-gray-600">{assets.length} asset(s)</span>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {assets.map(a => (
+                                                    <div key={a.id} className="flex items-center gap-2 text-sm text-gray-700">
+                                                        <i data-lucide="building" className="w-4 h-4"></i>
+                                                        <span>{a.title} - Full details</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {recipients.length > 0 && (
+                                <div className="bg-white rounded-xl card-shadow p-6 mb-6">
+                                    <h3 className="text-xl font-bold text-gray-900 mb-4">Recipients & Access Levels</h3>
+                                    <div className="space-y-3">
+                                        {recipients.map(r => (
+                                            <div key={r.id} className="p-4 border border-gray-200 rounded-lg">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <p className="font-semibold text-gray-900">{r.name}</p>
+                                                        <p className="text-sm text-gray-600">{r.role}</p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-sm font-semibold text-gray-700">{r.accessLevel}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="bg-white rounded-xl card-shadow p-6">
+                                <div className="flex flex-col md:flex-row gap-4">
+                                    <button className="flex-1 bg-red-600 text-white py-4 rounded-lg font-semibold hover:bg-red-700 transition">
+                                        <i data-lucide="x-circle" className="w-5 h-5 inline mr-2"></i>
+                                        Override & Cancel Disclosure
+                                    </button>
+                                    <button className="flex-1 bg-blue-900 text-white py-4 rounded-lg font-semibold hover:bg-blue-800 transition">
+                                        <i data-lucide="check-circle" className="w-5 h-5 inline mr-2"></i>
+                                        Confirm Disclosure (Requires MFA)
+                                    </button>
+                                </div>
+                                <p className="text-center text-sm text-gray-600 mt-4">
+                                    All actions are logged in the immutable audit trail
+                                </p>
+                            </div>
+                        </>
+                    )}
+                </div>
+            );
+        };
+
+        // App Layout with Sidebar
+        const AppLayout = ({ children, currentPage, onNavigate }) => {
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+
+            const navigation = [
+                { id: 'dashboard', name: 'Dashboard', icon: 'layout-dashboard' },
+                { id: 'estate-planner', name: 'Estate Planner', icon: 'file-edit' },
+                { id: 'legal', name: 'Legal Documents', icon: 'file-text' },
+                { id: 'assets', name: 'Assets & Liabilities', icon: 'building' },
+                { id: 'digital', name: 'Digital Life', icon: 'smartphone' },
+                { id: 'trusted', name: 'Trusted People', icon: 'users' },
+                { id: 'activity', name: 'Activity Monitoring', icon: 'activity' },
+                { id: 'triggers', name: 'Trigger Management', icon: 'bell' },
+                { id: 'disclosure-preview', name: 'Disclosure Preview', icon: 'eye' },
+            ];
+
+            return (
+                <div className="min-h-screen bg-gray-50 flex">
+                    {/* Sidebar */}
+                    <div className={`${sidebarOpen ? 'block' : 'hidden'} md:block w-64 bg-white border-r fixed md:static h-full z-20 overflow-y-auto`}>
+                        <div className="p-6 border-b">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="shield" className="w-6 h-6 text-white"></i>
+                                </div>
+                                <span className="text-lg font-bold text-gray-900">Life Continuity</span>
+                            </div>
+                        </div>
+                        <nav className="p-4">
+                            {navigation.map(item => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => {
+                                        onNavigate(item.id);
+                                        setSidebarOpen(false);
+                                    }}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition ${
+                                        currentPage === item.id
+                                            ? 'bg-blue-50 text-blue-900 font-semibold'
+                                            : 'text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    <i data-lucide={item.icon} className="w-5 h-5"></i>
+                                    <span className="text-sm">{item.name}</span>
+                                </button>
+                            ))}
+                        </nav>
+                        <div className="p-4 border-t mt-auto">
+                            <button onClick={() => onNavigate('home')} className="w-full text-sm text-gray-600 hover:text-gray-900 text-left px-4 py-2">
+                                Sign Out
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="flex-1 overflow-auto">
+                        {/* Top Bar */}
+                        <div className="bg-white border-b p-4 flex items-center justify-between md:hidden sticky top-0 z-10">
+                            <button onClick={() => setSidebarOpen(!sidebarOpen)}>
+                                <i data-lucide={sidebarOpen ? 'x' : 'menu'} className="w-6 h-6"></i>
+                            </button>
+                            <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 bg-blue-900 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="shield" className="w-5 h-5 text-white"></i>
+                                </div>
+                                <span className="font-bold">Life Continuity</span>
+                            </div>
+                            <div className="w-6"></div>
+                        </div>
+
+                        {/* Page Content */}
+                        <div className="p-6 md:p-8 max-w-7xl mx-auto">
+                            {children}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [isAuthenticated, setIsAuthenticated] = useState(false);
+            const [userDisplayName, setUserDisplayName] = useState('');
+
+            useEffect(() => {
+                lucide.createIcons();
+            }, [currentPage]);
+
+            useEffect(() => {
+                const hash = window.location.hash;
+                if (hash && currentPage === 'home') {
+                    const el = document.querySelector(hash);
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, [currentPage]);
+
+            const handleLogin = () => {
+                setUserDisplayName(productionData.user.name || '');
+                setIsAuthenticated(true);
+                setCurrentPage('dashboard');
+            };
+
+            const handleSignup = (name) => {
+                setUserDisplayName(name || '');
+                productionData.user.name = name || '';
+                setIsAuthenticated(true);
+                setCurrentPage('dashboard');
+            };
+
+            const handleGetStarted = () => {
+                setCurrentPage('signup');
+            };
+
+            const handleNavigate = (page, hash) => {
+                setCurrentPage(page);
+                if (hash) window.location.hash = hash;
+                if (page === 'home') {
+                    setIsAuthenticated(false);
+                }
+            };
+
+            // Public pages
+            if (!isAuthenticated) {
+                if (currentPage === 'signup') {
+                    return <SignupPage onNavigate={handleNavigate} onSignup={handleSignup} />;
+                }
+                if (currentPage === 'login') {
+                    return <LoginPage onNavigate={handleNavigate} onLogin={handleLogin} />;
+                }
+                if (currentPage === 'pricing') {
+                    return <PricingPage onNavigate={handleNavigate} />;
+                }
+                return <HomePage onNavigate={handleNavigate} onGetStarted={handleGetStarted} />;
+            }
+
+            // Authenticated app pages
+            const renderPage = () => {
+                switch (currentPage) {
+                    case 'dashboard':
+                        return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} />;
+                    case 'assets':
+                        return <AssetsPage />;
+                    case 'legal':
+                        return <LegalDocumentsPage />;
+                    case 'trusted':
+                        return <TrustedPeoplePage />;
+                    case 'digital':
+                        return <DigitalLifePage />;
+                    case 'activity':
+                        return <ActivityPage />;
+                    case 'estate-planner':
+                        return <EstatePlannerPage />;
+                    case 'triggers':
+                        return <TriggersPage />;
+                    case 'disclosure-preview':
+                        return <DisclosurePreviewPage />;
+                    default:
+                        return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} />;
+                }
+            };
+
+            return (
+                <AppLayout currentPage={currentPage} onNavigate={handleNavigate}>
+                    {renderPage()}
+                </AppLayout>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

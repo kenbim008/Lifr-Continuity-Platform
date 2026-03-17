@@ -231,6 +231,27 @@
                                         <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
                                         <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">FAQ</button>
                                         <a href="./LCP%20-%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full">Affiliate &amp; Referral Program</button>
+                                    </div>
+                                </div>
+                                <div className="md:col-span-4 flex flex-wrap items-center gap-4 pt-4 border-t border-gray-800 mt-4">
+                                    <span className="text-xs text-gray-400">Connect with us:</span>
+                                    <div className="flex gap-3 text-gray-300">
+                                        <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                            <i data-lucide="linkedin" className="w-4 h-4"></i><span>LinkedIn</span>
+                                        </a>
+                                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                            <i data-lucide="twitter" className="w-4 h-4"></i><span>Twitter</span>
+                                        </a>
+                                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                            <i data-lucide="facebook" className="w-4 h-4"></i><span>Facebook</span>
+                                        </a>
+                                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                            <i data-lucide="instagram" className="w-4 h-4"></i><span>Instagram</span>
+                                        </a>
+                                        <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                            <i data-lucide="youtube" className="w-4 h-4"></i><span>YouTube</span>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -555,6 +576,143 @@
             </PublicPageShell>
         );
 
+        const AffiliateProgramPage = (props) => (
+            <PublicPageShell
+                {...props}
+                title="Affiliate & Referral Program"
+                subtitle="Earn rewards by sharing Life Continuity with your network."
+            >
+                <div className="space-y-8 text-gray-700 text-sm">
+                    <section>
+                        <h2 className="text-lg font-bold text-gray-900 mb-2">Program Objectives</h2>
+                        <ul className="list-disc list-inside space-y-1">
+                            <li>Drive qualified sign-ups by leveraging trusted voices (estate planners, financial advisors, attorneys, influencers).</li>
+                            <li>Increase brand awareness among adults 40+, families, and business owners planning their estate.</li>
+                            <li>Reward loyal customers for referring friends and family.</li>
+                            <li>Create a scalable acquisition channel with low upfront cost.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 className="text-lg font-bold text-gray-900 mb-2">Two-Tier Structure</h2>
+                        <p className="mb-2">The program has two tracks:</p>
+                        <ul className="list-disc list-inside space-y-1">
+                            <li><strong>Customer Referral Program</strong> – for existing users inviting friends and family.</li>
+                            <li><strong>Professional Affiliate Program</strong> – for advisors, bloggers, and institutions earning commissions.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Customer Referral Program</h3>
+                        <p className="mb-2">Turn satisfied customers into advocates.</p>
+                        <ul className="list-disc list-inside space-y-1 mb-3">
+                            <li>Every user gets a unique referral link in their account (under “Refer &amp; Earn”).</li>
+                            <li>Friends receive a discount on their first year (for example, 20% off).</li>
+                            <li>Referrers receive a credit (for example, $25 or a free month) after the friend becomes a paying customer.</li>
+                            <li>Tiered bonuses for multiple referrals (e.g., bigger credit after 3+ successful referrals).</li>
+                            <li>Referrals tracked for up to 90 days from click to conversion.</li>
+                        </ul>
+                        <p className="text-xs text-gray-500">
+                            Tracking and payouts will be finalized when billing and referral infrastructure are connected to your production systems.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Professional Affiliate Program</h3>
+                        <p className="mb-2">Designed for professionals and influencers with aligned audiences.</p>
+                        <div className="overflow-x-auto mb-3">
+                            <table className="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr className="border-b-2 border-gray-200">
+                                        <th className="py-2 px-3 font-bold text-gray-900">Plan</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Price</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Recurring Commission (12 mo)</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Example One-Time Option</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr className="border-b border-gray-100">
+                                        <td className="py-2 px-3">Basic</td>
+                                        <td className="py-2 px-3">$9 / month</td>
+                                        <td className="py-2 px-3">30% recurring for 12 months</td>
+                                        <td className="py-2 px-3">$30 one-time (optional)</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-100">
+                                        <td className="py-2 px-3">Premium</td>
+                                        <td className="py-2 px-3">$19 / month</td>
+                                        <td className="py-2 px-3">30% recurring for 12 months</td>
+                                        <td className="py-2 px-3">$65 one-time (optional)</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="py-2 px-3">Family</td>
+                                        <td className="py-2 px-3">$29 / month</td>
+                                        <td className="py-2 px-3">30% recurring for 12 months</td>
+                                        <td className="py-2 px-3">$100 one-time (optional)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                            Exact commission structure, payout frequency, and thresholds can be adjusted in your affiliate terms and underlying tracking platform.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Affiliate Tiers (Gamification)</h3>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr className="border-b-2 border-gray-200">
+                                        <th className="py-2 px-3 font-bold text-gray-900">Tier</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Monthly sales</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Benefits</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr className="border-b border-gray-100">
+                                        <td className="py-2 px-3">Bronze</td>
+                                        <td className="py-2 px-3">0–5</td>
+                                        <td className="py-2 px-3">30% commission</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-100">
+                                        <td className="py-2 px-3">Silver</td>
+                                        <td className="py-2 px-3">6–15</td>
+                                        <td className="py-2 px-3">35% commission + bonus $50</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="py-2 px-3">Gold</td>
+                                        <td className="py-2 px-3">16+</td>
+                                        <td className="py-2 px-3">40% commission + quarterly bonus + featured partner listing</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Tracking, Payouts &amp; Compliance</h3>
+                        <ul className="list-disc list-inside space-y-1">
+                            <li>Referrals tracked via unique links/codes and 90‑day attribution windows.</li>
+                            <li>Payouts occur only after referred accounts remain active for a minimum period (for example, 30 days).</li>
+                            <li>Standard affiliate disclosures required (FTC and local regulations).</li>
+                            <li>Fraud prevention via monitoring of unusual activity and manual review for large payouts.</li>
+                        </ul>
+                        <p className="text-xs text-gray-500 mt-2">
+                            This page is a UI blueprint. Actual commission calculations and payouts require integration with your billing and affiliate software.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Where to View Your Stats</h3>
+                        <p>
+                            As a logged‑in user, you can see a snapshot of your referrals, expected payout, and paid‑out totals in your main Dashboard under the
+                            “Referrals &amp; Rewards” section. When referral tracking is connected to your billing system, those values will reflect real activity.
+                        </p>
+                    </section>
+                </div>
+            </PublicPageShell>
+        );
+
         // Pricing Page Component
         const PricingPage = ({ onNavigate, country, setCountry, language, setLanguage, t }) => {
             const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' or 'annual'
@@ -793,6 +951,7 @@
                                         <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
                                         <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">FAQ</button>
                                         <a href="./LCP%20-%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full">Affiliate &amp; Referral Program</button>
                                     </div>
                                 </div>
                             </div>
@@ -1221,6 +1380,13 @@
             const assetCount = productionData.assets.length;
             const totalValue = productionData.assets.reduce((sum, a) => sum + (a.value || 0), 0);
             const verifiedCount = productionData.trustedPeople.filter(p => p.verified).length;
+            const referralStats = {
+                total: 0,
+                active: 0,
+                expectedPayout: 0,
+                paidOut: 0,
+                tier: 'Bronze'
+            };
 
             return (
                 <div>
@@ -1273,7 +1439,7 @@
                     {/* Quick Actions */}
                     <div className="bg-white rounded-xl card-shadow p-6 mb-8">
                         <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-                        <div className="grid md:grid-cols-3 gap-4">
+                        <div className="grid md:grid-cols-4 gap-4">
                             <button onClick={() => onNavigate('assets')} className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left">
                                 <i data-lucide="plus" className="w-6 h-6 text-blue-900"></i>
                                 <div>
@@ -1295,6 +1461,42 @@
                                     <p className="text-sm text-gray-600">Confirm your status</p>
                                 </div>
                             </button>
+                            <button onClick={() => onNavigate('affiliate-program')} className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition text-left">
+                                <i data-lucide="sparkles" className="w-6 h-6 text-green-700"></i>
+                                <div>
+                                    <p className="font-semibold text-gray-900">Refer &amp; Earn</p>
+                                    <p className="text-sm text-gray-600">Invite friends and track rewards</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Referrals & Rewards */}
+                    <div className="bg-white rounded-xl card-shadow p-6 mb-8">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-bold text-gray-900">Referrals &amp; Rewards</h2>
+                            <button onClick={() => onNavigate('affiliate-program')} className="text-sm text-blue-900 font-semibold hover:underline">
+                                View program details
+                            </button>
+                        </div>
+                        <div className="grid md:grid-cols-4 gap-4">
+                            <div>
+                                <p className="text-xs text-gray-500 mb-1">Total referrals</p>
+                                <p className="text-2xl font-bold text-gray-900">{referralStats.total}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 mb-1">Active (paid accounts)</p>
+                                <p className="text-2xl font-bold text-gray-900">{referralStats.active}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 mb-1">Expected payout</p>
+                                <p className="text-2xl font-bold text-gray-900">${referralStats.expectedPayout.toFixed(2)}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 mb-1">Paid out</p>
+                                <p className="text-2xl font-bold text-gray-900">${referralStats.paidOut.toFixed(2)}</p>
+                                <p className="text-xs text-green-700 mt-1">Tier: {referralStats.tier}</p>
+                            </div>
                         </div>
                     </div>
 
@@ -2375,6 +2577,7 @@
                                         <button onClick={() => onNavigate('contact-us')} className="text-gray-300 hover:text-white transition">Contact</button>
                                         <button onClick={() => onNavigate('faq')} className="text-gray-300 hover:text-white transition">FAQ</button>
                                         <a href="./LCP%20-%20Demo.html" className="text-gray-300 hover:text-white transition">Demo</a>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="text-gray-300 hover:text-white transition">Affiliate &amp; Referral</button>
                                     </div>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-4">
@@ -2457,9 +2660,6 @@
                 if (currentPage === 'legal-disclaimer') {
                     return <LegalDisclaimerPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
-                if (currentPage === 'support') {
-                    return <SupportPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
-                }
                 if (currentPage === 'help-center') {
                     return <HelpCenterPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
@@ -2468,6 +2668,9 @@
                 }
                 if (currentPage === 'faq') {
                     return <FAQPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                }
+                if (currentPage === 'affiliate-program') {
+                    return <AffiliateProgramPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
                 if (currentPage === 'security-architecture') {
                     return <SecurityArchitecturePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
@@ -2504,14 +2707,14 @@
                         return <TermsOfServicePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'legal-disclaimer':
                         return <LegalDisclaimerPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
-                    case 'support':
-                        return <SupportPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'help-center':
                         return <HelpCenterPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'contact-us':
                         return <ContactUsPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'faq':
                         return <FAQPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    case 'affiliate-program':
+                        return <AffiliateProgramPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     default:
                         return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} />;
                 }

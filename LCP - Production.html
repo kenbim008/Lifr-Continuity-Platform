@@ -231,7 +231,7 @@
                                         <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
                                         <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">FAQ</button>
                                         <a href="./LCP%20-%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
-                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full">Affiliate Program</button>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
                                     </div>
                                 </div>
                                 <div className="md:col-span-4 flex flex-wrap items-center gap-4 pt-4 border-t border-gray-800 mt-4">
@@ -713,6 +713,186 @@
             </PublicPageShell>
         );
 
+        // Affiliate Dashboard (for registered users; demo shows this with rules, no login)
+        const AFFILIATE_DEMO_DATA = {
+            clicks: 124,
+            signUps: 18,
+            pendingCommission: 142.50,
+            paidCommission: 287.00,
+            referralLink: 'https://lifecontinuity.com/r/LC-DEMO-REF',
+            referrals: [
+                { id: '1', name: 'Jane D.', email: 'jane@example.com', status: 'Converted', commission: 28.50 },
+                { id: '2', name: 'Mike R.', email: 'mike@example.com', status: 'Converted', commission: 65.00 },
+                { id: '3', name: 'Sarah K.', email: 'sarah@example.com', status: 'Pending', commission: 0 }
+            ],
+            commissions: [
+                { id: '1', date: '2026-03-10', description: 'Premium referral - Jane D.', amount: 28.50, status: 'Paid' },
+                { id: '2', date: '2026-03-08', description: 'Family referral - Mike R.', amount: 65.00, status: 'Paid' },
+                { id: '3', date: '2026-03-14', description: 'Basic referral - Sarah K.', amount: 19.50, status: 'Pending' }
+            ],
+            payouts: [
+                { id: '1', date: '2026-03-01', amount: 93.50, method: 'PayPal', status: 'Completed' },
+                { id: '2', date: '2026-02-01', amount: 193.50, method: 'PayPal', status: 'Completed' }
+            ]
+        };
+
+        const AffiliateDashboardPage = ({ onNavigate, isDemo = false, showRules = false }) => {
+            const [activeTab, setActiveTab] = useState('referrals');
+            const [copied, setCopied] = useState(false);
+            const refCode = isDemo ? 'LC-DEMO-REF' : (productionData.user && productionData.user.name ? 'REF-' + productionData.user.name.replace(/\s+/g, '').slice(0, 8) : 'REF');
+            const referralUrl = isDemo ? AFFILIATE_DEMO_DATA.referralLink : (typeof window !== 'undefined' ? (window.location.origin + '/r/' + refCode) : 'https://lifecontinuity.com/r/' + refCode);
+            const data = isDemo ? AFFILIATE_DEMO_DATA : {
+                clicks: 0,
+                signUps: 0,
+                pendingCommission: 0,
+                paidCommission: 0,
+                referrals: [],
+                commissions: [],
+                payouts: []
+            };
+
+            const copyLink = () => {
+                if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                    navigator.clipboard.writeText(referralUrl);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                }
+            };
+
+            const shareUrl = (platform) => {
+                const enc = encodeURIComponent(referralUrl);
+                const text = encodeURIComponent('Check out Life Continuity - clarity when it matters.');
+                const urls = {
+                    email: 'mailto:?subject=Life Continuity&body=' + enc,
+                    facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + enc,
+                    twitter: 'https://twitter.com/intent/tweet?url=' + enc + '&text=' + text,
+                    linkedin: 'https://www.linkedin.com/sharing/share-offsite/?url=' + enc
+                };
+                if (urls[platform]) window.open(urls[platform], '_blank', 'noopener,noreferrer,width=600,height=400');
+            };
+
+            const tabs = [
+                { id: 'referrals', label: 'Referrals', icon: 'users' },
+                { id: 'commissions', label: 'Commissions', icon: 'dollar-sign' },
+                { id: 'payouts', label: 'Payouts', icon: 'credit-card' }
+            ];
+
+            return (
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <h1 className="text-2xl font-bold text-gray-900">Affiliate Dashboard</h1>
+                        {showRules && (
+                            <button onClick={() => onNavigate('affiliate-program')} className="text-sm text-blue-900 font-semibold hover:underline">
+                                View program rules
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Metrics */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="bg-white rounded-xl card-shadow p-4">
+                            <p className="text-xs text-gray-500 mb-1">Link clicks</p>
+                            <p className="text-2xl font-bold text-gray-900">{data.clicks}</p>
+                        </div>
+                        <div className="bg-white rounded-xl card-shadow p-4">
+                            <p className="text-xs text-gray-500 mb-1">Sign-ups</p>
+                            <p className="text-2xl font-bold text-gray-900">{data.signUps}</p>
+                        </div>
+                        <div className="bg-white rounded-xl card-shadow p-4">
+                            <p className="text-xs text-gray-500 mb-1">Pending commission</p>
+                            <p className="text-2xl font-bold text-gray-900">${typeof data.pendingCommission === 'number' ? data.pendingCommission.toFixed(2) : data.pendingCommission}</p>
+                        </div>
+                        <div className="bg-white rounded-xl card-shadow p-4">
+                            <p className="text-xs text-gray-500 mb-1">Paid commission</p>
+                            <p className="text-2xl font-bold text-green-700">${typeof data.paidCommission === 'number' ? data.paidCommission.toFixed(2) : data.paidCommission}</p>
+                        </div>
+                    </div>
+
+                    {/* Referral link + Copy + Share */}
+                    <div className="bg-white rounded-xl card-shadow p-6">
+                        <h2 className="text-lg font-bold text-gray-900 mb-2">Your referral link</h2>
+                        <div className="flex flex-wrap gap-2 items-center">
+                            <input type="text" readOnly value={referralUrl} className="flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm" />
+                            <button onClick={copyLink} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition text-sm">
+                                <i data-lucide={copied ? 'check' : 'copy'} className="w-4 h-4"></i>
+                                {copied ? 'Copied' : 'Copy'}
+                            </button>
+                            <span className="text-xs text-gray-500">Share:</span>
+                            <button onClick={() => shareUrl('email')} className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition" title="Email"><i data-lucide="mail" className="w-4 h-4 text-gray-600"></i></button>
+                            <button onClick={() => shareUrl('facebook')} className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition" title="Facebook"><i data-lucide="facebook" className="w-4 h-4 text-gray-600"></i></button>
+                            <button onClick={() => shareUrl('twitter')} className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition" title="Twitter"><i data-lucide="twitter" className="w-4 h-4 text-gray-600"></i></button>
+                            <button onClick={() => shareUrl('linkedin')} className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition" title="LinkedIn"><i data-lucide="linkedin" className="w-4 h-4 text-gray-600"></i></button>
+                        </div>
+                    </div>
+
+                    {/* Tabs */}
+                    <div className="bg-white rounded-xl card-shadow overflow-hidden">
+                        <div className="flex border-b border-gray-200">
+                            {tabs.map((tab) => (
+                                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-6 py-4 font-medium border-b-2 transition ${activeTab === tab.id ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>
+                                    <i data-lucide={tab.icon} className="w-4 h-4"></i>
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="p-6">
+                            {activeTab === 'referrals' && (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-sm">
+                                        <thead><tr className="border-b border-gray-200"><th className="py-2 pr-4 font-bold text-gray-900">Referred user</th><th className="py-2 pr-4 font-bold text-gray-900">Status</th><th className="py-2 font-bold text-gray-900">Commission earned</th></tr></thead>
+                                        <tbody>
+                                            {data.referrals && data.referrals.length > 0 ? data.referrals.map((r) => (
+                                                <tr key={r.id} className="border-b border-gray-100"><td className="py-3 pr-4">{r.name || r.email}</td><td className="py-3 pr-4">{r.status}</td><td className="py-3">${typeof r.commission === 'number' ? r.commission.toFixed(2) : r.commission}</td></tr>
+                                            )) : (
+                                                <tr><td colSpan="3" className="py-8 text-center text-gray-500">No referrals yet. Share your link to get started.</td></tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                            {activeTab === 'commissions' && (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-sm">
+                                        <thead><tr className="border-b border-gray-200"><th className="py-2 pr-4 font-bold text-gray-900">Date</th><th className="py-2 pr-4 font-bold text-gray-900">Description</th><th className="py-2 pr-4 font-bold text-gray-900">Amount</th><th className="py-2 font-bold text-gray-900">Status</th></tr></thead>
+                                        <tbody>
+                                            {data.commissions && data.commissions.length > 0 ? data.commissions.map((c) => (
+                                                <tr key={c.id} className="border-b border-gray-100"><td className="py-3 pr-4">{c.date}</td><td className="py-3 pr-4">{c.description}</td><td className="py-3 pr-4">${typeof c.amount === 'number' ? c.amount.toFixed(2) : c.amount}</td><td className="py-3">{c.status}</td></tr>
+                                            )) : (
+                                                <tr><td colSpan="4" className="py-8 text-center text-gray-500">No commission history yet.</td></tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                            {activeTab === 'payouts' && (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-sm">
+                                        <thead><tr className="border-b border-gray-200"><th className="py-2 pr-4 font-bold text-gray-900">Date</th><th className="py-2 pr-4 font-bold text-gray-900">Amount</th><th className="py-2 pr-4 font-bold text-gray-900">Method</th><th className="py-2 font-bold text-gray-900">Status</th></tr></thead>
+                                        <tbody>
+                                            {data.payouts && data.payouts.length > 0 ? data.payouts.map((p) => (
+                                                <tr key={p.id} className="border-b border-gray-100"><td className="py-3 pr-4">{p.date}</td><td className="py-3 pr-4">${typeof p.amount === 'number' ? p.amount.toFixed(2) : p.amount}</td><td className="py-3 pr-4">{p.method}</td><td className="py-3">{p.status}</td></tr>
+                                            )) : (
+                                                <tr><td colSpan="4" className="py-8 text-center text-gray-500">No payouts yet.</td></tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {showRules && (
+                        <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                            <h2 className="text-lg font-bold text-gray-900 mb-3">Program rules</h2>
+                            <div className="space-y-2 text-gray-700 text-sm">
+                                <p>Two tracks: <strong>Customer Referral</strong> (credits for referring friends) and <strong>Professional Affiliate</strong> (commissions on Basic/Premium/Family plans). 30% recurring for 12 months; tiers: Bronze, Silver, Gold. Referrals tracked 90 days; FTC disclosure required.</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
         // Pricing Page Component
         const PricingPage = ({ onNavigate, country, setCountry, language, setLanguage, t }) => {
             const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' or 'annual'
@@ -951,7 +1131,16 @@
                                         <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
                                         <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">FAQ</button>
                                         <a href="./LCP%20-%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
-                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full">Affiliate Program</button>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
+                                    </div>
+                                </div>
+                                <div className="md:col-span-4 flex flex-wrap items-center gap-4 pt-4 border-t border-gray-800 mt-4">
+                                    <span className="text-xs text-gray-400">Connect with us:</span>
+                                    <div className="flex gap-3 text-gray-300">
+                                        <a href="mailto:support@lifecontinuity.com" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="mail" className="w-4 h-4"></i><span>Email</span></a>
+                                        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="facebook" className="w-4 h-4"></i><span>Facebook</span></a>
+                                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="twitter" className="w-4 h-4"></i><span>Twitter</span></a>
+                                        <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="linkedin" className="w-4 h-4"></i><span>LinkedIn</span></a>
                                     </div>
                                 </div>
                             </div>
@@ -1148,6 +1337,16 @@
                                         <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
                                         <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">FAQ</button>
                                         <a href="./LCP%20-%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
+                                    </div>
+                                </div>
+                                <div className="md:col-span-4 flex flex-wrap items-center gap-4 pt-4 border-t border-gray-800 mt-4">
+                                    <span className="text-xs text-gray-400">Connect with us:</span>
+                                    <div className="flex gap-3 text-gray-300">
+                                        <a href="mailto:support@lifecontinuity.com" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="mail" className="w-4 h-4"></i><span>Email</span></a>
+                                        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="facebook" className="w-4 h-4"></i><span>Facebook</span></a>
+                                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="twitter" className="w-4 h-4"></i><span>Twitter</span></a>
+                                        <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="linkedin" className="w-4 h-4"></i><span>LinkedIn</span></a>
                                     </div>
                                 </div>
                             </div>
@@ -1393,6 +1592,21 @@
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {firstName}</h1>
                         <p className="text-gray-600">Your estate continuity dashboard</p>
+
+                        {/* Refer a Friend panel */}
+                        <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl">
+                            <div className="flex items-start justify-between gap-4">
+                                <div>
+                                    <h2 className="text-sm font-semibold text-gray-900">Refer a Friend</h2>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                        Share your referral code to invite a friend. This is a placeholder and will be wired to live tracking later.
+                                    </p>
+                                    <p className="mt-3 text-xs text-gray-700">
+                                        Your code: <span className="font-mono font-semibold">LC-REF-CODE</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <LegalDisclaimer />
@@ -1461,7 +1675,7 @@
                                     <p className="text-sm text-gray-600">Confirm your status</p>
                                 </div>
                             </button>
-                            <button onClick={() => onNavigate('affiliate-program')} className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition text-left">
+                            <button onClick={() => onNavigate('affiliate-dashboard')} className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition text-left">
                                 <i data-lucide="sparkles" className="w-6 h-6 text-green-700"></i>
                                 <div>
                                     <p className="font-semibold text-gray-900">Refer &amp; Earn</p>
@@ -1475,7 +1689,7 @@
                     <div className="bg-white rounded-xl card-shadow p-6 mb-8">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-xl font-bold text-gray-900">Referrals &amp; Rewards</h2>
-                            <button onClick={() => onNavigate('affiliate-program')} className="text-sm text-blue-900 font-semibold hover:underline">
+                            <button onClick={() => onNavigate('affiliate-dashboard')} className="text-sm text-blue-900 font-semibold hover:underline">
                                 View program details
                             </button>
                         </div>
@@ -2577,7 +2791,7 @@
                                         <button onClick={() => onNavigate('contact-us')} className="text-gray-300 hover:text-white transition">Contact</button>
                                         <button onClick={() => onNavigate('faq')} className="text-gray-300 hover:text-white transition">FAQ</button>
                                         <a href="./LCP%20-%20Demo.html" className="text-gray-300 hover:text-white transition">Demo</a>
-                                        <button onClick={() => onNavigate('affiliate-program')} className="text-gray-300 hover:text-white transition">Affiliate Program</button>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="text-[#015DE7] hover:text-white transition">Affiliate Program</button>
                                     </div>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-4">
@@ -2672,6 +2886,7 @@
                 if (currentPage === 'affiliate-program') {
                     return <AffiliateProgramPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
+                // Guest: rules only. Logged-in: dashboard is handled in renderPage (authenticated).
                 if (currentPage === 'security-architecture') {
                     return <SecurityArchitecturePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
@@ -2713,7 +2928,10 @@
                         return <ContactUsPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'faq':
                         return <FAQPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    case 'affiliate-dashboard':
+                        return <AffiliateDashboardPage onNavigate={handleNavigate} isDemo={false} showRules={false} />;
                     case 'affiliate-program':
+                        // Authenticated view of rules page
                         return <AffiliateProgramPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     default:
                         return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} />;

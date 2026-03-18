@@ -212,6 +212,16 @@
                             {children}
                         </div>
                     </div>
+                    <footer className="bg-gray-900 text-white py-8 mt-12">
+                        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
+                            <button onClick={() => onNavigate('privacy-policy')} className="text-gray-300 hover:text-white transition">Privacy</button>
+                            <button onClick={() => onNavigate('terms-of-service')} className="text-gray-300 hover:text-white transition">Terms</button>
+                            <button onClick={() => onNavigate('help-center')} className="text-gray-300 hover:text-white transition">Help</button>
+                            <button onClick={() => onNavigate('affiliate-program')} className="text-gray-300 hover:text-white transition">Affiliate Program</button>
+                            <a href="./LCP%20-%20Production.html" className="text-gray-300 hover:text-white transition">Production</a>
+                        </div>
+                        <p className="text-center text-xs text-gray-500 mt-4">© 2026 Life Continuity. Clarity When It Matters.</p>
+                    </footer>
                 </div>
             );
         };
@@ -525,6 +535,42 @@
             </PublicPageShell>
         );
 
+        const AffiliateProgramPage = (props) => (
+            <PublicPageShell {...props} title="Affiliate Program" subtitle="Earn rewards by sharing Life Continuity with your network.">
+                <div className="space-y-8 text-gray-700 text-sm">
+                    <section>
+                        <h2 className="text-lg font-bold text-gray-900 mb-2">Program Objectives</h2>
+                        <ul className="list-disc list-inside space-y-1">
+                            <li>Drive qualified sign-ups by leveraging trusted voices (estate planners, financial advisors, attorneys, influencers).</li>
+                            <li>Increase brand awareness among adults 40+, families, and business owners planning their estate.</li>
+                            <li>Reward loyal customers for referring friends and family.</li>
+                            <li>Create a scalable acquisition channel with low upfront cost.</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2 className="text-lg font-bold text-gray-900 mb-2">Two-Tier Structure</h2>
+                        <p className="mb-2">The program has two tracks:</p>
+                        <ul className="list-disc list-inside space-y-1">
+                            <li><strong>Customer Referral Program</strong> – for existing users inviting friends and family.</li>
+                            <li><strong>Professional Affiliate Program</strong> – for advisors, bloggers, and institutions earning commissions.</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Customer Referral Program</h3>
+                        <p className="mb-2">Turn satisfied customers into advocates. Every user gets a unique referral link; friends get a discount; referrers earn credits after the friend becomes a paying customer. Referrals tracked for up to 90 days.</p>
+                    </section>
+                    <section>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Professional Affiliate Program</h3>
+                        <p className="mb-2">Commission structure: 30% recurring for 12 months on Basic ($9/mo), Premium ($19/mo), and Family ($29/mo). One-time options: $30, $65, $100. Affiliate tiers: Bronze (30%), Silver (35% + $50 bonus), Gold (40% + quarterly bonus + featured listing).</p>
+                    </section>
+                    <section>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Tracking &amp; Compliance</h3>
+                        <p>Referrals tracked via unique links/codes and 90-day attribution. Payouts after referred accounts remain active (e.g. 30 days). FTC disclosure required. View your referral stats in your Dashboard under Referrals &amp; Rewards.</p>
+                    </section>
+                </div>
+            </PublicPageShell>
+        );
+
         // Pricing Page Component
         const PricingPage = ({ onNavigate, country, setCountry, language, setLanguage, t }) => {
             const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' or 'annual'
@@ -762,6 +808,8 @@
                                         <button onClick={() => onNavigate('help-center')} className="block hover:text-white transition text-left w-full">Help Center</button>
                                         <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
                                         <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">FAQ</button>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full">Affiliate Program</button>
+                                        <a href="./LCP%20-%20Production.html" className="block hover:text-white transition">Production (no sample data)</a>
                                     </div>
                                 </div>
                             </div>
@@ -957,6 +1005,8 @@
                                         <button onClick={() => onNavigate('help-center')} className="block hover:text-white transition text-left w-full">Help Center</button>
                                         <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
                                         <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">FAQ</button>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full">Affiliate Program</button>
+                                        <a href="./LCP%20-%20Production.html" className="block hover:text-white transition">Production (no sample data)</a>
                                     </div>
                                 </div>
                             </div>
@@ -2328,6 +2378,29 @@
                         <div className="p-6 md:p-8 max-w-7xl mx-auto">
                             {children}
                         </div>
+
+                        <footer className="bg-gray-900 text-white py-10 mt-8">
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                    <div className="text-sm text-gray-300">
+                                        © 2026 Life Continuity. <span className="text-gray-400">Clarity When It Matters.</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                                        <button onClick={() => onNavigate('privacy-policy')} className="text-gray-300 hover:text-white transition">Privacy Policy</button>
+                                        <button onClick={() => onNavigate('terms-of-service')} className="text-gray-300 hover:text-white transition">Terms</button>
+                                        <button onClick={() => onNavigate('legal-disclaimer')} className="text-gray-300 hover:text-white transition">Disclaimer</button>
+                                        <button onClick={() => onNavigate('help-center')} className="text-gray-300 hover:text-white transition">Help Center</button>
+                                        <button onClick={() => onNavigate('contact-us')} className="text-gray-300 hover:text-white transition">Contact</button>
+                                        <button onClick={() => onNavigate('faq')} className="text-gray-300 hover:text-white transition">FAQ</button>
+                                        <a href="./LCP%20-%20Production.html" className="text-gray-300 hover:text-white transition">Production</a>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="text-gray-300 hover:text-white transition">Affiliate Program</button>
+                                    </div>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-4">
+                                    <strong>Important:</strong> Life Continuity does not replace, override, or supersede a legally executed Will or estate document.
+                                </p>
+                            </div>
+                        </footer>
                     </div>
                 </div>
             );
@@ -2418,6 +2491,9 @@
                 if (currentPage === 'security-architecture') {
                     return <SecurityArchitecturePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
+                if (currentPage === 'affiliate-program') {
+                    return <AffiliateProgramPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                }
                 return <HomePage onNavigate={handleNavigate} onGetStarted={handleGetStarted} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
             }
 
@@ -2458,6 +2534,8 @@
                         return <ContactUsPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'faq':
                         return <FAQPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    case 'affiliate-program':
+                        return <AffiliateProgramPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     default:
                         return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} />;
                 }

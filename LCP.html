@@ -231,6 +231,7 @@
                                         <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
                                         <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">FAQ</button>
                                         <a href="./LCP%20-%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
                                     </div>
                                 </div>
                             </div>
@@ -551,6 +552,50 @@
                         <p className="font-bold text-gray-900">FAQ</p>
                         <p className="text-sm text-gray-600 mt-1">Common questions, fast answers.</p>
                     </button>
+                </div>
+            </PublicPageShell>
+        );
+
+        const AffiliateProgramPage = (props) => (
+            <PublicPageShell
+                {...props}
+                title="Affiliate Program"
+                subtitle="Earn rewards by sharing Life Continuity with your network."
+            >
+                <div className="space-y-8 text-gray-700 text-sm">
+                    <section>
+                        <h2 className="text-lg font-bold text-gray-900 mb-2">Program Objectives</h2>
+                        <ul className="list-disc list-inside space-y-1">
+                            <li>Drive qualified sign-ups by leveraging trusted voices (estate planners, financial advisors, attorneys, influencers).</li>
+                            <li>Increase brand awareness among adults 40+, families, and business owners planning their estate.</li>
+                            <li>Reward loyal customers for referring friends and family.</li>
+                            <li>Create a scalable acquisition channel with low upfront cost.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 className="text-lg font-bold text-gray-900 mb-2">Two-Tier Structure</h2>
+                        <p className="mb-2">The program has two tracks:</p>
+                        <ul className="list-disc list-inside space-y-1">
+                            <li><strong>Customer Referral Program</strong> – for existing users inviting friends and family.</li>
+                            <li><strong>Professional Affiliate Program</strong> – for advisors, bloggers, and institutions earning commissions.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Customer Referral Program</h3>
+                        <p className="mb-2">Turn satisfied customers into advocates. Every user gets a unique referral link; friends get a discount; referrers earn credits after the friend becomes a paying customer. Referrals tracked for up to 90 days.</p>
+                    </section>
+
+                    <section>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Professional Affiliate Program</h3>
+                        <p className="mb-2">Commission structure: 30% recurring for 12 months on Basic ($9/mo), Premium ($19/mo), and Family ($29/mo). One-time options: $30, $65, $100. Affiliate tiers: Bronze (30%), Silver (35% + $50 bonus), Gold (40% + quarterly bonus + featured listing).</p>
+                    </section>
+
+                    <section>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Tracking &amp; Compliance</h3>
+                        <p>Referrals tracked via unique links/codes and 90-day attribution. Payouts after referred accounts remain active (e.g. 30 days). FTC disclosure required. View your referral stats in your Dashboard under Referrals &amp; Rewards.</p>
+                    </section>
                 </div>
             </PublicPageShell>
         );

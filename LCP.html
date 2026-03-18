@@ -869,6 +869,7 @@
                                 </div>
                                 <div className="hidden md:flex items-center gap-6">
                                     {country != null && <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />}
+                                    <button onClick={() => onNavigate('home')} className="text-gray-600 hover:text-gray-900">Home</button>
                                     <a href="#how-it-works" className="text-gray-600 hover:text-gray-900">{t('nav_how')}</a>
                                     <a href="#features" className="text-gray-600 hover:text-gray-900">{t('nav_features')}</a>
                                     <button onClick={() => onNavigate('pricing')} className="text-blue-900 font-semibold hover:text-blue-800">{t('nav_pricing')}</button>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Life Continuity - Production</title>
+    <title>Life Continuity - Demo (Sample Data)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -77,27 +77,46 @@
             return map[lang] || map.en || key;
         };
 
-        // Production Data Store (no demo data)
+        // Demo Data Store (sample data for presentation only)
         const productionData = {
             user: {
-                name: "",
-                email: "",
-                mfaEnabled: false,
-                lastCheckIn: null,
-                nextCheckIn: null,
+                name: "John Anderson",
+                email: "john.anderson@email.com",
+                mfaEnabled: true,
+                lastCheckIn: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                nextCheckIn: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString(),
                 status: "Active"
             },
-            assets: [],
-            legalDocs: [],
-            trustedPeople: [],
-            digitalAssets: [],
+            assets: [
+                { id: 1, category: "Real Estate", title: "Primary Residence", value: 450000, location: "123 Main St, Calgary, AB", beneficiary: "Sarah Anderson", type: "Inform Only" },
+                { id: 2, category: "Bank Accounts", title: "TD Checking Account", value: 25000, location: "TD Bank - Account #****4567", beneficiary: "Sarah Anderson", type: "Provide Document" },
+                { id: 3, category: "Investment Accounts", title: "RRSP Portfolio", value: 180000, location: "Questrade Account", beneficiary: "Children Trust", type: "Provide Contact Details" },
+                { id: 4, category: "Business Interests", title: "Tech Startup LLC", value: 75000, location: "Alberta Corporation", beneficiary: "Business Partner", type: "Release Trigger" }
+            ],
+            legalDocs: [
+                { id: 1, type: "Will", name: "Last Will & Testament", uploaded: "2024-01-15", size: "2.3 MB", recipients: ["Executor", "Spouse"] },
+                { id: 2, type: "Power of Attorney", name: "POA - Healthcare", uploaded: "2024-01-15", size: "1.1 MB", recipients: ["Spouse"] },
+                { id: 3, type: "Living Will", name: "Healthcare Directive", uploaded: "2024-01-15", size: "890 KB", recipients: ["Spouse", "Children"] }
+            ],
+            trustedPeople: [
+                { id: 1, name: "Sarah Anderson", email: "sarah@email.com", phone: "+1-555-0101", role: "Executor", accessLevel: "Full Access", verified: true },
+                { id: 2, name: "Michael Chen", email: "michael@email.com", phone: "+1-555-0102", role: "Trusted Contact", accessLevel: "Concern Verification", verified: true },
+                { id: 3, name: "Jennifer Smith", email: "jennifer@email.com", phone: "+1-555-0103", role: "Legal Advisor", accessLevel: "Legal Documents Only", verified: false },
+                { id: 4, name: "David Anderson", email: "david@email.com", phone: "+1-555-0104", role: "Beneficiary", accessLevel: "View Only - Post Trigger", verified: true }
+            ],
+            digitalAssets: [
+                { id: 1, platform: "Gmail", category: "Email", instructions: "Memorialize account", contact: "Google Account Recovery", trigger: "60 days post-verification" },
+                { id: 2, platform: "Facebook", category: "Social Media", instructions: "Delete account", contact: "Contact: sarah@email.com", trigger: "30 days post-verification" },
+                { id: 3, platform: "Coinbase", category: "Crypto Wallet", instructions: "Recovery phrase stored offline", contact: "Executor instructions", trigger: "Immediate - Executor Only" },
+                { id: 4, platform: "AWS", category: "Cloud Storage", instructions: "Transfer to business partner", contact: "partner@company.com", trigger: "7 days post-verification" }
+            ],
             estatePlanner: {
-                personal: { fullName: "", dob: "", address: "" },
-                executor: { name: "", relationship: "", phone: "", backup: "" },
-                guardians: { primary: "", backup: "", notes: "" },
-                allocation: "",
-                specialInstructions: "",
-                funeral: ""
+                personal: { fullName: "John Robert Anderson", dob: "1970-05-15", address: "123 Main St, Calgary, AB T2P 1A1" },
+                executor: { name: "Sarah Anderson", relationship: "Spouse", phone: "+1-555-0101", backup: "Michael Chen" },
+                guardians: { primary: "Sarah Anderson", backup: "Jennifer Smith", notes: "For minor children Emily (12) and Lucas (9)" },
+                allocation: "Equal distribution to children's education trusts. Primary residence to spouse. Investment accounts split 60/40 spouse/children.",
+                specialInstructions: "Maintain family cottage for 5 years minimum. Donate piano to local music school.",
+                funeral: "Cremation preferred. Memorial service at Riverside Chapel. Donations to Heart & Stroke Foundation."
             }
         };
 

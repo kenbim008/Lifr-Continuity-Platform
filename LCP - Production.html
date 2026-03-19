@@ -91,9 +91,11 @@
                 status: "active", // "active" | "cancelled" | "permanently_disabled"
                 plan: null,
                 creditCardOnFile: false,
-                firstMonthFree: true,
+                firstMonthFree: false,
                 cancelledAt: null,
-                gracePeriodEndsAt: null
+                gracePeriodEndsAt: null,
+                downgradedAt: null,
+                previousPlan: null
             },
             assets: [],
             legalDocs: [],
@@ -1376,10 +1378,13 @@
         };
 
         // Subscription access helper
+        const hasActiveSubscription = () => {
+            const sub = productionData.subscription;
+            return sub && sub.plan && sub.status === 'active';
+        };
         const hasSubscriptionAccess = () => {
             const sub = productionData.subscription;
-            if (!sub) return true;
-            if (sub.status === 'active') return true;
+            if (!sub) return false;
             if (sub.status === 'cancelled' && sub.gracePeriodEndsAt) {
                 if (new Date(sub.gracePeriodEndsAt) < new Date()) {
                     sub.status = 'permanently_disabled';
@@ -1423,6 +1428,76 @@
             );
         };
 
+        // Subscribe Required Screen (registered but no subscription - 1st month free at subscribe)
+        const PLAN_OPTIONS = [
+            { name: 'Basic', monthlyPrice: 9, annualPrice: 90 },
+            { name: 'Premium', monthlyPrice: 19, annualPrice: 190 },
+            { name: 'Family', monthlyPrice: 29, annualPrice: 290 }
+        ];
+        const SubscribeRequiredScreen = ({ onNavigate, onSubscribed }) => {
+            const [selectedPlan, setSelectedPlan] = useState(null);
+            const [cardLast4, setCardLast4] = useState('');
+            const [cardExpiry, setCardExpiry] = useState('');
+            const handleSubscribe = (e) => {
+                e.preventDefault();
+                if (!selectedPlan || !cardLast4 || !cardExpiry) return;
+                const p = productionData.subscription;
+                p.status = 'active';
+                p.plan = selectedPlan.name;
+                p.creditCardOnFile = true;
+                p.firstMonthFree = true;
+                p.cancelledAt = null;
+                p.gracePeriodEndsAt = null;
+                p.downgradedAt = null;
+                p.previousPlan = null;
+                onSubscribed();
+            };
+            return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+                    <div className="max-w-lg w-full bg-white rounded-xl card-shadow-lg p-8">
+                        <div className="text-center mb-6">
+                            <div className="inline-block bg-amber-400 text-blue-900 px-4 py-2 rounded-full text-sm font-bold mb-4">1st Month Free</div>
+                            <h1 className="text-2xl font-bold text-gray-900 mb-2">Subscribe to Access Features</h1>
+                            <p className="text-gray-600 text-sm">Registration is free. Subscribe and add your credit card to use the app and upload documents. Cancel anytime.</p>
+                        </div>
+                        {!selectedPlan ? (
+                            <div className="space-y-3">
+                                {PLAN_OPTIONS.map((pl) => (
+                                    <button key={pl.name} onClick={() => setSelectedPlan(pl)} className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 text-left flex justify-between items-center">
+                                        <span className="font-semibold text-gray-900">{pl.name}</span>
+                                        <span className="text-gray-600">${pl.monthlyPrice}/mo — 1st month free</span>
+                                    </button>
+                                ))}
+                            </div>
+                        ) : (
+                            <form onSubmit={handleSubscribe} className="space-y-4">
+                                <div className="bg-blue-50 rounded-lg p-3 flex justify-between items-center">
+                                    <span className="font-semibold text-gray-900">Selected: {selectedPlan.name}</span>
+                                    <button type="button" onClick={() => setSelectedPlan(null)} className="text-sm text-gray-600 hover:underline">Change</button>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Card (last 4)</label>
+                                        <input type="text" value={cardLast4} onChange={(e) => setCardLast4(e.target.value.slice(-4))} placeholder="1234" maxLength="4" className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">MM/YY</label>
+                                        <input type="text" value={cardExpiry} onChange={(e) => setCardExpiry(e.target.value)} placeholder="MM/YY" className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                                    </div>
+                                </div>
+                                <button type="submit" className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition">
+                                    Subscribe — 1st Month Free
+                                </button>
+                            </form>
+                        )}
+                        <button onClick={() => onNavigate('home')} className="w-full mt-4 border border-gray-300 text-gray-600 py-2 rounded-lg hover:bg-gray-50">
+                            Return to Home
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
         // Permanently Disabled Screen
         const PermanentlyDisabledScreen = ({ onNavigate }) => (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
@@ -1437,6 +1512,89 @@
             </div>
         );
 
+        // Plan-based feature gating and upgrade/downgrade
+        const PLAN_RANK = { Basic: 1, Premium: 2, Family: 3 };
+        const PLAN_PRICES = { Basic: 9, Premium: 19, Family: 29 };
+        const FEATURE_PLANS = {
+            'dashboard': 'Basic', 'assets': 'Basic', 'legal': 'Basic', 'trusted': 'Basic', 'activity': 'Basic',
+            'digital': 'Premium', 'triggers': 'Premium', 'disclosure-preview': 'Premium', 'estate-planner': 'Premium',
+            'security-architecture': 'Basic'
+        };
+        const FEATURE_NAMES = {
+            'assets': 'Assets & Liabilities', 'legal': 'Legal Documents', 'trusted': 'Trusted People', 'activity': 'Activity Monitoring',
+            'digital': 'Digital Life', 'triggers': 'Trigger Management', 'disclosure-preview': 'Disclosure Preview', 'estate-planner': 'Estate Planner'
+        };
+        const canAccessFeature = (featureId) => {
+            const sub = productionData.subscription;
+            if (!sub || !sub.plan || sub.status !== 'active') return false;
+            const required = FEATURE_PLANS[featureId] || 'Basic';
+            return (PLAN_RANK[sub.plan] || 0) >= (PLAN_RANK[required] || 0);
+        };
+        const ChangePlanModal = ({ currentPlan, onClose, onSubscriptionChange }) => {
+            const [targetPlan, setTargetPlan] = React.useState(null);
+            const sub = productionData.subscription;
+            const wasDowngraded = sub.downgradedAt && sub.previousPlan;
+            const monthsSinceDowngrade = wasDowngraded && sub.downgradedAt
+                ? Math.max(1, Math.ceil((new Date() - new Date(sub.downgradedAt)) / (30 * 24 * 60 * 60 * 1000)))
+                : 0;
+            const retroactiveAmount = targetPlan && monthsSinceDowngrade ? PLAN_PRICES[targetPlan] * monthsSinceDowngrade : 0;
+            const handleConfirm = (mode) => {
+                if (!targetPlan) return;
+                const p = productionData.subscription;
+                const isUpg = (PLAN_RANK[targetPlan] || 0) > (PLAN_RANK[currentPlan] || 0);
+                const isDown = (PLAN_RANK[targetPlan] || 0) < (PLAN_RANK[currentPlan] || 0);
+                p.plan = targetPlan;
+                if (isDown) { p.downgradedAt = new Date().toISOString(); p.previousPlan = currentPlan; }
+                else if (mode === 'retroactive' || mode === 'new' || (wasDowngraded && isUpg)) { p.downgradedAt = null; p.previousPlan = null; }
+                if (mode === 'new' && wasDowngraded && (PLAN_RANK[targetPlan] || 0) >= 2) {
+                    productionData.digitalAssets = [];
+                    productionData.estatePlanner = { personal: { fullName: "", dob: "", address: "" }, executor: { name: "", relationship: "", phone: "", backup: "" }, guardians: { primary: "", backup: "", notes: "" }, allocation: "", specialInstructions: "", funeral: "" };
+                }
+                onSubscriptionChange && onSubscriptionChange(); onClose();
+            };
+            const isUpgrade = targetPlan && (PLAN_RANK[targetPlan] || 0) > (PLAN_RANK[currentPlan] || 0);
+            const isDowngrade = targetPlan && (PLAN_RANK[targetPlan] || 0) < (PLAN_RANK[currentPlan] || 0);
+            return (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+                    <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">Change Plan</h2>
+                        <p className="text-sm text-gray-600 mb-4">Current plan: <strong>{currentPlan}</strong></p>
+                        <div className="space-y-2 mb-4">
+                            {['Basic', 'Premium', 'Family'].filter(p => p !== currentPlan).map(plan => (
+                                <button key={plan} onClick={() => setTargetPlan(plan)} className={`w-full p-3 rounded-lg border-2 text-left ${targetPlan === plan ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                                    <span className="font-semibold">{plan}</span> — ${PLAN_PRICES[plan]}/mo
+                                </button>
+                            ))}
+                        </div>
+                        {targetPlan && isDowngrade && (
+                            <p className="text-sm text-amber-700 mb-4">You will lose access to {currentPlan}-only features (Digital Life, Triggers, Disclosure Preview, Estate Planner).</p>
+                        )}
+                        {targetPlan && wasDowngraded && isUpgrade && (
+                            <div className="space-y-3 mb-4 p-3 bg-gray-50 rounded-lg">
+                                <p className="text-sm font-semibold text-gray-900">You previously downgraded. Choose how to upgrade:</p>
+                                <button onClick={() => handleConfirm('retroactive')} className="w-full p-3 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800">Pay retroactive ${retroactiveAmount} ({monthsSinceDowngrade} mo × ${PLAN_PRICES[targetPlan]}) — Keep existing documents</button>
+                                <button onClick={() => handleConfirm('new')} className="w-full p-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">Pay new subscription fee — Upload new documents only (lose access to old)</button>
+                            </div>
+                        )}
+                        {targetPlan && (!wasDowngraded || !isUpgrade) && (
+                            <div className="flex gap-2">
+                                <button onClick={() => handleConfirm()} className="flex-1 bg-blue-900 text-white py-2 rounded-lg font-semibold hover:bg-blue-800">{isDowngrade ? 'Downgrade' : 'Upgrade'}</button>
+                                <button onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-lg">Cancel</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+        const UpgradePromptPage = ({ featureName, requiredPlan, onNavigate }) => (
+            <div className="bg-white rounded-xl card-shadow p-8 max-w-md mx-auto text-center">
+                <i data-lucide="lock" className="w-16 h-16 text-amber-500 mx-auto mb-4"></i>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">{featureName} requires {requiredPlan}</h2>
+                <p className="text-gray-600 text-sm mb-6">Upgrade your plan to access this feature.</p>
+                <button onClick={() => onNavigate('dashboard')} className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800">Go to Dashboard to Upgrade</button>
+            </div>
+        );
+
         // Signup Page Component
         const SignupPage = ({ onNavigate, onSignup, country, setCountry, language, setLanguage, t }) => {
             const [formData, setFormData] = useState({
@@ -1444,21 +1602,14 @@
                 email: '',
                 password: '',
                 province: '',
-                cardLast4: '',
-                cardExpiry: '',
                 agreedToDisclaimer: false
             });
 
             const handleSubmit = (e) => {
                 e.preventDefault();
-                if (formData.agreedToDisclaimer && formData.cardLast4 && formData.cardExpiry) {
+                if (formData.agreedToDisclaimer) {
                     productionData.user.email = formData.email;
-                    productionData.subscription.status = 'active';
-                    productionData.subscription.creditCardOnFile = true;
-                    productionData.subscription.firstMonthFree = true;
-                    productionData.subscription.plan = 'Basic';
-                    productionData.subscription.cancelledAt = null;
-                    productionData.subscription.gracePeriodEndsAt = null;
+                    productionData.user.name = formData.name;
                     onSignup(formData.name);
                 }
             };
@@ -1534,21 +1685,6 @@
                                     </select>
                                 </div>
 
-                                <div className="border border-gray-200 rounded-lg p-4 bg-green-50">
-                                    <p className="text-sm font-semibold text-green-800 mb-3">1st Month Free — Add your credit card to subscribe</p>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700 mb-1">Card (last 4 digits)</label>
-                                            <input type="text" value={formData.cardLast4} onChange={(e) => setFormData({...formData, cardLast4: e.target.value.slice(-4)})} placeholder="1234" maxLength="4" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700 mb-1">MM/YY</label>
-                                            <input type="text" value={formData.cardExpiry} onChange={(e) => setFormData({...formData, cardExpiry: e.target.value})} placeholder="MM/YY" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-gray-600 mt-2">Subscribers can cancel anytime. Billing starts after your free month.</p>
-                                </div>
-
                                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                                     <label className="flex items-start gap-3 cursor-pointer">
                                         <input
@@ -1567,9 +1703,9 @@
                                 <button
                                     type="submit"
                                     className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
-                                    disabled={!formData.agreedToDisclaimer || !formData.cardLast4 || !formData.cardExpiry}
+                                    disabled={!formData.agreedToDisclaimer}
                                 >
-                                    Create Account — 1st Month Free
+                                    Create Account
                                 </button>
                             </form>
 
@@ -1672,6 +1808,7 @@
 
         // Dashboard Component
         const Dashboard = ({ onNavigate, userDisplayName = "", onSubscriptionChange }) => {
+            const [showChangePlan, setShowChangePlan] = useState(false);
             const user = productionData.user;
             const sub = productionData.subscription;
             const handleCancelSubscription = () => {
@@ -1705,41 +1842,28 @@
                         {/* Subscription panel */}
                         {sub && sub.status === 'active' && (
                             <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl border-l-4 border-green-500">
-                                <div className="flex items-start justify-between gap-4">
+                                <div className="flex items-start justify-between gap-4 flex-wrap">
                                     <div>
                                         <h2 className="text-sm font-semibold text-gray-900">Subscription — Active</h2>
                                         <p className="text-xs text-gray-600 mt-1">
-                                            {sub.firstMonthFree ? "1st month free" : ""} Plan: {sub.plan || 'Basic'}. Cancel anytime.
+                                            {sub.firstMonthFree ? "1st month free • " : ""}Plan: {sub.plan || 'Basic'} • Cancel anytime.
                                         </p>
                                         <p className="mt-2 text-xs text-amber-700">
                                             If you cancel, you lose access immediately. Pay within 30 days to restore access; otherwise your account will be permanently disabled.
                                         </p>
                                     </div>
-                                    <button onClick={handleCancelSubscription} className="text-sm font-semibold text-red-600 hover:text-red-700 whitespace-nowrap">
-                                        Cancel Subscription
-                                    </button>
+                                    <div className="flex gap-2 flex-shrink-0">
+                                        <button onClick={() => setShowChangePlan(true)} className="px-3 py-1.5 text-sm font-medium border border-blue-900 text-blue-900 rounded-lg hover:bg-blue-50 transition">
+                                            Change Plan
+                                        </button>
+                                        <button onClick={handleCancelSubscription} className="text-sm font-semibold text-red-600 hover:text-red-700 whitespace-nowrap">
+                                            Cancel Subscription
+                                        </button>
+                                    </div>
                                 </div>
+                                {showChangePlan && <ChangePlanModal currentPlan={sub.plan || 'Basic'} onClose={() => setShowChangePlan(false)} onSubscriptionChange={onSubscriptionChange} />}
                             </div>
                         )}
-
-                        {/* Subscription panel */}
-                        <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl">
-                            <div className="flex items-start justify-between gap-4">
-                                <div>
-                                    <h2 className="text-sm font-semibold text-gray-900">Subscription</h2>
-                                    <p className="text-xs text-gray-600 mt-1">
-                                        {sub && sub.status === 'active' ? (
-                                            <>Plan: {sub.plan || 'Basic'}. 1st month free. Cancel anytime.</>
-                                        ) : null}
-                                    </p>
-                                </div>
-                                {sub && sub.status === 'active' && (
-                                    <button onClick={handleCancelSubscription} className="text-sm font-semibold text-red-600 hover:text-red-700 whitespace-nowrap">
-                                        Cancel Subscription
-                                    </button>
-                                )}
-                            </div>
-                        </div>
 
                         {/* Refer a Friend panel */}
                         <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl">
@@ -1753,25 +1877,6 @@
                                         Your code: <span className="font-mono font-semibold">LC-REF-CODE</span>
                                     </p>
                                 </div>
-                            </div>
-                        </div>
-
-                        {/* Subscription panel */}
-                        <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl">
-                            <div className="flex items-start justify-between gap-4">
-                                <div>
-                                    <h2 className="text-sm font-semibold text-gray-900">Subscription</h2>
-                                    <p className="text-xs text-gray-600 mt-1">
-                                        {sub && sub.status === 'active' ? (
-                                            <>1st month free • Plan: {sub.plan || 'Basic'} • Cancel anytime</>
-                                        ) : 'Manage your subscription'}
-                                    </p>
-                                </div>
-                                {sub && sub.status === 'active' && (
-                                    <button onClick={handleCancelSubscription} className="px-3 py-1.5 text-sm font-medium border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition">
-                                        Cancel Subscription
-                                    </button>
-                                )}
                             </div>
                         </div>
                     </div>
@@ -3070,33 +3175,45 @@
             }
 
             // Authenticated app pages - check subscription access
-            if (!hasSubscriptionAccess()) {
-                if (productionData.subscription.status === 'permanently_disabled') {
-                    return <PermanentlyDisabledScreen onNavigate={handleNavigate} />;
-                }
+            const sub = productionData.subscription;
+            if (sub && sub.status === 'permanently_disabled') {
+                return <PermanentlyDisabledScreen onNavigate={handleNavigate} />;
+            }
+            if (sub && sub.status === 'cancelled') {
                 return <AccessRevokedScreen onNavigate={handleNavigate} onRestore={handleRestoreSubscription} />;
             }
+            if (!hasActiveSubscription()) {
+                return <SubscribeRequiredScreen onNavigate={handleNavigate} onSubscribed={() => { setCurrentPage('dashboard'); handleSubscriptionChange(); }} />;
+            }
 
+            const gatePage = (pageId, PageComponent, props = {}) => {
+                if (!canAccessFeature(pageId)) {
+                    const required = FEATURE_PLANS[pageId] || 'Basic';
+                    const name = FEATURE_NAMES[pageId] || pageId;
+                    return <UpgradePromptPage featureName={name} requiredPlan={required} onNavigate={handleNavigate} />;
+                }
+                return <PageComponent {...props} />;
+            };
             const renderPage = () => {
                 switch (currentPage) {
                     case 'dashboard':
                         return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} onSubscriptionChange={handleSubscriptionChange} />;
                     case 'assets':
-                        return <AssetsPage />;
+                        return gatePage('assets', AssetsPage);
                     case 'legal':
-                        return <LegalDocumentsPage />;
+                        return gatePage('legal', LegalDocumentsPage);
                     case 'trusted':
-                        return <TrustedPeoplePage />;
+                        return gatePage('trusted', TrustedPeoplePage);
                     case 'digital':
-                        return <DigitalLifePage />;
+                        return gatePage('digital', DigitalLifePage);
                     case 'activity':
-                        return <ActivityPage />;
+                        return gatePage('activity', ActivityPage);
                     case 'estate-planner':
-                        return <EstatePlannerPage />;
+                        return gatePage('estate-planner', EstatePlannerPage);
                     case 'triggers':
-                        return <TriggersPage />;
+                        return gatePage('triggers', TriggersPage);
                     case 'disclosure-preview':
-                        return <DisclosurePreviewPage />;
+                        return gatePage('disclosure-preview', DisclosurePreviewPage);
                     case 'security-architecture':
                         return <SecurityArchitecturePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} embedded />;
                     case 'privacy-policy':

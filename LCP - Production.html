@@ -87,6 +87,14 @@
                 nextCheckIn: null,
                 status: "Active"
             },
+            subscription: {
+                status: "active", // "active" | "cancelled" | "permanently_disabled"
+                plan: null,
+                creditCardOnFile: false,
+                firstMonthFree: true,
+                cancelledAt: null,
+                gracePeriodEndsAt: null
+            },
             assets: [],
             legalDocs: [],
             trustedPeople: [],
@@ -1189,6 +1197,10 @@
                     {/* Hero Section */}
                     <section className="gradient-bg text-white py-20">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                            <div className="inline-block bg-amber-400 text-blue-900 px-5 py-2 rounded-full text-sm font-bold mb-6 shadow-lg">
+                                <i data-lucide="gift" className="w-4 h-4 inline-block mr-2 -mt-0.5" style={{verticalAlign:"middle"}}></i>
+                                1st Month Free — Subscribe & add your credit card. Cancel anytime.
+                            </div>
                             <h1 className="text-5xl md:text-6xl font-bold mb-6">
                                 {t('hero_title')}
                             </h1>
@@ -1363,6 +1375,68 @@
             );
         };
 
+        // Subscription access helper
+        const hasSubscriptionAccess = () => {
+            const sub = productionData.subscription;
+            if (!sub) return true;
+            if (sub.status === 'active') return true;
+            if (sub.status === 'cancelled' && sub.gracePeriodEndsAt) {
+                if (new Date(sub.gracePeriodEndsAt) < new Date()) {
+                    sub.status = 'permanently_disabled';
+                    return false;
+                }
+                return false;
+            }
+            return sub.status !== 'permanently_disabled';
+        };
+        const isInGracePeriod = () => {
+            const sub = productionData.subscription;
+            return sub && sub.status === 'cancelled' && sub.gracePeriodEndsAt && new Date(sub.gracePeriodEndsAt) > new Date();
+        };
+
+        // Access Revoked Screen (subscription cancelled - grace period or expired)
+        const AccessRevokedScreen = ({ onNavigate, onRestore }) => {
+            const inGrace = isInGracePeriod();
+            const sub = productionData.subscription;
+            const graceEnd = sub && sub.gracePeriodEndsAt ? new Date(sub.gracePeriodEndsAt).toLocaleDateString() : '';
+            return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+                    <div className="max-w-md w-full bg-white rounded-xl card-shadow-lg p-8 text-center">
+                        <i data-lucide="shield-off" className="w-16 h-16 text-amber-500 mx-auto mb-4"></i>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">Account Access Suspended</h1>
+                        <p className="text-gray-600 mb-6">Your subscription has been cancelled. You have lost access to your account.</p>
+                        {inGrace ? (
+                            <>
+                                <p className="text-sm text-gray-700 mb-4">Pay your subscription fee within 30 days of cancellation to restore access. Your grace period ends: <strong>{graceEnd}</strong></p>
+                                <button onClick={onRestore} className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition mb-3">
+                                    Pay &amp; Restore Access
+                                </button>
+                            </>
+                        ) : (
+                            <p className="text-sm text-red-600 mb-4">Your 30-day grace period has ended. Your account has been permanently disabled.</p>
+                        )}
+                        <button onClick={() => onNavigate('home')} className="w-full border border-gray-300 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-50 transition">
+                            Return to Home
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // Permanently Disabled Screen
+        const PermanentlyDisabledScreen = ({ onNavigate }) => (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+                <div className="max-w-md w-full bg-white rounded-xl card-shadow-lg p-8 text-center">
+                    <i data-lucide="x-octagon" className="w-16 h-16 text-red-500 mx-auto mb-4"></i>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Account Permanently Disabled</h1>
+                    <p className="text-gray-600 mb-6">Your subscription was not renewed within the 30-day grace period. Your account has been permanently disabled and cannot be restored.</p>
+                    <button onClick={() => onNavigate('home')} className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition">
+                        Return to Home
+                    </button>
+                </div>
+            </div>
+        );
+
         // Signup Page Component
         const SignupPage = ({ onNavigate, onSignup, country, setCountry, language, setLanguage, t }) => {
             const [formData, setFormData] = useState({
@@ -1370,12 +1444,21 @@
                 email: '',
                 password: '',
                 province: '',
+                cardLast4: '',
+                cardExpiry: '',
                 agreedToDisclaimer: false
             });
 
             const handleSubmit = (e) => {
                 e.preventDefault();
-                if (formData.agreedToDisclaimer) {
+                if (formData.agreedToDisclaimer && formData.cardLast4 && formData.cardExpiry) {
+                    productionData.user.email = formData.email;
+                    productionData.subscription.status = 'active';
+                    productionData.subscription.creditCardOnFile = true;
+                    productionData.subscription.firstMonthFree = true;
+                    productionData.subscription.plan = 'Basic';
+                    productionData.subscription.cancelledAt = null;
+                    productionData.subscription.gracePeriodEndsAt = null;
                     onSignup(formData.name);
                 }
             };
@@ -1451,6 +1534,21 @@
                                     </select>
                                 </div>
 
+                                <div className="border border-gray-200 rounded-lg p-4 bg-green-50">
+                                    <p className="text-sm font-semibold text-green-800 mb-3">1st Month Free — Add your credit card to subscribe</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Card (last 4 digits)</label>
+                                            <input type="text" value={formData.cardLast4} onChange={(e) => setFormData({...formData, cardLast4: e.target.value.slice(-4)})} placeholder="1234" maxLength="4" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">MM/YY</label>
+                                            <input type="text" value={formData.cardExpiry} onChange={(e) => setFormData({...formData, cardExpiry: e.target.value})} placeholder="MM/YY" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-600 mt-2">Subscribers can cancel anytime. Billing starts after your free month.</p>
+                                </div>
+
                                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                                     <label className="flex items-start gap-3 cursor-pointer">
                                         <input
@@ -1469,9 +1567,9 @@
                                 <button
                                     type="submit"
                                     className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
-                                    disabled={!formData.agreedToDisclaimer}
+                                    disabled={!formData.agreedToDisclaimer || !formData.cardLast4 || !formData.cardExpiry}
                                 >
-                                    Create Account
+                                    Create Account — 1st Month Free
                                 </button>
                             </form>
 
@@ -1573,8 +1671,18 @@
         };
 
         // Dashboard Component
-        const Dashboard = ({ onNavigate, userDisplayName = "" }) => {
+        const Dashboard = ({ onNavigate, userDisplayName = "", onSubscriptionChange }) => {
             const user = productionData.user;
+            const sub = productionData.subscription;
+            const handleCancelSubscription = () => {
+                if (!window.confirm('Cancel your subscription? You will lose access immediately. You have 30 days to pay and restore access.')) return;
+                sub.status = 'cancelled';
+                sub.cancelledAt = new Date().toISOString();
+                const end = new Date();
+                end.setDate(end.getDate() + 30);
+                sub.gracePeriodEndsAt = end.toISOString();
+                if (onSubscriptionChange) onSubscriptionChange();
+            };
             const statusColor = user.status === 'Active' ? 'green' : user.status === 'Escalation' ? 'red' : 'yellow';
             const firstName = userDisplayName ? userDisplayName.trim().split(/\s+/)[0] : "there";
             const assetCount = productionData.assets.length;
@@ -1594,6 +1702,45 @@
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {firstName}</h1>
                         <p className="text-gray-600">Your estate continuity dashboard</p>
 
+                        {/* Subscription panel */}
+                        {sub && sub.status === 'active' && (
+                            <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl border-l-4 border-green-500">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div>
+                                        <h2 className="text-sm font-semibold text-gray-900">Subscription — Active</h2>
+                                        <p className="text-xs text-gray-600 mt-1">
+                                            {sub.firstMonthFree ? "1st month free" : ""} Plan: {sub.plan || 'Basic'}. Cancel anytime.
+                                        </p>
+                                        <p className="mt-2 text-xs text-amber-700">
+                                            If you cancel, you lose access immediately. Pay within 30 days to restore access; otherwise your account will be permanently disabled.
+                                        </p>
+                                    </div>
+                                    <button onClick={handleCancelSubscription} className="text-sm font-semibold text-red-600 hover:text-red-700 whitespace-nowrap">
+                                        Cancel Subscription
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Subscription panel */}
+                        <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl">
+                            <div className="flex items-start justify-between gap-4">
+                                <div>
+                                    <h2 className="text-sm font-semibold text-gray-900">Subscription</h2>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                        {sub && sub.status === 'active' ? (
+                                            <>Plan: {sub.plan || 'Basic'}. 1st month free. Cancel anytime.</>
+                                        ) : null}
+                                    </p>
+                                </div>
+                                {sub && sub.status === 'active' && (
+                                    <button onClick={handleCancelSubscription} className="text-sm font-semibold text-red-600 hover:text-red-700 whitespace-nowrap">
+                                        Cancel Subscription
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
                         {/* Refer a Friend panel */}
                         <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl">
                             <div className="flex items-start justify-between gap-4">
@@ -1606,6 +1753,25 @@
                                         Your code: <span className="font-mono font-semibold">LC-REF-CODE</span>
                                     </p>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Subscription panel */}
+                        <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl">
+                            <div className="flex items-start justify-between gap-4">
+                                <div>
+                                    <h2 className="text-sm font-semibold text-gray-900">Subscription</h2>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                        {sub && sub.status === 'active' ? (
+                                            <>1st month free • Plan: {sub.plan || 'Basic'} • Cancel anytime</>
+                                        ) : 'Manage your subscription'}
+                                    </p>
+                                </div>
+                                {sub && sub.status === 'active' && (
+                                    <button onClick={handleCancelSubscription} className="px-3 py-1.5 text-sm font-medium border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition">
+                                        Cancel Subscription
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -2810,8 +2976,17 @@
             const [currentPage, setCurrentPage] = useState('home');
             const [isAuthenticated, setIsAuthenticated] = useState(false);
             const [userDisplayName, setUserDisplayName] = useState('');
+            const [subVersion, setSubVersion] = useState(0);
             const [country, setCountry] = useState(() => typeof localStorage !== 'undefined' ? (localStorage.getItem('lcp_country') || 'US') : 'US');
             const [language, setLanguage] = useState(() => typeof localStorage !== 'undefined' ? (localStorage.getItem('lcp_language') || 'en') : 'en');
+
+            const handleRestoreSubscription = () => {
+                productionData.subscription.status = 'active';
+                productionData.subscription.cancelledAt = null;
+                productionData.subscription.gracePeriodEndsAt = null;
+                setSubVersion(v => v + 1);
+            };
+            const handleSubscriptionChange = () => { setSubVersion(v => v + 1); };
 
             useEffect(() => { try { localStorage.setItem('lcp_country', country); } catch (e) {} }, [country]);
             useEffect(() => { try { localStorage.setItem('lcp_language', language); } catch (e) {} }, [language]);
@@ -2894,11 +3069,18 @@
                 return <HomePage onNavigate={handleNavigate} onGetStarted={handleGetStarted} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
             }
 
-            // Authenticated app pages
+            // Authenticated app pages - check subscription access
+            if (!hasSubscriptionAccess()) {
+                if (productionData.subscription.status === 'permanently_disabled') {
+                    return <PermanentlyDisabledScreen onNavigate={handleNavigate} />;
+                }
+                return <AccessRevokedScreen onNavigate={handleNavigate} onRestore={handleRestoreSubscription} />;
+            }
+
             const renderPage = () => {
                 switch (currentPage) {
                     case 'dashboard':
-                        return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} />;
+                        return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} onSubscriptionChange={handleSubscriptionChange} />;
                     case 'assets':
                         return <AssetsPage />;
                     case 'legal':

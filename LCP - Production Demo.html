@@ -1761,7 +1761,7 @@
                 name: '',
                 email: '',
                 password: '',
-                province: '',
+                country: '',
                 agreedToDisclaimer: false
             });
 
@@ -1836,18 +1836,17 @@
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Province / State</label>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Country</label>
                                     <select
-                                        value={formData.province}
-                                        onChange={(e) => setFormData({...formData, province: e.target.value})}
+                                        value={formData.country}
+                                        onChange={(e) => setFormData({...formData, country: e.target.value})}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         required
                                     >
-                                        <option value="">Select Province/State</option>
-                                        <option value="AB">Alberta</option>
-                                        <option value="BC">British Columbia</option>
-                                        <option value="ON">Ontario</option>
-                                        <option value="QC">Quebec</option>
+                                        <option value="">Select Country</option>
+                                        {COUNTRY_LIST.map((c) => (
+                                            <option key={c.code} value={c.code}>{c.name}</option>
+                                        ))}
                                     </select>
                                 </div>
 

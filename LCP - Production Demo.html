@@ -190,11 +190,15 @@
         );
 
         const PublicPageShell = ({ title, subtitle, onNavigate, country, setCountry, language, setLanguage, t, children }) => {
+            const [mobileNavOpen, setMobileNavOpen] = useState(false);
+            useEffect(() => {
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
+            }, [mobileNavOpen]);
             return (
                 <div className="min-h-screen bg-gray-50">
                     <nav className="bg-white border-b sticky top-0 z-50">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="flex justify-between items-center h-16">
+                            <div className="relative z-[80] flex justify-between items-center h-16 bg-white">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-6 h-6 text-white"></i>
@@ -208,10 +212,26 @@
                                     <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900">{t('nav_signin')}</button>
                                     <button onClick={() => onNavigate('signup')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">{t('nav_get_started')}</button>
                                 </div>
-                                <button className="md:hidden text-gray-600 hover:text-gray-900">
-                                    <i data-lucide="menu" className="w-6 h-6"></i>
+                                <button type="button" aria-label="Toggle menu" aria-expanded={mobileNavOpen} onClick={() => setMobileNavOpen(!mobileNavOpen)} className="md:hidden text-gray-600 hover:text-gray-900 p-2 -mr-2">
+                                    <i data-lucide={mobileNavOpen ? 'x' : 'menu'} className="w-6 h-6"></i>
                                 </button>
                             </div>
+                            {mobileNavOpen && (
+                                <>
+                                    <div className="fixed inset-0 bg-black/40 z-[60] md:hidden" onClick={() => setMobileNavOpen(false)} aria-hidden="true" />
+                                    <div className="fixed top-16 left-0 right-0 border-b bg-white shadow-lg p-4 z-[70] md:hidden flex flex-col gap-1">
+                                        {country != null && (
+                                            <div className="pb-3 mb-2 border-b border-gray-100">
+                                                <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />
+                                            </div>
+                                        )}
+                                        <button type="button" onClick={() => { onNavigate('home'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_home')}</button>
+                                        <button type="button" onClick={() => { onNavigate('pricing'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_pricing')}</button>
+                                        <button type="button" onClick={() => { onNavigate('login'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_signin')}</button>
+                                        <button type="button" onClick={() => { onNavigate('signup'); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">{t('nav_get_started')}</button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </nav>
 
@@ -968,6 +988,10 @@
         // Pricing Page Component
         const PricingPage = ({ onNavigate, country, setCountry, language, setLanguage, t, embeddedInApp, onChoosePlanSubscribe }) => {
             const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' or 'annual'
+            const [mobileNavOpen, setMobileNavOpen] = useState(false);
+            useEffect(() => {
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
+            }, [mobileNavOpen]);
 
             const plans = [
                 {
@@ -1020,7 +1044,7 @@
                     {/* Navigation */}
                     <nav className="bg-white border-b sticky top-0 z-50">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="flex justify-between items-center h-16">
+                            <div className="relative z-[80] flex justify-between items-center h-16 bg-white">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-6 h-6 text-white"></i>
@@ -1036,10 +1060,28 @@
                                     <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900">{t('nav_signin')}</button>
                                     <button onClick={() => onNavigate('signup')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">{t('nav_get_started')}</button>
                                 </div>
-                                <button className="md:hidden text-gray-600 hover:text-gray-900">
-                                    <i data-lucide="menu" className="w-6 h-6"></i>
+                                <button type="button" aria-label="Toggle menu" aria-expanded={mobileNavOpen} onClick={() => setMobileNavOpen(!mobileNavOpen)} className="md:hidden text-gray-600 hover:text-gray-900 p-2 -mr-2">
+                                    <i data-lucide={mobileNavOpen ? 'x' : 'menu'} className="w-6 h-6"></i>
                                 </button>
                             </div>
+                            {mobileNavOpen && (
+                                <>
+                                    <div className="fixed inset-0 bg-black/40 z-[60] md:hidden" onClick={() => setMobileNavOpen(false)} aria-hidden="true" />
+                                    <div className="fixed top-16 left-0 right-0 border-b bg-white shadow-lg p-4 z-[70] md:hidden flex flex-col gap-1">
+                                        {country != null && (
+                                            <div className="pb-3 mb-2 border-b border-gray-100">
+                                                <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />
+                                            </div>
+                                        )}
+                                        <button type="button" onClick={() => { onNavigate('home'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_home')}</button>
+                                        <button type="button" onClick={() => { onNavigate('home', '#how-it-works'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_how')}</button>
+                                        <button type="button" onClick={() => { onNavigate('home', '#features'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_features')}</button>
+                                        <button type="button" onClick={() => { onNavigate('pricing'); setMobileNavOpen(false); }} className="text-blue-900 font-semibold text-left py-2">{t('nav_pricing')}</button>
+                                        <button type="button" onClick={() => { onNavigate('login'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_signin')}</button>
+                                        <button type="button" onClick={() => { onNavigate('signup'); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">{t('nav_get_started')}</button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </nav>
 
@@ -1237,12 +1279,16 @@
 
         // Home Page Component
         const HomePage = ({ onNavigate, onGetStarted, country, setCountry, language, setLanguage, t }) => {
+            const [mobileNavOpen, setMobileNavOpen] = useState(false);
+            useEffect(() => {
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
+            }, [mobileNavOpen]);
             return (
                 <div className="min-h-screen">
                     {/* Navigation */}
                     <nav className="bg-white border-b sticky top-0 z-50">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="flex justify-between items-center h-16">
+                            <div className="relative z-[80] flex justify-between items-center h-16 bg-white">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-6 h-6 text-white"></i>
@@ -1258,10 +1304,28 @@
                                     <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900">{t('nav_signin')}</button>
                                     <button onClick={onGetStarted} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">{t('nav_get_started')}</button>
                                 </div>
-                                <button className="md:hidden text-gray-600 hover:text-gray-900">
-                                    <i data-lucide="menu" className="w-6 h-6"></i>
+                                <button type="button" aria-label="Toggle menu" aria-expanded={mobileNavOpen} onClick={() => setMobileNavOpen(!mobileNavOpen)} className="md:hidden text-gray-600 hover:text-gray-900 p-2 -mr-2">
+                                    <i data-lucide={mobileNavOpen ? 'x' : 'menu'} className="w-6 h-6"></i>
                                 </button>
                             </div>
+                            {mobileNavOpen && (
+                                <>
+                                    <div className="fixed inset-0 bg-black/40 z-[60] md:hidden" onClick={() => setMobileNavOpen(false)} aria-hidden="true" />
+                                    <div className="fixed top-16 left-0 right-0 border-b bg-white shadow-lg p-4 z-[70] md:hidden flex flex-col gap-1">
+                                        {country != null && (
+                                            <div className="pb-3 mb-2 border-b border-gray-100">
+                                                <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />
+                                            </div>
+                                        )}
+                                        <button type="button" onClick={() => { onNavigate('home'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">Home</button>
+                                        <a href="#how-it-works" onClick={() => setMobileNavOpen(false)} className="text-gray-700 hover:text-gray-900 py-2">{t('nav_how')}</a>
+                                        <a href="#features" onClick={() => setMobileNavOpen(false)} className="text-gray-700 hover:text-gray-900 py-2">{t('nav_features')}</a>
+                                        <button type="button" onClick={() => { onNavigate('pricing'); setMobileNavOpen(false); }} className="text-blue-900 font-semibold text-left py-2">{t('nav_pricing')}</button>
+                                        <button type="button" onClick={() => { onNavigate('login'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_signin')}</button>
+                                        <button type="button" onClick={() => { onGetStarted(); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">{t('nav_get_started')}</button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </nav>
 
@@ -3108,6 +3172,9 @@
         // App Layout with Sidebar
         const AppLayout = ({ children, currentPage, onNavigate, country, setCountry, language, setLanguage, t }) => {
             const [sidebarOpen, setSidebarOpen] = useState(false);
+            useEffect(() => {
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
+            }, [sidebarOpen]);
 
             const navigation = [
                 { id: 'dashboard', name: 'Dashboard', icon: 'layout-dashboard' },
@@ -3126,8 +3193,11 @@
 
             return (
                 <div className="min-h-screen bg-gray-50 flex">
+                    {sidebarOpen && (
+                        <div className="fixed inset-0 bg-black/40 z-30 md:hidden" onClick={() => setSidebarOpen(false)} aria-hidden="true" />
+                    )}
                     {/* Sidebar */}
-                    <div className={`${sidebarOpen ? 'block' : 'hidden'} md:block w-64 bg-white border-r fixed md:static h-full z-20 overflow-y-auto`}>
+                    <div className={`${sidebarOpen ? 'block' : 'hidden'} md:block w-64 bg-white border-r fixed inset-y-0 left-0 md:inset-auto md:static z-40 h-screen md:h-full min-h-0 overflow-y-auto`}>
                         <div className="p-6 border-b">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
@@ -3165,9 +3235,9 @@
                     {/* Main Content */}
                     <div className="flex-1 overflow-auto">
                         {/* Top Bar */}
-                        <div className="bg-white border-b p-4 flex items-center justify-between sticky top-0 z-10">
+                        <div className="bg-white border-b p-4 flex items-center justify-between sticky top-0 z-50">
                             <div className="flex items-center gap-3">
-                                <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden">
+                                <button type="button" aria-label={sidebarOpen ? 'Close menu' : 'Open menu'} onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-2 -ml-2 text-gray-800">
                                     <i data-lucide={sidebarOpen ? 'x' : 'menu'} className="w-6 h-6"></i>
                                 </button>
                                 <div className="flex items-center gap-2">

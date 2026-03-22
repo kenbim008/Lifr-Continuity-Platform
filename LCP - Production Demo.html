@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Life Continuity - Demo (Sample Data)</title>
+    <title>Life Continuity - Demo (sample data)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -77,7 +77,7 @@
             return map[lang] || map.en || key;
         };
 
-        // Demo Data Store (sample data for presentation only)
+        // Demo Data Store (same app as production — sample data for presentation)
         const productionData = {
             user: {
                 name: "John Anderson",
@@ -87,6 +87,18 @@
                 nextCheckIn: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString(),
                 status: "Active"
             },
+            subscription: {
+                status: "active",
+                plan: "Premium",
+                creditCardOnFile: true,
+                firstMonthFree: false,
+                cancelledAt: null,
+                gracePeriodEndsAt: null,
+                downgradedAt: null,
+                previousPlan: null,
+                pendingCheckoutPlan: null
+            },
+            stripeConnectPayoutsEnabled: true,
             assets: [
                 { id: 1, category: "Real Estate", title: "Primary Residence", value: 450000, location: "123 Main St, Calgary, AB", beneficiary: "Sarah Anderson", type: "Inform Only" },
                 { id: 2, category: "Bank Accounts", title: "TD Checking Account", value: 25000, location: "TD Bank - Account #****4567", beneficiary: "Sarah Anderson", type: "Provide Document" },
@@ -728,6 +740,20 @@
                             “Referrals &amp; Rewards” section. When referral tracking is connected to your billing system, those values will reflect real activity.
                         </p>
                     </section>
+
+                    <section className="border border-green-200 bg-green-50 rounded-xl p-6">
+                        <h3 className="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
+                            <i data-lucide="wallet" className="w-5 h-5 text-green-700"></i>
+                            Withdraw referral earnings (Stripe)
+                        </h3>
+                        <p className="text-sm text-gray-700 mb-4">
+                            Subscribers can connect Stripe from the Dashboard to receive referral commissions. Use <strong>Withdraw to Stripe</strong> on your Affiliate Dashboard to move available balances to your connected Stripe account.
+                        </p>
+                        <button onClick={() => props.onNavigate('login')} className="inline-flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg font-semibold hover:bg-green-800 transition text-sm">
+                            <i data-lucide="arrow-up-right" className="w-4 h-4"></i>
+                            Sign in — Affiliate Dashboard &amp; Withdraw
+                        </button>
+                    </section>
                 </div>
             </PublicPageShell>
         );
@@ -758,6 +784,7 @@
         const AffiliateDashboardPage = ({ onNavigate, isDemo = false, showRules = false }) => {
             const [activeTab, setActiveTab] = useState('referrals');
             const [copied, setCopied] = useState(false);
+            const stripeReady = isDemo || productionData.stripeConnectPayoutsEnabled;
             const refCode = isDemo ? 'LC-DEMO-REF' : (productionData.user && productionData.user.name ? 'REF-' + productionData.user.name.replace(/\s+/g, '').slice(0, 8) : 'REF');
             const referralUrl = isDemo ? AFFILIATE_DEMO_DATA.referralLink : (typeof window !== 'undefined' ? (window.location.origin + '/r/' + refCode) : 'https://lifecontinuity.com/r/' + refCode);
             const data = isDemo ? AFFILIATE_DEMO_DATA : {
@@ -768,6 +795,21 @@
                 referrals: [],
                 commissions: [],
                 payouts: []
+            };
+
+            const handleWithdrawStripe = () => {
+                if (!stripeReady) {
+                    alert('Connect Stripe for payouts from your Dashboard first. Then you can withdraw referral earnings to your Stripe account.');
+                    onNavigate('dashboard');
+                    return;
+                }
+                const pending = typeof data.pendingCommission === 'number' ? data.pendingCommission : parseFloat(data.pendingCommission) || 0;
+                if (pending <= 0) {
+                    alert('No withdrawable balance right now.');
+                    return;
+                }
+                if (!window.confirm(`Withdraw $${pending.toFixed(2)} to your connected Stripe account? (Demo — no real transfer.)`)) return;
+                alert('Withdrawal initiated. In production this uses Stripe Connect payouts.');
             };
 
             const copyLink = () => {
@@ -798,14 +840,25 @@
 
             return (
                 <div className="space-y-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
                         <h1 className="text-2xl font-bold text-gray-900">Affiliate Dashboard</h1>
-                        {showRules && (
-                            <button onClick={() => onNavigate('affiliate-program')} className="text-sm text-blue-900 font-semibold hover:underline">
-                                View program rules
+                        <div className="flex flex-wrap items-center gap-2">
+                            <button type="button" onClick={handleWithdrawStripe} className="inline-flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg font-semibold hover:bg-green-800 transition text-sm">
+                                <i data-lucide="banknote" className="w-4 h-4"></i>
+                                Withdraw to Stripe
                             </button>
-                        )}
+                            {showRules && (
+                                <button onClick={() => onNavigate('affiliate-program')} className="text-sm text-blue-900 font-semibold hover:underline">
+                                    View program rules
+                                </button>
+                            )}
+                        </div>
                     </div>
+                    {!stripeReady && !isDemo && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-900">
+                            Connect Stripe from your main Dashboard under <strong>Referral payouts (Stripe)</strong> to enable withdrawals to your Stripe account.
+                        </div>
+                    )}
 
                     {/* Metrics */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -913,7 +966,7 @@
         };
 
         // Pricing Page Component
-        const PricingPage = ({ onNavigate, country, setCountry, language, setLanguage, t }) => {
+        const PricingPage = ({ onNavigate, country, setCountry, language, setLanguage, t, embeddedInApp, onChoosePlanSubscribe }) => {
             const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' or 'annual'
 
             const plans = [
@@ -1074,8 +1127,15 @@
                                                 ))}
                                             </ul>
                                             
-                                            <button className={`w-full bg-${plan.color}-600 text-white py-3 rounded-lg font-semibold hover:bg-${plan.color}-700 transition`}>
-                                                Choose {plan.name}
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (embeddedInApp && onChoosePlanSubscribe) onChoosePlanSubscribe(plan.name);
+                                                    else onNavigate('signup');
+                                                }}
+                                                className={`w-full bg-${plan.color}-600 text-white py-3 rounded-lg font-semibold hover:bg-${plan.color}-700 transition`}
+                                            >
+                                                {embeddedInApp ? `Subscribe — ${plan.name}` : `Choose ${plan.name}`}
                                             </button>
                                         </div>
                                     </div>
@@ -1208,6 +1268,10 @@
                     {/* Hero Section */}
                     <section className="gradient-bg text-white py-20">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                            <div className="inline-block bg-amber-400 text-blue-900 px-5 py-2 rounded-full text-sm font-bold mb-6 shadow-lg">
+                                <i data-lucide="gift" className="w-4 h-4 inline-block mr-2 -mt-0.5" style={{verticalAlign:"middle"}}></i>
+                                1st Month Free — Subscribe & add your credit card. Cancel anytime.
+                            </div>
                             <h1 className="text-5xl md:text-6xl font-bold mb-6">
                                 {t('hero_title')}
                             </h1>
@@ -1382,6 +1446,251 @@
             );
         };
 
+        // Subscription access helper
+        const hasActiveSubscription = () => {
+            const sub = productionData.subscription;
+            return sub && sub.plan && sub.status === 'active';
+        };
+        const hasSubscriptionAccess = () => {
+            const sub = productionData.subscription;
+            if (!sub) return false;
+            if (sub.status === 'cancelled' && sub.gracePeriodEndsAt) {
+                if (new Date(sub.gracePeriodEndsAt) < new Date()) {
+                    sub.status = 'permanently_disabled';
+                    return false;
+                }
+                return false;
+            }
+            return sub.status !== 'permanently_disabled';
+        };
+        const isInGracePeriod = () => {
+            const sub = productionData.subscription;
+            return sub && sub.status === 'cancelled' && sub.gracePeriodEndsAt && new Date(sub.gracePeriodEndsAt) > new Date();
+        };
+
+        // Access Revoked Screen (subscription cancelled - grace period or expired)
+        const AccessRevokedScreen = ({ onNavigate, onRestore }) => {
+            const inGrace = isInGracePeriod();
+            const sub = productionData.subscription;
+            const graceEnd = sub && sub.gracePeriodEndsAt ? new Date(sub.gracePeriodEndsAt).toLocaleDateString() : '';
+            return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+                    <div className="max-w-md w-full bg-white rounded-xl card-shadow-lg p-8 text-center">
+                        <i data-lucide="shield-off" className="w-16 h-16 text-amber-500 mx-auto mb-4"></i>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">Account Access Suspended</h1>
+                        <p className="text-gray-600 mb-6">Your subscription has been cancelled. You have lost access to your account.</p>
+                        {inGrace ? (
+                            <>
+                                <p className="text-sm text-gray-700 mb-4">Pay your subscription fee within 30 days of cancellation to restore access. Your grace period ends: <strong>{graceEnd}</strong></p>
+                                <button onClick={onRestore} className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition mb-3">
+                                    Pay &amp; Restore Access
+                                </button>
+                            </>
+                        ) : (
+                            <p className="text-sm text-red-600 mb-4">Your 30-day grace period has ended. Your account has been permanently disabled.</p>
+                        )}
+                        <button onClick={() => onNavigate('home')} className="w-full border border-gray-300 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-50 transition">
+                            Return to Home
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // Subscribe Required Screen (registered but no subscription - 1st month free at subscribe)
+        const PLAN_OPTIONS = [
+            { name: 'Basic', monthlyPrice: 9, annualPrice: 90 },
+            { name: 'Premium', monthlyPrice: 19, annualPrice: 190 },
+            { name: 'Family', monthlyPrice: 29, annualPrice: 290 }
+        ];
+        const SubscribeRequiredScreen = ({ onNavigate, onSubscribed }) => {
+            const [selectedPlan, setSelectedPlan] = useState(null);
+            const [cardNumber, setCardNumber] = useState('');
+            const [cardName, setCardName] = useState('');
+            const [cardExpiry, setCardExpiry] = useState('');
+            const [cardCvv, setCardCvv] = useState('');
+            const [billingZip, setBillingZip] = useState('');
+            useEffect(() => {
+                const pending = productionData.subscription.pendingCheckoutPlan;
+                if (pending && PLAN_OPTIONS.some((pl) => pl.name === pending)) {
+                    setSelectedPlan(PLAN_OPTIONS.find((pl) => pl.name === pending));
+                    productionData.subscription.pendingCheckoutPlan = null;
+                }
+            }, []);
+            const handleSubscribe = (e) => {
+                e.preventDefault();
+                const digits = cardNumber.replace(/\s/g, '');
+                if (!selectedPlan || digits.length < 15 || !cardName.trim() || !cardExpiry.trim() || cardCvv.length < 3 || !billingZip.trim()) return;
+                const p = productionData.subscription;
+                p.status = 'active';
+                p.plan = selectedPlan.name;
+                p.creditCardOnFile = true;
+                p.firstMonthFree = true;
+                p.cancelledAt = null;
+                p.gracePeriodEndsAt = null;
+                p.downgradedAt = null;
+                p.previousPlan = null;
+                onSubscribed();
+            };
+            return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+                    <div className="max-w-lg w-full bg-white rounded-xl card-shadow-lg p-8">
+                        <div className="text-center mb-6">
+                            <div className="inline-block bg-amber-400 text-blue-900 px-4 py-2 rounded-full text-sm font-bold mb-4">1st Month Free</div>
+                            <h1 className="text-2xl font-bold text-gray-900 mb-2">Subscribe to Access Features</h1>
+                            <p className="text-gray-600 text-sm">Registration is free. Subscribe with your full card details for payment (charged securely via Stripe). Cancel anytime.</p>
+                        </div>
+                        {!selectedPlan ? (
+                            <div className="space-y-3">
+                                {PLAN_OPTIONS.map((pl) => (
+                                    <button key={pl.name} onClick={() => setSelectedPlan(pl)} className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 text-left flex justify-between items-center">
+                                        <span className="font-semibold text-gray-900">{pl.name}</span>
+                                        <span className="text-gray-600">${pl.monthlyPrice}/mo — 1st month free</span>
+                                    </button>
+                                ))}
+                            </div>
+                        ) : (
+                            <form onSubmit={handleSubscribe} className="space-y-4">
+                                <div className="bg-blue-50 rounded-lg p-3 flex justify-between items-center">
+                                    <span className="font-semibold text-gray-900">Selected: {selectedPlan.name}</span>
+                                    <button type="button" onClick={() => setSelectedPlan(null)} className="text-sm text-gray-600 hover:underline">Change</button>
+                                </div>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Card number</label>
+                                        <input type="text" inputMode="numeric" autoComplete="cc-number" value={cardNumber} onChange={(e) => setCardNumber(e.target.value.replace(/[^\d\s]/g, '').slice(0, 19))} placeholder="4242 4242 4242 4242" className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Name on card</label>
+                                        <input type="text" autoComplete="cc-name" value={cardName} onChange={(e) => setCardName(e.target.value)} placeholder="As shown on card" className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Expiry (MM/YY)</label>
+                                            <input type="text" autoComplete="cc-exp" value={cardExpiry} onChange={(e) => setCardExpiry(e.target.value)} placeholder="MM/YY" className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">CVV</label>
+                                            <input type="password" autoComplete="cc-csc" value={cardCvv} onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="•••" maxLength="4" className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Billing ZIP</label>
+                                            <input type="text" autoComplete="postal-code" value={billingZip} onChange={(e) => setBillingZip(e.target.value)} placeholder="Postal code" className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-500">Payment is processed securely. In production this connects to Stripe; this page is a UI flow only.</p>
+                                </div>
+                                <button type="submit" className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition">
+                                    Subscribe — 1st Month Free
+                                </button>
+                            </form>
+                        )}
+                        <button onClick={() => onNavigate('home')} className="w-full mt-4 border border-gray-300 text-gray-600 py-2 rounded-lg hover:bg-gray-50">
+                            Return to Home
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // Permanently Disabled Screen
+        const PermanentlyDisabledScreen = ({ onNavigate }) => (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+                <div className="max-w-md w-full bg-white rounded-xl card-shadow-lg p-8 text-center">
+                    <i data-lucide="x-octagon" className="w-16 h-16 text-red-500 mx-auto mb-4"></i>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Account Permanently Disabled</h1>
+                    <p className="text-gray-600 mb-6">Your subscription was not renewed within the 30-day grace period. Your account has been permanently disabled and cannot be restored.</p>
+                    <button onClick={() => onNavigate('home')} className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition">
+                        Return to Home
+                    </button>
+                </div>
+            </div>
+        );
+
+        // Plan-based feature gating and upgrade/downgrade
+        const PLAN_RANK = { Basic: 1, Premium: 2, Family: 3 };
+        const PLAN_PRICES = { Basic: 9, Premium: 19, Family: 29 };
+        const FEATURE_PLANS = {
+            'dashboard': 'Basic', 'assets': 'Basic', 'legal': 'Basic', 'trusted': 'Basic', 'activity': 'Basic',
+            'digital': 'Premium', 'triggers': 'Premium', 'disclosure-preview': 'Premium', 'estate-planner': 'Premium',
+            'security-architecture': 'Basic', 'affiliate-dashboard': 'Basic'
+        };
+        const FEATURE_NAMES = {
+            'assets': 'Assets & Liabilities', 'legal': 'Legal Documents', 'trusted': 'Trusted People', 'activity': 'Activity Monitoring',
+            'digital': 'Digital Life', 'triggers': 'Trigger Management', 'disclosure-preview': 'Disclosure Preview', 'estate-planner': 'Estate Planner',
+            'affiliate-dashboard': 'Affiliate Dashboard'
+        };
+        const canAccessFeature = (featureId) => {
+            const sub = productionData.subscription;
+            if (!sub || !sub.plan || sub.status !== 'active') return false;
+            const required = FEATURE_PLANS[featureId] || 'Basic';
+            return (PLAN_RANK[sub.plan] || 0) >= (PLAN_RANK[required] || 0);
+        };
+        const ChangePlanModal = ({ currentPlan, onClose, onSubscriptionChange }) => {
+            const [targetPlan, setTargetPlan] = React.useState(null);
+            const sub = productionData.subscription;
+            const wasDowngraded = sub.downgradedAt && sub.previousPlan;
+            const monthsSinceDowngrade = wasDowngraded && sub.downgradedAt
+                ? Math.max(1, Math.ceil((new Date() - new Date(sub.downgradedAt)) / (30 * 24 * 60 * 60 * 1000)))
+                : 0;
+            const retroactiveAmount = targetPlan && monthsSinceDowngrade ? PLAN_PRICES[targetPlan] * monthsSinceDowngrade : 0;
+            const handleConfirm = (mode) => {
+                if (!targetPlan) return;
+                const p = productionData.subscription;
+                const isUpg = (PLAN_RANK[targetPlan] || 0) > (PLAN_RANK[currentPlan] || 0);
+                const isDown = (PLAN_RANK[targetPlan] || 0) < (PLAN_RANK[currentPlan] || 0);
+                p.plan = targetPlan;
+                if (isDown) { p.downgradedAt = new Date().toISOString(); p.previousPlan = currentPlan; }
+                else if (mode === 'retroactive' || mode === 'new' || (wasDowngraded && isUpg)) { p.downgradedAt = null; p.previousPlan = null; }
+                if (mode === 'new' && wasDowngraded && (PLAN_RANK[targetPlan] || 0) >= 2) {
+                    productionData.digitalAssets = [];
+                    productionData.estatePlanner = { personal: { fullName: "", dob: "", address: "" }, executor: { name: "", relationship: "", phone: "", backup: "" }, guardians: { primary: "", backup: "", notes: "" }, allocation: "", specialInstructions: "", funeral: "" };
+                }
+                onSubscriptionChange && onSubscriptionChange(); onClose();
+            };
+            const isUpgrade = targetPlan && (PLAN_RANK[targetPlan] || 0) > (PLAN_RANK[currentPlan] || 0);
+            const isDowngrade = targetPlan && (PLAN_RANK[targetPlan] || 0) < (PLAN_RANK[currentPlan] || 0);
+            return (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+                    <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">Change Plan</h2>
+                        <p className="text-sm text-gray-600 mb-4">Current plan: <strong>{currentPlan}</strong></p>
+                        <div className="space-y-2 mb-4">
+                            {['Basic', 'Premium', 'Family'].filter(p => p !== currentPlan).map(plan => (
+                                <button key={plan} onClick={() => setTargetPlan(plan)} className={`w-full p-3 rounded-lg border-2 text-left ${targetPlan === plan ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                                    <span className="font-semibold">{plan}</span> — ${PLAN_PRICES[plan]}/mo
+                                </button>
+                            ))}
+                        </div>
+                        {targetPlan && isDowngrade && (
+                            <p className="text-sm text-amber-700 mb-4">You will lose access to {currentPlan}-only features (Digital Life, Triggers, Disclosure Preview, Estate Planner).</p>
+                        )}
+                        {targetPlan && wasDowngraded && isUpgrade && (
+                            <div className="space-y-3 mb-4 p-3 bg-gray-50 rounded-lg">
+                                <p className="text-sm font-semibold text-gray-900">You previously downgraded. Choose how to upgrade:</p>
+                                <button onClick={() => handleConfirm('retroactive')} className="w-full p-3 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800">Pay retroactive ${retroactiveAmount} ({monthsSinceDowngrade} mo × ${PLAN_PRICES[targetPlan]}) — Keep existing documents</button>
+                                <button onClick={() => handleConfirm('new')} className="w-full p-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">Pay new subscription fee — Upload new documents only (lose access to old)</button>
+                            </div>
+                        )}
+                        {targetPlan && (!wasDowngraded || !isUpgrade) && (
+                            <div className="flex gap-2">
+                                <button onClick={() => handleConfirm()} className="flex-1 bg-blue-900 text-white py-2 rounded-lg font-semibold hover:bg-blue-800">{isDowngrade ? 'Downgrade' : 'Upgrade'}</button>
+                                <button onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-lg">Cancel</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+        const UpgradePromptPage = ({ featureName, requiredPlan, onNavigate }) => (
+            <div className="bg-white rounded-xl card-shadow p-8 max-w-md mx-auto text-center">
+                <i data-lucide="lock" className="w-16 h-16 text-amber-500 mx-auto mb-4"></i>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">{featureName} requires {requiredPlan}</h2>
+                <p className="text-gray-600 text-sm mb-6">Upgrade your plan to access this feature.</p>
+                <button onClick={() => onNavigate('dashboard')} className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800">Go to Dashboard to Upgrade</button>
+            </div>
+        );
+
         // Signup Page Component
         const SignupPage = ({ onNavigate, onSignup, country, setCountry, language, setLanguage, t }) => {
             const [formData, setFormData] = useState({
@@ -1395,6 +1704,8 @@
             const handleSubmit = (e) => {
                 e.preventDefault();
                 if (formData.agreedToDisclaimer) {
+                    productionData.user.email = formData.email;
+                    productionData.user.name = formData.name;
                     onSignup(formData.name);
                 }
             };
@@ -1414,6 +1725,12 @@
                             </div>
                             <h2 className="text-3xl font-bold text-gray-900">Create Your Account</h2>
                             <p className="text-gray-600 mt-2">Start organizing your estate today</p>
+                            <p className="text-sm text-gray-600 mt-3">
+                                <a href="./LCP%20-%20Production%20Demo.html" target="_blank" rel="noopener noreferrer" className="text-blue-900 font-semibold hover:underline">
+                                    Open the demo app
+                                </a>
+                                <span className="text-gray-500"> — same experience with sample data only</span>
+                            </p>
                         </div>
 
                         <div className="bg-white rounded-xl card-shadow-lg p-8">
@@ -1592,8 +1909,25 @@
         };
 
         // Dashboard Component
-        const Dashboard = ({ onNavigate, userDisplayName = "" }) => {
+        const Dashboard = ({ onNavigate, userDisplayName = "", onSubscriptionChange }) => {
+            const [showChangePlan, setShowChangePlan] = useState(false);
             const user = productionData.user;
+            const sub = productionData.subscription;
+            const subscribed = hasActiveSubscription();
+            const connectStripePayouts = () => {
+                window.open('https://connect.stripe.com/express/oauth/authorize', '_blank', 'noopener,noreferrer');
+                productionData.stripeConnectPayoutsEnabled = true;
+                if (onSubscriptionChange) onSubscriptionChange();
+            };
+            const handleCancelSubscription = () => {
+                if (!window.confirm('Cancel your subscription? You will lose access immediately. You have 30 days to pay and restore access.')) return;
+                sub.status = 'cancelled';
+                sub.cancelledAt = new Date().toISOString();
+                const end = new Date();
+                end.setDate(end.getDate() + 30);
+                sub.gracePeriodEndsAt = end.toISOString();
+                if (onSubscriptionChange) onSubscriptionChange();
+            };
             const statusColor = user.status === 'Active' ? 'green' : user.status === 'Escalation' ? 'red' : 'yellow';
             const firstName = userDisplayName ? userDisplayName.trim().split(/\s+/)[0] : "there";
             const assetCount = productionData.assets.length;
@@ -1612,6 +1946,60 @@
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {firstName}</h1>
                         <p className="text-gray-600">Your estate continuity dashboard</p>
+
+                        {!subscribed && (
+                            <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4 max-w-2xl">
+                                <p className="text-sm font-semibold text-amber-900 mb-2">Free account — features locked</p>
+                                <p className="text-xs text-amber-800 mb-3">You can browse <strong>Pricing</strong> and this dashboard. Subscribe to unlock vault features, uploads, and affiliate withdrawals.</p>
+                                <div className="flex flex-wrap gap-2">
+                                    <button type="button" onClick={() => onNavigate('pricing')} className="px-4 py-2 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800">View pricing</button>
+                                    <button type="button" onClick={() => { productionData.subscription.pendingCheckoutPlan = null; onNavigate('subscribe-checkout'); }} className="px-4 py-2 border border-blue-900 text-blue-900 rounded-lg text-sm font-semibold hover:bg-blue-50">Subscribe now</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Subscription panel */}
+                        {sub && sub.status === 'active' && subscribed && (
+                            <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl border-l-4 border-green-500">
+                                <div className="flex items-start justify-between gap-4 flex-wrap">
+                                    <div>
+                                        <h2 className="text-sm font-semibold text-gray-900">Subscription — Active</h2>
+                                        <p className="text-xs text-gray-600 mt-1">
+                                            {sub.firstMonthFree ? "1st month free • " : ""}Plan: {sub.plan || 'Basic'} • Cancel anytime.
+                                        </p>
+                                        <p className="mt-2 text-xs text-amber-700">
+                                            If you cancel, you lose access immediately. Pay within 30 days to restore access; otherwise your account will be permanently disabled.
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-2 flex-shrink-0">
+                                        <button onClick={() => setShowChangePlan(true)} className="px-3 py-1.5 text-sm font-medium border border-blue-900 text-blue-900 rounded-lg hover:bg-blue-50 transition">
+                                            Change Plan
+                                        </button>
+                                        <button onClick={handleCancelSubscription} className="text-sm font-semibold text-red-600 hover:text-red-700 whitespace-nowrap">
+                                            Cancel Subscription
+                                        </button>
+                                    </div>
+                                </div>
+                                {showChangePlan && <ChangePlanModal currentPlan={sub.plan || 'Basic'} onClose={() => setShowChangePlan(false)} onSubscriptionChange={onSubscriptionChange} />}
+                            </div>
+                        )}
+
+                        {subscribed && (
+                            <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl border-l-4 border-indigo-500">
+                                <h2 className="text-sm font-semibold text-gray-900 mb-1">Referral payouts (Stripe)</h2>
+                                <p className="text-xs text-gray-600 mb-3">Connect Stripe to receive referral commission withdrawals to your account.</p>
+                                {productionData.stripeConnectPayoutsEnabled ? (
+                                    <p className="text-sm text-green-700 font-medium">Stripe Connect enabled — you can withdraw from the Affiliate Dashboard.</p>
+                                ) : (
+                                    <div className="flex flex-wrap gap-2 items-center">
+                                        <button type="button" onClick={connectStripePayouts} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700">
+                                            Connect Stripe for payouts
+                                        </button>
+                                        <a href="https://stripe.com/connect" target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-700 underline hover:text-indigo-900">How Stripe Connect works</a>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         {/* Refer a Friend panel */}
                         <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl">
@@ -2723,6 +3111,8 @@
 
             const navigation = [
                 { id: 'dashboard', name: 'Dashboard', icon: 'layout-dashboard' },
+                { id: 'pricing', name: 'Pricing', icon: 'tag' },
+                { id: 'affiliate-dashboard', name: 'Affiliate', icon: 'gift' },
                 { id: 'estate-planner', name: 'Estate Planner', icon: 'file-edit' },
                 { id: 'legal', name: 'Legal Documents', icon: 'file-text' },
                 { id: 'assets', name: 'Assets & Liabilities', icon: 'building' },
@@ -2829,8 +3219,17 @@
             const [currentPage, setCurrentPage] = useState('home');
             const [isAuthenticated, setIsAuthenticated] = useState(false);
             const [userDisplayName, setUserDisplayName] = useState('');
+            const [subVersion, setSubVersion] = useState(0);
             const [country, setCountry] = useState(() => typeof localStorage !== 'undefined' ? (localStorage.getItem('lcp_country') || 'US') : 'US');
             const [language, setLanguage] = useState(() => typeof localStorage !== 'undefined' ? (localStorage.getItem('lcp_language') || 'en') : 'en');
+
+            const handleRestoreSubscription = () => {
+                productionData.subscription.status = 'active';
+                productionData.subscription.cancelledAt = null;
+                productionData.subscription.gracePeriodEndsAt = null;
+                setSubVersion(v => v + 1);
+            };
+            const handleSubscriptionChange = () => { setSubVersion(v => v + 1); };
 
             useEffect(() => { try { localStorage.setItem('lcp_country', country); } catch (e) {} }, [country]);
             useEffect(() => { try { localStorage.setItem('lcp_language', language); } catch (e) {} }, [language]);
@@ -2913,27 +3312,50 @@
                 return <HomePage onNavigate={handleNavigate} onGetStarted={handleGetStarted} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
             }
 
-            // Authenticated app pages
+            // Authenticated app pages - check subscription access
+            const sub = productionData.subscription;
+            if (sub && sub.status === 'permanently_disabled') {
+                return <PermanentlyDisabledScreen onNavigate={handleNavigate} />;
+            }
+            if (sub && sub.status === 'cancelled') {
+                return <AccessRevokedScreen onNavigate={handleNavigate} onRestore={handleRestoreSubscription} />;
+            }
+
+            const gatePage = (pageId, PageComponent, props = {}) => {
+                if (!hasActiveSubscription()) {
+                    return <SubscribeRequiredScreen onNavigate={handleNavigate} onSubscribed={() => { setCurrentPage('dashboard'); handleSubscriptionChange(); }} />;
+                }
+                if (!canAccessFeature(pageId)) {
+                    const required = FEATURE_PLANS[pageId] || 'Basic';
+                    const name = FEATURE_NAMES[pageId] || pageId;
+                    return <UpgradePromptPage featureName={name} requiredPlan={required} onNavigate={handleNavigate} />;
+                }
+                return <PageComponent {...props} />;
+            };
             const renderPage = () => {
                 switch (currentPage) {
                     case 'dashboard':
-                        return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} />;
+                        return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} onSubscriptionChange={handleSubscriptionChange} />;
+                    case 'pricing':
+                        return <PricingPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} embeddedInApp={true} onChoosePlanSubscribe={(planName) => { productionData.subscription.pendingCheckoutPlan = planName; setCurrentPage('subscribe-checkout'); }} />;
+                    case 'subscribe-checkout':
+                        return <SubscribeRequiredScreen onNavigate={handleNavigate} onSubscribed={() => { setCurrentPage('dashboard'); handleSubscriptionChange(); }} />;
                     case 'assets':
-                        return <AssetsPage />;
+                        return gatePage('assets', AssetsPage);
                     case 'legal':
-                        return <LegalDocumentsPage />;
+                        return gatePage('legal', LegalDocumentsPage);
                     case 'trusted':
-                        return <TrustedPeoplePage />;
+                        return gatePage('trusted', TrustedPeoplePage);
                     case 'digital':
-                        return <DigitalLifePage />;
+                        return gatePage('digital', DigitalLifePage);
                     case 'activity':
-                        return <ActivityPage />;
+                        return gatePage('activity', ActivityPage);
                     case 'estate-planner':
-                        return <EstatePlannerPage />;
+                        return gatePage('estate-planner', EstatePlannerPage);
                     case 'triggers':
-                        return <TriggersPage />;
+                        return gatePage('triggers', TriggersPage);
                     case 'disclosure-preview':
-                        return <DisclosurePreviewPage />;
+                        return gatePage('disclosure-preview', DisclosurePreviewPage);
                     case 'security-architecture':
                         return <SecurityArchitecturePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} embedded />;
                     case 'privacy-policy':
@@ -2949,7 +3371,7 @@
                     case 'faq':
                         return <FAQPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'affiliate-dashboard':
-                        return <AffiliateDashboardPage onNavigate={handleNavigate} isDemo={false} showRules={false} />;
+                        return gatePage('affiliate-dashboard', AffiliateDashboardPage, { onNavigate: handleNavigate, isDemo: true, showRules: false });
                     case 'affiliate-program':
                         // Authenticated view of rules page
                         return <AffiliateProgramPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;

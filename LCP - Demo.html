@@ -177,6 +177,15 @@
             </div>
         );
 
+        const BRAND_LEGACY_COLOR = '#214398';
+        const BRAND_VAULT_COLOR = '#214398';
+        const BrandWordmark = ({ className = '' }) => (
+            <span className={className}>
+                <span style={{ color: BRAND_LEGACY_COLOR }}>Legacy</span>
+                <span style={{ color: BRAND_VAULT_COLOR }}>Vault</span>
+            </span>
+        );
+
         const PublicPageShell = ({ title, subtitle, onNavigate, country, setCountry, language, setLanguage, t, children }) => {
             return (
                 <div className="min-h-screen bg-gray-50">
@@ -187,7 +196,7 @@
                                     <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-6 h-6 text-white"></i>
                                     </div>
-                                    <span className="text-xl font-bold text-gray-900">LegacyVault</span>
+                                    <BrandWordmark className="text-xl font-bold" />
                                 </div>
                                 <div className="hidden md:flex items-center gap-6">
                                     {country != null && <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />}
@@ -631,7 +640,7 @@
                                     <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-6 h-6 text-white"></i>
                                     </div>
-                                    <span className="text-xl font-bold text-gray-900">LegacyVault</span>
+                                    <BrandWordmark className="text-xl font-bold" />
                                 </div>
                                 <div className="hidden md:flex items-center gap-6">
                                     {country != null && <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />}
@@ -837,7 +846,7 @@
                                     <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-6 h-6 text-white"></i>
                                     </div>
-                                    <span className="text-xl font-bold text-gray-900">LegacyVault</span>
+                                    <BrandWordmark className="text-xl font-bold" />
                                 </div>
                                 <div className="hidden md:flex items-center gap-6">
                                     {country != null && <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />}
@@ -2124,7 +2133,7 @@
                                     <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-6 h-6 text-white"></i>
                                     </div>
-                                    <span className="text-xl font-bold text-gray-900">LegacyVault</span>
+                                    <BrandWordmark className="text-xl font-bold" />
                                 </div>
                                 <div className="hidden md:flex items-center gap-6">
                                     {country != null && <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />}
@@ -2324,7 +2333,7 @@
                                 <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                     <i data-lucide="shield" className="w-6 h-6 text-white"></i>
                                 </div>
-                                <span className="text-lg font-bold text-gray-900">LegacyVault</span>
+                                <BrandWordmark className="text-lg font-bold" />
                             </div>
                         </div>
                         <nav className="p-4">
@@ -2365,7 +2374,7 @@
                                     <div className="w-8 h-8 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-5 h-5 text-white"></i>
                                     </div>
-                                    <span className="font-bold text-gray-900">LegacyVault</span>
+                                    <BrandWordmark className="font-bold" />
                                 </div>
                             </div>
                             {country != null && setCountry && language != null && setLanguage && t && (

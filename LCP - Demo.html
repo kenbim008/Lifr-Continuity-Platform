@@ -77,7 +77,7 @@
             return map[lang] || map.en || key;
         };
 
-        // Demo Data Store (sample data for presentation only)
+        // Demo Data Store (same app as production — sample data for presentation)
         const productionData = {
             user: {
                 name: "John Anderson",
@@ -87,6 +87,18 @@
                 nextCheckIn: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString(),
                 status: "Active"
             },
+            subscription: {
+                status: "active",
+                plan: "Premium",
+                creditCardOnFile: true,
+                firstMonthFree: false,
+                cancelledAt: null,
+                gracePeriodEndsAt: null,
+                downgradedAt: null,
+                previousPlan: null,
+                pendingCheckoutPlan: null
+            },
+            stripeConnectPayoutsEnabled: true,
             assets: [
                 { id: 1, category: "Real Estate", title: "Primary Residence", value: 450000, location: "123 Main St, Calgary, AB", beneficiary: "Sarah Anderson", type: "Inform Only" },
                 { id: 2, category: "Bank Accounts", title: "TD Checking Account", value: 25000, location: "TD Bank - Account #****4567", beneficiary: "Sarah Anderson", type: "Provide Document" },
@@ -187,11 +199,15 @@
         );
 
         const PublicPageShell = ({ title, subtitle, onNavigate, country, setCountry, language, setLanguage, t, children }) => {
+            const [mobileNavOpen, setMobileNavOpen] = useState(false);
+            useEffect(() => {
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
+            }, [mobileNavOpen]);
             return (
                 <div className="min-h-screen bg-gray-50">
                     <nav className="bg-white border-b sticky top-0 z-50">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="flex justify-between items-center h-16">
+                            <div className="relative z-[80] flex justify-between items-center h-16 bg-white">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-6 h-6 text-white"></i>
@@ -203,12 +219,30 @@
                                     <button onClick={() => onNavigate('home')} className="text-gray-600 hover:text-gray-900">{t('nav_home')}</button>
                                     <button onClick={() => onNavigate('pricing')} className="text-gray-600 hover:text-gray-900">{t('nav_pricing')}</button>
                                     <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900">{t('nav_signin')}</button>
+                                    <button onClick={() => onNavigate('generate-will')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">Generate Will?</button>
                                     <button onClick={() => onNavigate('signup')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">{t('nav_get_started')}</button>
                                 </div>
-                                <button className="md:hidden text-gray-600 hover:text-gray-900">
-                                    <i data-lucide="menu" className="w-6 h-6"></i>
+                                <button type="button" aria-label="Toggle menu" aria-expanded={mobileNavOpen} onClick={() => setMobileNavOpen(!mobileNavOpen)} className="md:hidden text-gray-600 hover:text-gray-900 p-2 -mr-2">
+                                    <i data-lucide={mobileNavOpen ? 'x' : 'menu'} className="w-6 h-6"></i>
                                 </button>
                             </div>
+                            {mobileNavOpen && (
+                                <>
+                                    <div className="fixed inset-0 bg-black/40 z-[60] md:hidden" onClick={() => setMobileNavOpen(false)} aria-hidden="true" />
+                                    <div className="fixed top-16 left-0 right-0 border-b bg-white shadow-lg p-4 z-[70] md:hidden flex flex-col gap-1">
+                                        {country != null && (
+                                            <div className="pb-3 mb-2 border-b border-gray-100">
+                                                <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />
+                                            </div>
+                                        )}
+                                        <button type="button" onClick={() => { onNavigate('home'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_home')}</button>
+                                        <button type="button" onClick={() => { onNavigate('pricing'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_pricing')}</button>
+                                        <button type="button" onClick={() => { onNavigate('login'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_signin')}</button>
+                                        <button type="button" onClick={() => { onNavigate('generate-will'); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">Generate Will?</button>
+                                        <button type="button" onClick={() => { onNavigate('signup'); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">{t('nav_get_started')}</button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </nav>
 
@@ -221,15 +255,80 @@
                             {children}
                         </div>
                     </div>
-                    <footer className="bg-gray-900 text-white py-8 mt-12">
-                        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
-                            <button onClick={() => onNavigate('privacy-policy')} className="text-gray-300 hover:text-white transition">Privacy</button>
-                            <button onClick={() => onNavigate('terms-of-service')} className="text-gray-300 hover:text-white transition">Terms</button>
-                            <button onClick={() => onNavigate('help-center')} className="text-gray-300 hover:text-white transition">Help</button>
-                            <button onClick={() => onNavigate('affiliate-program')} className="text-gray-300 hover:text-white transition">Affiliate Program</button>
-                            <a href="./LCP%20-%20Production.html" className="text-gray-300 hover:text-white transition">Production</a>
+
+                    <footer className="bg-gray-900 text-white py-12">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="grid md:grid-cols-4 gap-8 mb-8">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                            <i data-lucide="shield" className="w-5 h-5 text-white"></i>
+                                        </div>
+                                        <span className="font-bold">LegacyVault</span>
+                                    </div>
+                                    <p className="text-gray-400 text-sm">Clarity When It Matters</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold mb-4">Product</h4>
+                                    <div className="space-y-2 text-gray-400 text-sm">
+                                        <button onClick={() => onNavigate('home', '#how-it-works')} className="block hover:text-white transition text-left w-full">{t('nav_how')}</button>
+                                        <button onClick={() => onNavigate('home', '#features')} className="block hover:text-white transition text-left w-full">{t('nav_features')}</button>
+                                        <button onClick={() => onNavigate('home', '#security')} className="block hover:text-white transition text-left w-full">{t('nav_security')}</button>
+                                        <button onClick={() => onNavigate('security-architecture')} className="block hover:text-white transition text-left w-full">{t('nav_security_arch')}</button>
+                                        <button onClick={() => onNavigate('pricing')} className="block hover:text-white transition text-left w-full">{t('nav_pricing')}</button>
+                                        <button onClick={() => onNavigate('price-package-explained')} className="block hover:text-white transition text-left w-full">Price Package Explained</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold mb-4">Legal</h4>
+                                    <div className="space-y-2 text-gray-400 text-sm">
+                                        <button onClick={() => onNavigate('privacy-policy')} className="block hover:text-white transition text-left w-full">Privacy Policy</button>
+                                        <button onClick={() => onNavigate('terms-of-service')} className="block hover:text-white transition text-left w-full">Terms of Service</button>
+                                        <button onClick={() => onNavigate('legal-disclaimer')} className="block hover:text-white transition text-left w-full">Legal Disclaimer</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold mb-4">Support</h4>
+                                    <div className="space-y-2 text-gray-400 text-sm">
+                                        <button onClick={() => onNavigate('help-center')} className="block hover:text-white transition text-left w-full">Help Center</button>
+                                        <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
+                                        <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">Interactive FAQ</button>
+                                        <button onClick={() => onNavigate('help-center')} className="block hover:text-white transition text-left w-full">AI Support</button>
+                                        <a href="tel:4003833707" className="block hover:text-white transition text-left w-full">Live Agent: 400 383 3707</a>
+                                        <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Live Agent Contact Form</button>
+                                        <button onClick={() => onNavigate('plan-checklist')} className="block hover:text-white transition text-left w-full">Interactive Plan Checklist</button>
+                                        <a href="./LCP%20-%20Production%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
+                                    </div>
+                                </div>
+                                <div className="md:col-span-4 flex flex-wrap items-center justify-center gap-4 pt-4 border-t border-gray-800 mt-4 text-center">
+                                    <span className="text-xs text-gray-400">Connect with us:</span>
+                                    <div className="flex flex-wrap items-center justify-center gap-3 text-gray-300">
+                                        <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                            <i data-lucide="linkedin" className="w-4 h-4"></i><span>LinkedIn</span>
+                                        </a>
+                                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                            <i data-lucide="twitter" className="w-4 h-4"></i><span>Twitter</span>
+                                        </a>
+                                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                            <i data-lucide="facebook" className="w-4 h-4"></i><span>Facebook</span>
+                                        </a>
+                                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                            <i data-lucide="instagram" className="w-4 h-4"></i><span>Instagram</span>
+                                        </a>
+                                        <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                            <i data-lucide="youtube" className="w-4 h-4"></i><span>YouTube</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
+                                <p className="mb-2">© 2026 LegacyVault. All rights reserved.</p>
+                                <p className="text-xs">
+                                    <strong>Important:</strong> LegacyVault does not replace, override, or supersede a legally executed Will or estate document.
+                                </p>
+                            </div>
                         </div>
-                        <p className="text-center text-xs text-gray-500 mt-4">© 2026 LegacyVault. Clarity When It Matters.</p>
                     </footer>
                 </div>
             );
@@ -391,17 +490,31 @@
         );
 
         const FAQPage = (props) => {
+            const [activeTopic, setActiveTopic] = useState('all');
             const faqs = [
                 { q: 'Does LegacyVault replace a Will?', a: 'No. LegacyVault does not replace, override, or supersede a legally executed Will or estate document.' },
                 { q: 'Do you store passwords or crypto keys?', a: 'No. Store instructions and references only. Do not store passwords, private keys, or recovery phrases in plain text.' },
                 { q: 'How does conditional disclosure work?', a: 'Disclosure occurs only after configured trigger conditions and safeguards.' },
                 { q: 'Who can access my information?', a: 'Only designated recipients with the access levels you set, under your trigger and verification rules.' },
-                { q: 'What security standards do you follow?', a: 'We align to SOC 2, ISO 27001, GDPR, and PIPEDA practices. See Security & Compliance for details.' },
+                { q: 'What security standards do you follow?', a: 'We align to SOC 2, ISO 27001, GDPR, and PIPEDA practices. See Security & Compliance for details.', topic: 'security' },
+                { q: 'Why should I speak to your team before creating a Will?', a: 'One Will does not fit all situations. Our team can guide you to the right setup and help you decide when legal counsel is needed.', topic: 'will' },
+                { q: 'How can I reach Will creation support?', a: 'Call 400 383 3707 for guidance, or submit a Contact Us Will creation enquiry form and our team will get back to you.', topic: 'will' },
+                { q: 'Do Premium and Family plans support Last Wish videos?', a: 'Yes. Premium and Family subscribers can add instruction / last wish videos for $6.99 per video (max 5 minutes each), during subscription or any time after.', topic: 'pricing' },
             ];
             return (
-                <PublicPageShell {...props} title="FAQ" subtitle="Quick answers to common questions.">
+                <PublicPageShell {...props} title="FAQ" subtitle="Comprehensive interactive FAQ — filter topics, get answers, or connect with support.">
                     <div className="space-y-4">
-                        {faqs.map((f, idx) => (
+                        <div className="flex flex-wrap gap-2">
+                            {[{ id: 'all', label: 'All' }, { id: 'will', label: 'Will Guidance' }, { id: 'pricing', label: 'Pricing' }, { id: 'security', label: 'Security' }].map((topic) => (
+                                <button key={topic.id} onClick={() => setActiveTopic(topic.id)} className={`px-3 py-1.5 rounded-full text-sm ${activeTopic === topic.id ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{topic.label}</button>
+                            ))}
+                        </div>
+                        <div className="rounded-xl border border-gray-200 p-4 flex flex-wrap gap-3">
+                            <button onClick={() => props.onNavigate('help-center')} className="text-sm font-semibold text-blue-900 hover:underline">AI Support</button>
+                            <a href="tel:4003833707" className="text-sm font-semibold text-blue-900 hover:underline">Live Agent: 400 383 3707</a>
+                            <button onClick={() => props.onNavigate('contact-us')} className="text-sm font-semibold text-blue-900 hover:underline">Contact form</button>
+                        </div>
+                        {faqs.filter((f) => activeTopic === 'all' || !f.topic || f.topic === activeTopic).map((f, idx) => (
                             <details key={idx} className="border border-gray-200 rounded-lg p-4">
                                 <summary className="font-semibold text-gray-900 cursor-pointer">{f.q}</summary>
                                 <p className="text-gray-700 mt-2">{f.a}</p>
@@ -415,9 +528,32 @@
             );
         };
 
-        const ContactUsPage = (props) => (
-            <PublicPageShell {...props} title="Contact Us" subtitle="Reach our team for support, privacy, or security inquiries.">
+        const ContactUsPage = (props) => {
+            const [willForm, setWillForm] = useState({ name: '', email: '', phone: '', message: '' });
+            const [willSubmitted, setWillSubmitted] = useState(false);
+            const handleWillSubmit = (e) => {
+                e.preventDefault();
+                if (!willForm.name.trim() || !willForm.email.trim() || !willForm.message.trim()) return;
+                setWillSubmitted(true);
+            };
+            return (
+            <PublicPageShell {...props} title="Contact Us" subtitle="Reach our team for support, Will creation guidance, privacy, or security inquiries.">
                 <div className="space-y-6 text-gray-700">
+                    <div className="rounded-xl border border-blue-200 bg-blue-50 p-6">
+                        <h2 className="text-lg font-bold text-gray-900 mb-2">Will creation enquiry</h2>
+                        <p className="text-sm text-blue-900 mb-4">One Will does not fit all situations. Call <a href="tel:4003833707" className="font-semibold underline">400 383 3707</a> for immediate guidance, or complete this form and someone from our team will get back to you.</p>
+                        {willSubmitted ? (
+                            <p className="text-sm font-semibold text-green-800">Thank you — your Will creation enquiry was received. Our team will contact you shortly.</p>
+                        ) : (
+                            <form onSubmit={handleWillSubmit} className="grid md:grid-cols-2 gap-3">
+                                <input value={willForm.name} onChange={(e) => setWillForm({ ...willForm, name: e.target.value })} placeholder="Full name" className="px-3 py-2 border border-gray-300 rounded-lg" required />
+                                <input type="email" value={willForm.email} onChange={(e) => setWillForm({ ...willForm, email: e.target.value })} placeholder="Email" className="px-3 py-2 border border-gray-300 rounded-lg" required />
+                                <input value={willForm.phone} onChange={(e) => setWillForm({ ...willForm, phone: e.target.value })} placeholder="Phone (optional)" className="px-3 py-2 border border-gray-300 rounded-lg md:col-span-2" />
+                                <textarea value={willForm.message} onChange={(e) => setWillForm({ ...willForm, message: e.target.value })} placeholder="Tell us about your situation (family, assets, jurisdiction)…" rows={4} className="px-3 py-2 border border-gray-300 rounded-lg md:col-span-2" required />
+                                <button type="submit" className="md:col-span-2 bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 transition">Submit Will creation enquiry</button>
+                            </form>
+                        )}
+                    </div>
                     <div className="grid md:grid-cols-2 gap-6">
                         <div className="p-5 border border-gray-200 rounded-xl">
                             <h2 className="text-lg font-bold text-gray-900 mb-2">Support</h2>
@@ -442,7 +578,8 @@
                     </div>
                 </div>
             </PublicPageShell>
-        );
+            );
+        };
 
         const HelpCenterPage = (props) => {
             const [messages, setMessages] = useState([{ from: 'bot', text: "Hi—I'm the LegacyVault virtual assistant. What do you need help with?" }]);
@@ -545,7 +682,11 @@
         );
 
         const AffiliateProgramPage = (props) => (
-            <PublicPageShell {...props} title="Affiliate Program" subtitle="Earn rewards by sharing LegacyVault with your network.">
+            <PublicPageShell
+                {...props}
+                title="Affiliate Program"
+                subtitle="Earn rewards by sharing LegacyVault with your network."
+            >
                 <div className="space-y-8 text-gray-700 text-sm">
                     <section>
                         <h2 className="text-lg font-bold text-gray-900 mb-2">Program Objectives</h2>
@@ -556,6 +697,7 @@
                             <li>Create a scalable acquisition channel with low upfront cost.</li>
                         </ul>
                     </section>
+
                     <section>
                         <h2 className="text-lg font-bold text-gray-900 mb-2">Two-Tier Structure</h2>
                         <p className="mb-2">The program has two tracks:</p>
@@ -564,25 +706,346 @@
                             <li><strong>Professional Affiliate Program</strong> – for advisors, bloggers, and institutions earning commissions.</li>
                         </ul>
                     </section>
+
                     <section>
                         <h3 className="text-base font-bold text-gray-900 mb-2">Customer Referral Program</h3>
-                        <p className="mb-2">Turn satisfied customers into advocates. Every user gets a unique referral link; friends get a discount; referrers earn credits after the friend becomes a paying customer. Referrals tracked for up to 90 days.</p>
+                        <p className="mb-2">Turn satisfied customers into advocates.</p>
+                        <ul className="list-disc list-inside space-y-1 mb-3">
+                            <li>Every user gets a unique referral link in their account (under “Refer &amp; Earn”).</li>
+                            <li>Friends receive a discount on their first year (for example, 20% off).</li>
+                            <li>Referrers receive a credit (for example, $25 or a free month) after the friend becomes a paying customer.</li>
+                            <li>Tiered bonuses for multiple referrals (e.g., bigger credit after 3+ successful referrals).</li>
+                            <li>Referrals tracked for up to 90 days from click to conversion.</li>
+                        </ul>
+                        <p className="text-xs text-gray-500">
+                            Tracking and payouts will be finalized when billing and referral infrastructure are connected to your production systems.
+                        </p>
                     </section>
+
                     <section>
                         <h3 className="text-base font-bold text-gray-900 mb-2">Professional Affiliate Program</h3>
-                        <p className="mb-2">Commission structure: 30% recurring for 12 months on Basic ($9/mo), Premium ($19/mo), and Family ($29/mo). One-time options: $30, $65, $100. Affiliate tiers: Bronze (30%), Silver (35% + $50 bonus), Gold (40% + quarterly bonus + featured listing).</p>
+                        <p className="mb-2">Designed for professionals and influencers with aligned audiences.</p>
+                        <div className="overflow-x-auto mb-3">
+                            <table className="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr className="border-b-2 border-gray-200">
+                                        <th className="py-2 px-3 font-bold text-gray-900">Plan</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Price</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Recurring Commission (12 mo)</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Example One-Time Option</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr className="border-b border-gray-100">
+                                        <td className="py-2 px-3">Basic</td>
+                                        <td className="py-2 px-3">$9 / month</td>
+                                        <td className="py-2 px-3">30% recurring for 12 months</td>
+                                        <td className="py-2 px-3">$30 one-time (optional)</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-100">
+                                        <td className="py-2 px-3">Premium</td>
+                                        <td className="py-2 px-3">$19 / month</td>
+                                        <td className="py-2 px-3">30% recurring for 12 months</td>
+                                        <td className="py-2 px-3">$65 one-time (optional)</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="py-2 px-3">Family</td>
+                                        <td className="py-2 px-3">$29 / month</td>
+                                        <td className="py-2 px-3">30% recurring for 12 months</td>
+                                        <td className="py-2 px-3">$100 one-time (optional)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                            Exact commission structure, payout frequency, and thresholds can be adjusted in your affiliate terms and underlying tracking platform.
+                        </p>
                     </section>
+
                     <section>
-                        <h3 className="text-base font-bold text-gray-900 mb-2">Tracking &amp; Compliance</h3>
-                        <p>Referrals tracked via unique links/codes and 90-day attribution. Payouts after referred accounts remain active (e.g. 30 days). FTC disclosure required. View your referral stats in your Dashboard under Referrals &amp; Rewards.</p>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Affiliate Tiers (Gamification)</h3>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr className="border-b-2 border-gray-200">
+                                        <th className="py-2 px-3 font-bold text-gray-900">Tier</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Monthly sales</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Benefits</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr className="border-b border-gray-100">
+                                        <td className="py-2 px-3">Bronze</td>
+                                        <td className="py-2 px-3">0–5</td>
+                                        <td className="py-2 px-3">30% commission</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-100">
+                                        <td className="py-2 px-3">Silver</td>
+                                        <td className="py-2 px-3">6–15</td>
+                                        <td className="py-2 px-3">35% commission + bonus $50</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="py-2 px-3">Gold</td>
+                                        <td className="py-2 px-3">16+</td>
+                                        <td className="py-2 px-3">40% commission + quarterly bonus + featured partner listing</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Tracking, Payouts &amp; Compliance</h3>
+                        <ul className="list-disc list-inside space-y-1">
+                            <li>Referrals tracked via unique links/codes and 90‑day attribution windows.</li>
+                            <li>Payouts occur only after referred accounts remain active for a minimum period (for example, 30 days).</li>
+                            <li>Standard affiliate disclosures required (FTC and local regulations).</li>
+                            <li>Fraud prevention via monitoring of unusual activity and manual review for large payouts.</li>
+                        </ul>
+                        <p className="text-xs text-gray-500 mt-2">
+                            This page is a UI blueprint. Actual commission calculations and payouts require integration with your billing and affiliate software.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Where to View Your Stats</h3>
+                        <p>
+                            As a logged‑in user, you can see a snapshot of your referrals, expected payout, and paid‑out totals in your main Dashboard under the
+                            “Referrals &amp; Rewards” section. When referral tracking is connected to your billing system, those values will reflect real activity.
+                        </p>
+                    </section>
+
+                    <section className="border border-green-200 bg-green-50 rounded-xl p-6">
+                        <h3 className="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
+                            <i data-lucide="wallet" className="w-5 h-5 text-green-700"></i>
+                            Withdraw referral earnings (Stripe)
+                        </h3>
+                        <p className="text-sm text-gray-700 mb-4">
+                            Subscribers can connect Stripe from the Dashboard to receive referral commissions. Use <strong>Withdraw to Stripe</strong> on your Affiliate Dashboard to move available balances to your connected Stripe account.
+                        </p>
+                        <button onClick={() => props.onNavigate('login')} className="inline-flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg font-semibold hover:bg-green-800 transition text-sm">
+                            <i data-lucide="arrow-up-right" className="w-4 h-4"></i>
+                            Sign in — Affiliate Dashboard &amp; Withdraw
+                        </button>
                     </section>
                 </div>
             </PublicPageShell>
         );
 
+        // Affiliate Dashboard (for registered users; demo shows this with rules, no login)
+        const AFFILIATE_DEMO_DATA = {
+            clicks: 124,
+            signUps: 18,
+            pendingCommission: 142.50,
+            paidCommission: 287.00,
+            referralLink: 'https://legacyvault.com/r/LC-DEMO-REF',
+            referrals: [
+                { id: '1', name: 'Jane D.', email: 'jane@example.com', status: 'Converted', commission: 28.50 },
+                { id: '2', name: 'Mike R.', email: 'mike@example.com', status: 'Converted', commission: 65.00 },
+                { id: '3', name: 'Sarah K.', email: 'sarah@example.com', status: 'Pending', commission: 0 }
+            ],
+            commissions: [
+                { id: '1', date: '2026-03-10', description: 'Premium referral - Jane D.', amount: 28.50, status: 'Paid' },
+                { id: '2', date: '2026-03-08', description: 'Family referral - Mike R.', amount: 65.00, status: 'Paid' },
+                { id: '3', date: '2026-03-14', description: 'Basic referral - Sarah K.', amount: 19.50, status: 'Pending' }
+            ],
+            payouts: [
+                { id: '1', date: '2026-03-01', amount: 93.50, method: 'PayPal', status: 'Completed' },
+                { id: '2', date: '2026-02-01', amount: 193.50, method: 'PayPal', status: 'Completed' }
+            ]
+        };
+
+        const AffiliateDashboardPage = ({ onNavigate, isDemo = false, showRules = false }) => {
+            const [activeTab, setActiveTab] = useState('referrals');
+            const [copied, setCopied] = useState(false);
+            const stripeReady = isDemo || productionData.stripeConnectPayoutsEnabled;
+            const refCode = isDemo ? 'LC-DEMO-REF' : (productionData.user && productionData.user.name ? 'REF-' + productionData.user.name.replace(/\s+/g, '').slice(0, 8) : 'REF');
+            const referralUrl = isDemo ? AFFILIATE_DEMO_DATA.referralLink : (typeof window !== 'undefined' ? (window.location.origin + '/r/' + refCode) : 'https://legacyvault.com/r/' + refCode);
+            const data = isDemo ? AFFILIATE_DEMO_DATA : {
+                clicks: 0,
+                signUps: 0,
+                pendingCommission: 0,
+                paidCommission: 0,
+                referrals: [],
+                commissions: [],
+                payouts: []
+            };
+
+            const handleWithdrawStripe = () => {
+                if (!stripeReady) {
+                    alert('Connect Stripe for payouts from your Dashboard first. Then you can withdraw referral earnings to your Stripe account.');
+                    onNavigate('dashboard');
+                    return;
+                }
+                const pending = typeof data.pendingCommission === 'number' ? data.pendingCommission : parseFloat(data.pendingCommission) || 0;
+                if (pending <= 0) {
+                    alert('No withdrawable balance right now.');
+                    return;
+                }
+                if (!window.confirm(`Withdraw $${pending.toFixed(2)} to your connected Stripe account? (Demo — no real transfer.)`)) return;
+                alert('Withdrawal initiated. In production this uses Stripe Connect payouts.');
+            };
+
+            const copyLink = () => {
+                if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                    navigator.clipboard.writeText(referralUrl);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                }
+            };
+
+            const shareUrl = (platform) => {
+                const enc = encodeURIComponent(referralUrl);
+                const text = encodeURIComponent('Check out LegacyVault - clarity when it matters.');
+                const urls = {
+                    email: 'mailto:?subject=LegacyVault&body=' + enc,
+                    facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + enc,
+                    twitter: 'https://twitter.com/intent/tweet?url=' + enc + '&text=' + text,
+                    linkedin: 'https://www.linkedin.com/sharing/share-offsite/?url=' + enc
+                };
+                if (urls[platform]) window.open(urls[platform], '_blank', 'noopener,noreferrer,width=600,height=400');
+            };
+
+            const tabs = [
+                { id: 'referrals', label: 'Referrals', icon: 'users' },
+                { id: 'commissions', label: 'Commissions', icon: 'dollar-sign' },
+                { id: 'payouts', label: 'Payouts', icon: 'credit-card' }
+            ];
+
+            return (
+                <div className="space-y-6">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <h1 className="text-2xl font-bold text-gray-900">Affiliate Dashboard</h1>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <button type="button" onClick={handleWithdrawStripe} className="inline-flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg font-semibold hover:bg-green-800 transition text-sm">
+                                <i data-lucide="banknote" className="w-4 h-4"></i>
+                                Withdraw to Stripe
+                            </button>
+                            {showRules && (
+                                <button onClick={() => onNavigate('affiliate-program')} className="text-sm text-blue-900 font-semibold hover:underline">
+                                    View program rules
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    {!stripeReady && !isDemo && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-900">
+                            Connect Stripe from your main Dashboard under <strong>Referral payouts (Stripe)</strong> to enable withdrawals to your Stripe account.
+                        </div>
+                    )}
+
+                    {/* Metrics */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="bg-white rounded-xl card-shadow p-4">
+                            <p className="text-xs text-gray-500 mb-1">Link clicks</p>
+                            <p className="text-2xl font-bold text-gray-900">{data.clicks}</p>
+                        </div>
+                        <div className="bg-white rounded-xl card-shadow p-4">
+                            <p className="text-xs text-gray-500 mb-1">Sign-ups</p>
+                            <p className="text-2xl font-bold text-gray-900">{data.signUps}</p>
+                        </div>
+                        <div className="bg-white rounded-xl card-shadow p-4">
+                            <p className="text-xs text-gray-500 mb-1">Pending commission</p>
+                            <p className="text-2xl font-bold text-gray-900">${typeof data.pendingCommission === 'number' ? data.pendingCommission.toFixed(2) : data.pendingCommission}</p>
+                        </div>
+                        <div className="bg-white rounded-xl card-shadow p-4">
+                            <p className="text-xs text-gray-500 mb-1">Paid commission</p>
+                            <p className="text-2xl font-bold text-green-700">${typeof data.paidCommission === 'number' ? data.paidCommission.toFixed(2) : data.paidCommission}</p>
+                        </div>
+                    </div>
+
+                    {/* Referral link + Copy + Share */}
+                    <div className="bg-white rounded-xl card-shadow p-6">
+                        <h2 className="text-lg font-bold text-gray-900 mb-2">Your referral link</h2>
+                        <div className="flex flex-wrap gap-2 items-center">
+                            <input type="text" readOnly value={referralUrl} className="flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm" />
+                            <button onClick={copyLink} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition text-sm">
+                                <i data-lucide={copied ? 'check' : 'copy'} className="w-4 h-4"></i>
+                                {copied ? 'Copied' : 'Copy'}
+                            </button>
+                            <span className="text-xs text-gray-500">Share:</span>
+                            <button onClick={() => shareUrl('email')} className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition" title="Email"><i data-lucide="mail" className="w-4 h-4 text-gray-600"></i></button>
+                            <button onClick={() => shareUrl('facebook')} className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition" title="Facebook"><i data-lucide="facebook" className="w-4 h-4 text-gray-600"></i></button>
+                            <button onClick={() => shareUrl('twitter')} className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition" title="Twitter"><i data-lucide="twitter" className="w-4 h-4 text-gray-600"></i></button>
+                            <button onClick={() => shareUrl('linkedin')} className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition" title="LinkedIn"><i data-lucide="linkedin" className="w-4 h-4 text-gray-600"></i></button>
+                        </div>
+                    </div>
+
+                    {/* Tabs */}
+                    <div className="bg-white rounded-xl card-shadow overflow-hidden">
+                        <div className="flex border-b border-gray-200">
+                            {tabs.map((tab) => (
+                                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-6 py-4 font-medium border-b-2 transition ${activeTab === tab.id ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>
+                                    <i data-lucide={tab.icon} className="w-4 h-4"></i>
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="p-6">
+                            {activeTab === 'referrals' && (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-sm">
+                                        <thead><tr className="border-b border-gray-200"><th className="py-2 pr-4 font-bold text-gray-900">Referred user</th><th className="py-2 pr-4 font-bold text-gray-900">Status</th><th className="py-2 font-bold text-gray-900">Commission earned</th></tr></thead>
+                                        <tbody>
+                                            {data.referrals && data.referrals.length > 0 ? data.referrals.map((r) => (
+                                                <tr key={r.id} className="border-b border-gray-100"><td className="py-3 pr-4">{r.name || r.email}</td><td className="py-3 pr-4">{r.status}</td><td className="py-3">${typeof r.commission === 'number' ? r.commission.toFixed(2) : r.commission}</td></tr>
+                                            )) : (
+                                                <tr><td colSpan="3" className="py-8 text-center text-gray-500">No referrals yet. Share your link to get started.</td></tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                            {activeTab === 'commissions' && (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-sm">
+                                        <thead><tr className="border-b border-gray-200"><th className="py-2 pr-4 font-bold text-gray-900">Date</th><th className="py-2 pr-4 font-bold text-gray-900">Description</th><th className="py-2 pr-4 font-bold text-gray-900">Amount</th><th className="py-2 font-bold text-gray-900">Status</th></tr></thead>
+                                        <tbody>
+                                            {data.commissions && data.commissions.length > 0 ? data.commissions.map((c) => (
+                                                <tr key={c.id} className="border-b border-gray-100"><td className="py-3 pr-4">{c.date}</td><td className="py-3 pr-4">{c.description}</td><td className="py-3 pr-4">${typeof c.amount === 'number' ? c.amount.toFixed(2) : c.amount}</td><td className="py-3">{c.status}</td></tr>
+                                            )) : (
+                                                <tr><td colSpan="4" className="py-8 text-center text-gray-500">No commission history yet.</td></tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                            {activeTab === 'payouts' && (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-sm">
+                                        <thead><tr className="border-b border-gray-200"><th className="py-2 pr-4 font-bold text-gray-900">Date</th><th className="py-2 pr-4 font-bold text-gray-900">Amount</th><th className="py-2 pr-4 font-bold text-gray-900">Method</th><th className="py-2 font-bold text-gray-900">Status</th></tr></thead>
+                                        <tbody>
+                                            {data.payouts && data.payouts.length > 0 ? data.payouts.map((p) => (
+                                                <tr key={p.id} className="border-b border-gray-100"><td className="py-3 pr-4">{p.date}</td><td className="py-3 pr-4">${typeof p.amount === 'number' ? p.amount.toFixed(2) : p.amount}</td><td className="py-3 pr-4">{p.method}</td><td className="py-3">{p.status}</td></tr>
+                                            )) : (
+                                                <tr><td colSpan="4" className="py-8 text-center text-gray-500">No payouts yet.</td></tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {showRules && (
+                        <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                            <h2 className="text-lg font-bold text-gray-900 mb-3">Program rules</h2>
+                            <div className="space-y-2 text-gray-700 text-sm">
+                                <p>Two tracks: <strong>Customer Referral</strong> (credits for referring friends) and <strong>Professional Affiliate</strong> (commissions on Basic/Premium/Family plans). 30% recurring for 12 months; tiers: Bronze, Silver, Gold. Referrals tracked 90 days; FTC disclosure required.</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
         // Pricing Page Component
-        const PricingPage = ({ onNavigate, country, setCountry, language, setLanguage, t }) => {
+        const PricingPage = ({ onNavigate, country, setCountry, language, setLanguage, t, embeddedInApp, onChoosePlanSubscribe }) => {
             const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' or 'annual'
+            const [mobileNavOpen, setMobileNavOpen] = useState(false);
+            useEffect(() => {
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
+            }, [mobileNavOpen]);
 
             const plans = [
                 {
@@ -607,6 +1070,8 @@
                     features: [
                         'Advanced trigger logic',
                         'Digital asset manager',
+                        'Discounted Will Generation pricing',
+                        'Optional Last Wish Video ($6.99/video, max 5 min each)',
                         'AI estate summary',
                         'Multi-recipient disclosure control',
                         'Audit logs'
@@ -623,7 +1088,9 @@
                     features: [
                         'Up to 4 users',
                         'Shared family vault',
-                        'Cross-visibility options'
+                        'Cross-visibility options',
+                        'Discounted Will Generation pricing',
+                        'Optional Last Wish Video ($6.99/video, max 5 min each)'
                     ],
                     color: 'green',
                     icon: 'users'
@@ -635,7 +1102,7 @@
                     {/* Navigation */}
                     <nav className="bg-white border-b sticky top-0 z-50">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="flex justify-between items-center h-16">
+                            <div className="relative z-[80] flex justify-between items-center h-16 bg-white">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-6 h-6 text-white"></i>
@@ -646,15 +1113,33 @@
                                     {country != null && <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />}
                                     <button onClick={() => onNavigate('home')} className="text-gray-600 hover:text-gray-900">{t('nav_home')}</button>
                                     <button onClick={() => onNavigate('home', '#how-it-works')} className="text-gray-600 hover:text-gray-900">{t('nav_how')}</button>
-                                    <button onClick={() => onNavigate('home', '#features')} className="text-gray-600 hover:text-gray-900">{t('nav_features')}</button>
                                     <button onClick={() => onNavigate('pricing')} className="text-blue-900 font-semibold">{t('nav_pricing')}</button>
                                     <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900">{t('nav_signin')}</button>
+                                    <button onClick={() => onNavigate('generate-will')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">Generate Will?</button>
                                     <button onClick={() => onNavigate('signup')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">{t('nav_get_started')}</button>
                                 </div>
-                                <button className="md:hidden text-gray-600 hover:text-gray-900">
-                                    <i data-lucide="menu" className="w-6 h-6"></i>
+                                <button type="button" aria-label="Toggle menu" aria-expanded={mobileNavOpen} onClick={() => setMobileNavOpen(!mobileNavOpen)} className="md:hidden text-gray-600 hover:text-gray-900 p-2 -mr-2">
+                                    <i data-lucide={mobileNavOpen ? 'x' : 'menu'} className="w-6 h-6"></i>
                                 </button>
                             </div>
+                            {mobileNavOpen && (
+                                <>
+                                    <div className="fixed inset-0 bg-black/40 z-[60] md:hidden" onClick={() => setMobileNavOpen(false)} aria-hidden="true" />
+                                    <div className="fixed top-16 left-0 right-0 border-b bg-white shadow-lg p-4 z-[70] md:hidden flex flex-col gap-1">
+                                        {country != null && (
+                                            <div className="pb-3 mb-2 border-b border-gray-100">
+                                                <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />
+                                            </div>
+                                        )}
+                                        <button type="button" onClick={() => { onNavigate('home'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_home')}</button>
+                                        <button type="button" onClick={() => { onNavigate('home', '#how-it-works'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_how')}</button>
+                                        <button type="button" onClick={() => { onNavigate('pricing'); setMobileNavOpen(false); }} className="text-blue-900 font-semibold text-left py-2">{t('nav_pricing')}</button>
+                                        <button type="button" onClick={() => { onNavigate('login'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_signin')}</button>
+                                        <button type="button" onClick={() => { onNavigate('generate-will'); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">Generate Will?</button>
+                                        <button type="button" onClick={() => { onNavigate('signup'); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">{t('nav_get_started')}</button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </nav>
 
@@ -666,6 +1151,12 @@
                             </h1>
                             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
                                 Choose the plan that fits your family's needs. All plans include bank-level security and conditional disclosure.
+                            </p>
+                            <p className="text-sm text-gray-500 mb-2 max-w-3xl mx-auto">
+                                Will generation provides a structured template draft and execution checklist. It is not legal advice and may require jurisdiction-specific attorney review. Need legal help? Call 400 383 3707.
+                            </p>
+                            <p className="text-sm text-blue-900 font-medium mb-6 max-w-3xl mx-auto">
+                                <strong>Premium &amp; Family transparent add-on:</strong> Last Wish / instruction videos — <strong>$6.99 per video</strong> (max 5 min each). Add at checkout or any time after subscribing.
                             </p>
                             
                             {/* Billing Toggle */}
@@ -742,8 +1233,15 @@
                                                 ))}
                                             </ul>
                                             
-                                            <button className={`w-full bg-${plan.color}-600 text-white py-3 rounded-lg font-semibold hover:bg-${plan.color}-700 transition`}>
-                                                Choose {plan.name}
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (embeddedInApp && onChoosePlanSubscribe) onChoosePlanSubscribe(plan.name);
+                                                    else onNavigate('signup');
+                                                }}
+                                                className={`w-full bg-${plan.color}-600 text-white py-3 rounded-lg font-semibold hover:bg-${plan.color}-700 transition`}
+                                            >
+                                                {embeddedInApp ? `Subscribe — ${plan.name}` : `Choose ${plan.name}`}
                                             </button>
                                         </div>
                                     </div>
@@ -801,6 +1299,7 @@
                                         <button onClick={() => onNavigate('home', '#security')} className="block hover:text-white transition text-left w-full">{t('nav_security')}</button>
                                         <button onClick={() => onNavigate('security-architecture')} className="block hover:text-white transition text-left w-full">{t('nav_security_arch')}</button>
                                         <button onClick={() => onNavigate('pricing')} className="block hover:text-white transition text-left w-full">{t('nav_pricing')}</button>
+                                        <button onClick={() => onNavigate('price-package-explained')} className="block hover:text-white transition text-left w-full">Price Package Explained</button>
                                     </div>
                                 </div>
                                 <div>
@@ -816,9 +1315,22 @@
                                     <div className="space-y-2 text-gray-400 text-sm">
                                         <button onClick={() => onNavigate('help-center')} className="block hover:text-white transition text-left w-full">Help Center</button>
                                         <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
-                                        <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">FAQ</button>
-                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full">Affiliate Program</button>
-                                        <a href="./LCP%20-%20Production.html" className="block hover:text-white transition">Production (no sample data)</a>
+                                        <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">Interactive FAQ</button>
+                                        <button onClick={() => onNavigate('help-center')} className="block hover:text-white transition text-left w-full">AI Support</button>
+                                        <a href="tel:4003833707" className="block hover:text-white transition text-left w-full">Live Agent: 400 383 3707</a>
+                                        <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Live Agent Contact Form</button>
+                                        <button onClick={() => onNavigate('plan-checklist')} className="block hover:text-white transition text-left w-full">Interactive Plan Checklist</button>
+                                        <a href="./LCP%20-%20Production%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
+                                    </div>
+                                </div>
+                                <div className="md:col-span-4 flex flex-wrap items-center justify-center gap-4 pt-4 border-t border-gray-800 mt-4 text-center">
+                                    <span className="text-xs text-gray-400">Connect with us:</span>
+                                    <div className="flex flex-wrap items-center justify-center gap-3 text-gray-300">
+                                        <a href="mailto:support@legacyvault.com" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="mail" className="w-4 h-4"></i><span>Email</span></a>
+                                        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="facebook" className="w-4 h-4"></i><span>Facebook</span></a>
+                                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="twitter" className="w-4 h-4"></i><span>Twitter</span></a>
+                                        <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="linkedin" className="w-4 h-4"></i><span>LinkedIn</span></a>
                                     </div>
                                 </div>
                             </div>
@@ -834,14 +1346,463 @@
             );
         };
 
+        const PricePackageExplainedPage = (props) => {
+            const packages = [
+                {
+                    title: '1. Basic Plan',
+                    price: '$9 /month (or $90 /year)',
+                    intro: 'Designed for individuals looking for essential organization and a secure place to store vital documents.',
+                    features: [
+                        {
+                            name: 'Asset Storage',
+                            meaning: 'A digital inventory where you can list financial accounts, physical properties, and valuables so heirs are not searching for missing assets.'
+                        },
+                        {
+                            name: 'Legal Document Upload',
+                            meaning: 'Secure storage for digital copies of your Will, Power of Attorney, or Trust documents.'
+                        },
+                        {
+                            name: 'Trusted Contacts',
+                            meaning: 'You designate specific people who will be notified or granted access to certain information based on specific conditions (like your passing).'
+                        },
+                        {
+                            name: 'Basic Activity Monitoring',
+                            meaning: 'A proof-of-life check where the system monitors your logins to ensure you are still active; if inactivity persists, it triggers your disclosure plan.'
+                        }
+                    ]
+                },
+                {
+                    title: '2. Premium Plan',
+                    price: '$19 /month (or $190 /year)',
+                    intro: 'The most popular choice, offering more intelligent automation and granular control over how information is released.',
+                    features: [
+                        {
+                            name: 'Advanced Trigger Logic',
+                            meaning: 'More complex if/then scenarios for releasing data (for example, requiring verification from multiple doctors or legal entities before the vault unlocks).'
+                        },
+                        {
+                            name: 'Digital Asset Manager',
+                            meaning: 'Specifically handles digital footprints, such as social media logins, crypto keys, or cloud photo storage.'
+                        },
+                        {
+                            name: 'AI Estate Summary',
+                            meaning: 'Uses AI to scan your uploaded documents and create a simplified cheat sheet for your heirs, highlighting the most important instructions.'
+                        },
+                        {
+                            name: 'Discounted Will Generation Pricing',
+                            meaning: 'Premium members receive discounted Will generation pricing with guided support. One Will does not fit all situations — contact our team at 400 383 3707 for guidance.'
+                        },
+                        {
+                            name: 'Last Wish Video (transparent pricing)',
+                            meaning: 'Premium & Family only — optional $6.99 per instruction / last wish video (max 5 min each). Add during subscription or any time after.'
+                        },
+                        {
+                            name: 'Multi-recipient Disclosure',
+                            meaning: 'Allows you to tailor different packages of information for different people (for example, your spouse gets everything, but your business partner only gets company logins).'
+                        },
+                        {
+                            name: 'Audit Logs',
+                            meaning: 'A transparent history showing exactly who accessed what and when, providing a security trail for your peace of mind.'
+                        }
+                    ]
+                },
+                {
+                    title: '3. Family Plan',
+                    price: '$29 /month (or $290 /year)',
+                    intro: 'Best for households or couples who want to manage their legacies collectively.',
+                    features: [
+                        {
+                            name: 'Up to 4 Users',
+                            meaning: 'Provides individual accounts for family members under one subscription.'
+                        },
+                        {
+                            name: 'Shared Family Vault',
+                            meaning: 'A common area for documents that affect everyone, such as home insurance policies, family photos, or utility information.'
+                        },
+                        {
+                            name: 'Cross-visibility Options',
+                            meaning: 'Allows partners to see each other\'s progress and organization status without necessarily revealing private details until the trigger occurs.'
+                        },
+                        {
+                            name: 'Discounted Will Generation Pricing',
+                            meaning: 'Household-level access to Will draft generation and execution guidance for each subscriber profile in the plan.'
+                        }
+                    ]
+                }
+            ];
+
+            return (
+                <PublicPageShell {...props} title="Price Package Explained" subtitle="Definitions and explanations of what each pricing package contains.">
+                    <div className="space-y-6">
+                        <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+                            Need legal assistance with your generated Will? Call <strong>400 383 3707</strong>. LegacyVault provides template tooling and organization support, not legal representation.
+                        </div>
+                        {packages.map((pkg) => (
+                            <section key={pkg.title} className="rounded-xl border border-gray-200 p-6 bg-gray-50">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                                    <h2 className="text-2xl font-bold text-gray-900">{pkg.title}</h2>
+                                    <span className="text-lg font-semibold text-blue-900">{pkg.price}</span>
+                                </div>
+                                <p className="text-gray-700 mb-5">{pkg.intro}</p>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border border-gray-200 rounded-lg overflow-hidden">
+                                        <thead className="bg-gray-100">
+                                            <tr>
+                                                <th className="px-4 py-2 text-sm font-semibold text-gray-800">Feature</th>
+                                                <th className="px-4 py-2 text-sm font-semibold text-gray-800">What it Means</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {pkg.features.map((feature, index) => (
+                                                <tr key={`${pkg.title}-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                    <td className="px-4 py-3 align-top font-semibold text-gray-900">{feature.name}</td>
+                                                    <td className="px-4 py-3 align-top text-gray-700">{feature.meaning}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                        ))}
+                    </div>
+                </PublicPageShell>
+            );
+        };
+
+        const PlanChecklistPage = (props) => {
+            const checklistItems = [
+                { id: 'basic_assets', label: 'I only need to store a few key assets (bank info or account lists).', plan: 'Basic' },
+                { id: 'basic_docs', label: 'I want legal documents in one secure place.', plan: 'Basic' },
+                { id: 'basic_contacts', label: 'I have one or two trusted contacts for eventual access.', plan: 'Basic' },
+                { id: 'basic_simple', label: 'I prefer simple setup without advanced automation.', plan: 'Basic' },
+                { id: 'premium_digital', label: 'I have many digital assets (crypto, social, domains, cloud storage).', plan: 'Premium' },
+                { id: 'premium_triggers', label: 'I need advanced trigger logic before disclosure.', plan: 'Premium' },
+                { id: 'premium_will', label: 'I want to generate a Will draft directly from LegacyVault.', plan: 'Premium' },
+                { id: 'premium_ai', label: 'I want an AI estate summary for heirs.', plan: 'Premium' },
+                { id: 'premium_multi', label: 'I need multi-recipient disclosure with different access levels.', plan: 'Premium' },
+                { id: 'premium_audit', label: 'I want audit logs for who accessed what and when.', plan: 'Premium' },
+                { id: 'family_users', label: 'I want up to 4 users under one subscription.', plan: 'Family' },
+                { id: 'family_shared', label: 'My household needs a shared family vault.', plan: 'Family' },
+                { id: 'family_visibility', label: 'I want cross-visibility for household planning progress.', plan: 'Family' },
+                { id: 'family_value', label: 'I want the best value for multiple people in one household.', plan: 'Family' }
+            ];
+
+            const [selected, setSelected] = useState({});
+            const [showSuggestion, setShowSuggestion] = useState(false);
+
+            const toggleItem = (id) => {
+                setSelected((prev) => ({ ...prev, [id]: !prev[id] }));
+            };
+
+            const computeSuggestion = () => {
+                const score = { Basic: 0, Premium: 0, Family: 0 };
+                checklistItems.forEach((item) => {
+                    if (selected[item.id]) score[item.plan] += 1;
+                });
+
+                const ranked = Object.entries(score).sort((a, b) => b[1] - a[1]);
+                const topPlan = ranked[0][0];
+                const topScore = ranked[0][1];
+                const tie = ranked[1] && ranked[1][1] === topScore;
+
+                const planInfo = {
+                    Basic: { price: '$9/month (or $90/year)', reason: 'best for essential organization and simple secure storage.' },
+                    Premium: { price: '$19/month (or $190/year)', reason: 'best for advanced automation, control, and complex digital estates.' },
+                    Family: { price: '$29/month (or $290/year)', reason: 'best for shared household planning and multi-user value.' }
+                };
+
+                if (topScore === 0) {
+                    return {
+                        title: 'No selections yet',
+                        detail: 'Select at least one checklist item so we can suggest the best package.'
+                    };
+                }
+
+                if (tie) {
+                    return {
+                        title: 'Close Match: Premium or Family',
+                        detail: 'Your selections are split between advanced features and household collaboration. If this is mainly for one person, choose Premium. If multiple family members are involved, choose Family.'
+                    };
+                }
+
+                return {
+                    title: `Recommended Plan: ${topPlan}`,
+                    detail: `${topPlan} (${planInfo[topPlan].price}) is ${planInfo[topPlan].reason}`
+                };
+            };
+
+            const recommendation = computeSuggestion();
+
+            return (
+                <PublicPageShell {...props} title="Interactive Plan Checklist" subtitle="Select what matters to you and get an instant package recommendation.">
+                    <div className="space-y-6">
+                        <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+                            <p className="text-gray-700 mb-4">Check all statements that apply to your needs. Then click <strong>Suggest My Package</strong>.</p>
+                            <div className="space-y-3">
+                                {checklistItems.map((item) => (
+                                    <label key={item.id} className="flex items-start gap-3 bg-white rounded-lg border border-gray-200 p-3 cursor-pointer hover:border-blue-300">
+                                        <input
+                                            type="checkbox"
+                                            checked={!!selected[item.id]}
+                                            onChange={() => toggleItem(item.id)}
+                                            className="mt-1"
+                                        />
+                                        <span className="text-gray-800 text-sm">{item.label}</span>
+                                    </label>
+                                ))}
+                            </div>
+                            <div className="mt-5 flex flex-wrap gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowSuggestion(true)}
+                                    className="bg-blue-900 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-800 transition"
+                                >
+                                    Suggest My Package
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => { setSelected({}); setShowSuggestion(false); }}
+                                    className="border border-gray-300 text-gray-700 px-5 py-2 rounded-lg font-semibold hover:bg-gray-100 transition"
+                                >
+                                    Reset Checklist
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="rounded-xl border border-gray-200 bg-white p-5">
+                            <h3 className="font-bold text-gray-900 mb-3">Quick Price Comparison</h3>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border border-gray-200 rounded-lg overflow-hidden">
+                                    <thead className="bg-gray-100">
+                                        <tr>
+                                            <th className="px-4 py-2 text-sm font-semibold text-gray-800">Feature</th>
+                                            <th className="px-4 py-2 text-sm font-semibold text-gray-800">Basic</th>
+                                            <th className="px-4 py-2 text-sm font-semibold text-gray-800">Premium</th>
+                                            <th className="px-4 py-2 text-sm font-semibold text-gray-800">Family</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr className="bg-white">
+                                            <td className="px-4 py-2 font-semibold text-gray-900">Monthly Cost</td>
+                                            <td className="px-4 py-2 text-gray-700">$9</td>
+                                            <td className="px-4 py-2 text-gray-700">$19</td>
+                                            <td className="px-4 py-2 text-gray-700">$29</td>
+                                        </tr>
+                                        <tr className="bg-gray-50">
+                                            <td className="px-4 py-2 font-semibold text-gray-900">Annual Cost</td>
+                                            <td className="px-4 py-2 text-gray-700">$90 (Save $18)</td>
+                                            <td className="px-4 py-2 text-gray-700">$190 (Save $38)</td>
+                                            <td className="px-4 py-2 text-gray-700">$290 (Save $58)</td>
+                                        </tr>
+                                        <tr className="bg-white">
+                                            <td className="px-4 py-2 font-semibold text-gray-900">Best For</td>
+                                            <td className="px-4 py-2 text-gray-700">Individuals / Essentials</td>
+                                            <td className="px-4 py-2 text-gray-700">Tech-savvy / Complex estates</td>
+                                            <td className="px-4 py-2 text-gray-700">Households / Couples</td>
+                                        </tr>
+                                        <tr className="bg-gray-50">
+                                            <td className="px-4 py-2 font-semibold text-gray-900">Will Generation</td>
+                                            <td className="px-4 py-2 text-gray-700">Add-on only</td>
+                                            <td className="px-4 py-2 text-gray-700">Included (template + checklist)</td>
+                                            <td className="px-4 py-2 text-gray-700">Included (multi-user support)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    {showSuggestion && (
+                        <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4">
+                            <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">{recommendation.title}</h3>
+                                <p className="text-gray-700 mb-5">{recommendation.detail}</p>
+                                <div className="flex justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowSuggestion(false)}
+                                        className="bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 transition"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </PublicPageShell>
+            );
+        };
+
+        const GenerateWillPage = ({ onNavigate, country, setCountry, language, setLanguage, t, isAuthenticated = false }) => {
+            const [formData, setFormData] = useState({
+                fullName: productionData.user.name || '',
+                city: '',
+                region: '',
+                executorName: '',
+                executorRelationship: '',
+                guardianName: '',
+                digitalAssetClause: true,
+                physicalLocation: ''
+            });
+            const [generated, setGenerated] = useState(false);
+            const [showWillGuidance, setShowWillGuidance] = useState(true);
+            const [checklist, setChecklist] = useState({
+                printCopy: false,
+                witnessOne: false,
+                witnessTwo: false,
+                signInOrder: false,
+                initialEveryPage: false,
+                storeOriginal: false
+            });
+
+            const handleGenerate = (e) => {
+                e.preventDefault();
+                if (!isAuthenticated) {
+                    onNavigate('signup');
+                    return;
+                }
+                setShowWillGuidance(true);
+                setGenerated(true);
+            };
+
+            const headerBlock = (
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Generate Will</h1>
+                    <p className="text-gray-600">Create a structured Will draft using your LegacyVault information.</p>
+                </div>
+            );
+
+            const content = (
+                <div className="space-y-6">
+                    {!isAuthenticated && (
+                        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+                            You must be an active subscriber to generate a Will. Create an account or sign in to continue.
+                        </div>
+                    )}
+
+
+                    {showWillGuidance && (
+                        <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+                            <p className="font-semibold mb-2">Personalized Will guidance recommended</p>
+                            <p className="mb-3">Please contact <strong>400 383 3707</strong> for guidance on Will creation. One Will does not fit all situations — your family structure, assets, and jurisdiction all matter. Call now or submit our Contact Us form for a Will creation enquiry and someone from our team will get back to you.</p>
+                            <div className="flex flex-wrap gap-2">
+                                <a href="tel:4003833707" className="inline-flex items-center gap-2 bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 transition">
+                                    <i data-lucide="phone" className="w-4 h-4"></i>
+                                    Call 400 383 3707
+                                </a>
+                                <button type="button" onClick={() => onNavigate('contact-us')} className="inline-flex items-center gap-2 border border-blue-300 text-blue-900 px-4 py-2 rounded-lg font-semibold hover:bg-blue-100 transition">
+                                    <i data-lucide="mail" className="w-4 h-4"></i>
+                                    Will creation enquiry form
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <form onSubmit={handleGenerate} className="bg-white rounded-xl card-shadow p-6 space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Full legal name</label>
+                                <input value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">City</label>
+                                <input value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">State / Province</label>
+                                <input value={formData.region} onChange={(e) => setFormData({ ...formData, region: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Executor name</label>
+                                <input value={formData.executorName} onChange={(e) => setFormData({ ...formData, executorName: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Executor relationship</label>
+                                <input value={formData.executorRelationship} onChange={(e) => setFormData({ ...formData, executorRelationship: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Guardian (if minors)</label>
+                                <input value={formData.guardianName} onChange={(e) => setFormData({ ...formData, guardianName: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+                            </div>
+                        </div>
+                        <label className="flex items-start gap-3 text-sm text-gray-700">
+                            <input type="checkbox" checked={formData.digitalAssetClause} onChange={(e) => setFormData({ ...formData, digitalAssetClause: e.target.checked })} className="mt-1" />
+                            Include universal Digital Asset Clause for online accounts, cloud data, social platforms, and wallets.
+                        </label>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Where will you keep the signed original?</label>
+                            <input value={formData.physicalLocation} onChange={(e) => setFormData({ ...formData, physicalLocation: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="e.g. Fireproof safe in home office" />
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                            <button type="submit" className="bg-blue-900 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-800 transition">Generate Will Draft</button>
+                            {!isAuthenticated && <button type="button" onClick={() => onNavigate('pricing')} className="border border-gray-300 text-gray-700 px-5 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">View plans</button>}
+                        </div>
+                    </form>
+
+                    {generated && (
+                        <div className="bg-white rounded-xl card-shadow p-6 space-y-4">
+                            <h2 className="text-xl font-bold text-gray-900">Will Draft Preview</h2>
+                            <p className="text-sm text-gray-700">I, <strong>{formData.fullName}</strong>, a resident of <strong>{formData.city}, {formData.region}</strong>, declare this to be my Last Will and Testament and revoke all prior Wills and codicils.</p>
+                            <p className="text-sm text-gray-700">I appoint <strong>{formData.executorName}</strong> ({formData.executorRelationship}) as Executor of my estate.</p>
+                            {formData.guardianName && <p className="text-sm text-gray-700">I appoint <strong>{formData.guardianName}</strong> as guardian for my minor children.</p>}
+                            {formData.digitalAssetClause && <p className="text-sm text-gray-700">I grant my Executor lawful authority to access, manage, memorialize, transfer, or delete my digital assets and communications to the extent permitted by law.</p>}
+                            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+                                <p className="font-semibold mb-1">Execution reminder</p>
+                                <p>Print and sign with two non-beneficiary witnesses. For legal assistance, call <strong>400 383 3707</strong>.</p>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="bg-white rounded-xl card-shadow p-6">
+                        <h2 className="text-xl font-bold text-gray-900 mb-3">Execution Checklist</h2>
+                        <div className="space-y-2 text-sm text-gray-700">
+                            {[
+                                ['printCopy', 'Print a physical copy of the Will'],
+                                ['witnessOne', 'Witness #1 is 18+ and is not a beneficiary'],
+                                ['witnessTwo', 'Witness #2 is 18+ and is not a beneficiary'],
+                                ['signInOrder', 'Testator signs first, then both witnesses sign in each others presence'],
+                                ['initialEveryPage', 'Initial every page to reduce tampering risk'],
+                                ['storeOriginal', 'Store the original safely and record location in LegacyVault']
+                            ].map(([key, label]) => (
+                                <label key={key} className="flex items-start gap-3">
+                                    <input type="checkbox" checked={!!checklist[key]} onChange={(e) => setChecklist({ ...checklist, [key]: e.target.checked })} className="mt-1" />
+                                    <span>{label}</span>
+                                </label>
+                            ))}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-4">Template guidance only, not legal advice. Jurisdiction-specific requirements may vary.</p>
+                    </div>
+                </div>
+            );
+
+            if (!isAuthenticated) {
+                return (
+                    <PublicPageShell onNavigate={onNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} title="Generate Will" subtitle="Subscribers can create a Will draft directly in LegacyVault.">
+                        {content}
+                    </PublicPageShell>
+                );
+            }
+
+            return (
+                <div>
+                    {headerBlock}
+                    {content}
+                </div>
+            );
+        };
+
         // Home Page Component
         const HomePage = ({ onNavigate, onGetStarted, country, setCountry, language, setLanguage, t }) => {
+            const [mobileNavOpen, setMobileNavOpen] = useState(false);
+            useEffect(() => {
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
+            }, [mobileNavOpen]);
             return (
                 <div className="min-h-screen">
                     {/* Navigation */}
                     <nav className="bg-white border-b sticky top-0 z-50">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="flex justify-between items-center h-16">
+                            <div className="relative z-[80] flex justify-between items-center h-16 bg-white">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-6 h-6 text-white"></i>
@@ -850,22 +1811,45 @@
                                 </div>
                                 <div className="hidden md:flex items-center gap-6">
                                     {country != null && <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />}
+                                    <button onClick={() => onNavigate('home')} className="text-gray-600 hover:text-gray-900">Home</button>
                                     <a href="#how-it-works" className="text-gray-600 hover:text-gray-900">{t('nav_how')}</a>
-                                    <a href="#features" className="text-gray-600 hover:text-gray-900">{t('nav_features')}</a>
                                     <button onClick={() => onNavigate('pricing')} className="text-blue-900 font-semibold hover:text-blue-800">{t('nav_pricing')}</button>
                                     <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900">{t('nav_signin')}</button>
+                                    <button onClick={() => onNavigate('generate-will')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">Generate Will?</button>
                                     <button onClick={onGetStarted} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">{t('nav_get_started')}</button>
                                 </div>
-                                <button className="md:hidden text-gray-600 hover:text-gray-900">
-                                    <i data-lucide="menu" className="w-6 h-6"></i>
+                                <button type="button" aria-label="Toggle menu" aria-expanded={mobileNavOpen} onClick={() => setMobileNavOpen(!mobileNavOpen)} className="md:hidden text-gray-600 hover:text-gray-900 p-2 -mr-2">
+                                    <i data-lucide={mobileNavOpen ? 'x' : 'menu'} className="w-6 h-6"></i>
                                 </button>
                             </div>
+                            {mobileNavOpen && (
+                                <>
+                                    <div className="fixed inset-0 bg-black/40 z-[60] md:hidden" onClick={() => setMobileNavOpen(false)} aria-hidden="true" />
+                                    <div className="fixed top-16 left-0 right-0 border-b bg-white shadow-lg p-4 z-[70] md:hidden flex flex-col gap-1">
+                                        {country != null && (
+                                            <div className="pb-3 mb-2 border-b border-gray-100">
+                                                <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />
+                                            </div>
+                                        )}
+                                        <button type="button" onClick={() => { onNavigate('home'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">Home</button>
+                                        <a href="#how-it-works" onClick={() => setMobileNavOpen(false)} className="text-gray-700 hover:text-gray-900 py-2">{t('nav_how')}</a>
+                                        <button type="button" onClick={() => { onNavigate('pricing'); setMobileNavOpen(false); }} className="text-blue-900 font-semibold text-left py-2">{t('nav_pricing')}</button>
+                                        <button type="button" onClick={() => { onNavigate('login'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_signin')}</button>
+                                        <button type="button" onClick={() => { onNavigate('generate-will'); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">Generate Will?</button>
+                                        <button type="button" onClick={() => { onGetStarted(); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">{t('nav_get_started')}</button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </nav>
 
                     {/* Hero Section */}
                     <section className="gradient-bg text-white py-20">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                            <div className="inline-block bg-amber-400 text-blue-900 px-5 py-2 rounded-full text-sm font-bold mb-6 shadow-lg">
+                                <i data-lucide="gift" className="w-4 h-4 inline-block mr-2 -mt-0.5" style={{verticalAlign:"middle"}}></i>
+                                1st Month Free — Subscribe & add your credit card. Cancel anytime.
+                            </div>
                             <h1 className="text-5xl md:text-6xl font-bold mb-6">
                                 {t('hero_title')}
                             </h1>
@@ -998,6 +1982,7 @@
                                         <a href="#security" className="block hover:text-white transition">{t('nav_security')}</a>
                                         <button onClick={() => onNavigate('security-architecture')} className="block hover:text-white transition text-left w-full">{t('nav_security_arch')}</button>
                                         <button onClick={() => onNavigate('pricing')} className="block hover:text-white transition text-left w-full">{t('nav_pricing')}</button>
+                                        <button onClick={() => onNavigate('price-package-explained')} className="block hover:text-white transition text-left w-full">Price Package Explained</button>
                                     </div>
                                 </div>
                                 <div>
@@ -1013,9 +1998,22 @@
                                     <div className="space-y-2 text-gray-400 text-sm">
                                         <button onClick={() => onNavigate('help-center')} className="block hover:text-white transition text-left w-full">Help Center</button>
                                         <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
-                                        <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">FAQ</button>
-                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full">Affiliate Program</button>
-                                        <a href="./LCP%20-%20Production.html" className="block hover:text-white transition">Production (no sample data)</a>
+                                        <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">Interactive FAQ</button>
+                                        <button onClick={() => onNavigate('help-center')} className="block hover:text-white transition text-left w-full">AI Support</button>
+                                        <a href="tel:4003833707" className="block hover:text-white transition text-left w-full">Live Agent: 400 383 3707</a>
+                                        <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Live Agent Contact Form</button>
+                                        <button onClick={() => onNavigate('plan-checklist')} className="block hover:text-white transition text-left w-full">Interactive Plan Checklist</button>
+                                        <a href="./LCP%20-%20Production%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
+                                    </div>
+                                </div>
+                                <div className="md:col-span-4 flex flex-wrap items-center justify-center gap-4 pt-4 border-t border-gray-800 mt-4 text-center">
+                                    <span className="text-xs text-gray-400">Connect with us:</span>
+                                    <div className="flex flex-wrap items-center justify-center gap-3 text-gray-300">
+                                        <a href="mailto:support@legacyvault.com" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="mail" className="w-4 h-4"></i><span>Email</span></a>
+                                        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="facebook" className="w-4 h-4"></i><span>Facebook</span></a>
+                                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="twitter" className="w-4 h-4"></i><span>Twitter</span></a>
+                                        <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="linkedin" className="w-4 h-4"></i><span>LinkedIn</span></a>
                                     </div>
                                 </div>
                             </div>
@@ -1031,6 +2029,265 @@
             );
         };
 
+        // Subscription access helper
+        const hasActiveSubscription = () => {
+            const sub = productionData.subscription;
+            return sub && sub.plan && sub.status === 'active';
+        };
+        const hasSubscriptionAccess = () => {
+            const sub = productionData.subscription;
+            if (!sub) return false;
+            if (sub.status === 'cancelled' && sub.gracePeriodEndsAt) {
+                if (new Date(sub.gracePeriodEndsAt) < new Date()) {
+                    sub.status = 'permanently_disabled';
+                    return false;
+                }
+                return false;
+            }
+            return sub.status !== 'permanently_disabled';
+        };
+        const isInGracePeriod = () => {
+            const sub = productionData.subscription;
+            return sub && sub.status === 'cancelled' && sub.gracePeriodEndsAt && new Date(sub.gracePeriodEndsAt) > new Date();
+        };
+
+        // Access Revoked Screen (subscription cancelled - grace period or expired)
+        const AccessRevokedScreen = ({ onNavigate, onRestore }) => {
+            const inGrace = isInGracePeriod();
+            const sub = productionData.subscription;
+            const graceEnd = sub && sub.gracePeriodEndsAt ? new Date(sub.gracePeriodEndsAt).toLocaleDateString() : '';
+            return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+                    <div className="max-w-md w-full bg-white rounded-xl card-shadow-lg p-8 text-center">
+                        <i data-lucide="shield-off" className="w-16 h-16 text-amber-500 mx-auto mb-4"></i>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">Account Access Suspended</h1>
+                        <p className="text-gray-600 mb-6">Your subscription has been cancelled. You have lost access to your account.</p>
+                        {inGrace ? (
+                            <>
+                                <p className="text-sm text-gray-700 mb-4">Pay your subscription fee within 30 days of cancellation to restore access. Your grace period ends: <strong>{graceEnd}</strong></p>
+                                <button onClick={onRestore} className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition mb-3">
+                                    Pay &amp; Restore Access
+                                </button>
+                            </>
+                        ) : (
+                            <p className="text-sm text-red-600 mb-4">Your 30-day grace period has ended. Your account has been permanently disabled.</p>
+                        )}
+                        <button onClick={() => onNavigate('home')} className="w-full border border-gray-300 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-50 transition">
+                            Return to Home
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // Subscribe Required Screen (registered but no subscription - 1st month free at subscribe)
+        const PLAN_OPTIONS = [
+            { name: 'Basic', monthlyPrice: 9, annualPrice: 90 },
+            { name: 'Premium', monthlyPrice: 19, annualPrice: 190 },
+            { name: 'Family', monthlyPrice: 29, annualPrice: 290 }
+        ];
+        const SubscribeRequiredScreen = ({ onNavigate, onSubscribed }) => {
+            const [selectedPlan, setSelectedPlan] = useState(null);
+            const [lastWishVideoCount, setLastWishVideoCount] = useState(0);
+            const [cardNumber, setCardNumber] = useState('');
+            const [cardName, setCardName] = useState('');
+            const [cardExpiry, setCardExpiry] = useState('');
+            const [cardCvv, setCardCvv] = useState('');
+            const [billingZip, setBillingZip] = useState('');
+            useEffect(() => {
+                const pending = productionData.subscription.pendingCheckoutPlan;
+                if (pending && PLAN_OPTIONS.some((pl) => pl.name === pending)) {
+                    setSelectedPlan(PLAN_OPTIONS.find((pl) => pl.name === pending));
+                    productionData.subscription.pendingCheckoutPlan = null;
+                }
+            }, []);
+            const handleSubscribe = (e) => {
+                e.preventDefault();
+                const digits = cardNumber.replace(/\s/g, '');
+                if (!selectedPlan || digits.length < 15 || !cardName.trim() || !cardExpiry.trim() || cardCvv.length < 3 || !billingZip.trim()) return;
+                const p = productionData.subscription;
+                p.status = 'active';
+                p.plan = selectedPlan.name;
+                p.creditCardOnFile = true;
+                p.firstMonthFree = true;
+                p.cancelledAt = null;
+                p.gracePeriodEndsAt = null;
+                p.downgradedAt = null;
+                p.previousPlan = null;
+                p.lastWishVideoCount = (selectedPlan.name === 'Premium' || selectedPlan.name === 'Family') ? lastWishVideoCount : 0;
+                p.lastWishVideoCost = p.lastWishVideoCount * 6.99;
+                onSubscribed();
+            };
+            return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+                    <div className="max-w-lg w-full bg-white rounded-xl card-shadow-lg p-8">
+                        <div className="text-center mb-6">
+                            <div className="inline-block bg-amber-400 text-blue-900 px-4 py-2 rounded-full text-sm font-bold mb-4">1st Month Free</div>
+                            <h1 className="text-2xl font-bold text-gray-900 mb-2">Subscribe to Access Features</h1>
+                            <p className="text-gray-600 text-sm">Registration is free. Subscribe with your full card details for payment (charged securely via Stripe). Cancel anytime.</p>
+                        </div>
+                        {!selectedPlan ? (
+                            <div className="space-y-3">
+                                {PLAN_OPTIONS.map((pl) => (
+                                    <button key={pl.name} onClick={() => setSelectedPlan(pl)} className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 text-left flex justify-between items-center">
+                                        <span className="font-semibold text-gray-900">{pl.name}</span>
+                                        <span className="text-gray-600">${pl.monthlyPrice}/mo — 1st month free</span>
+                                    </button>
+                                ))}
+                            </div>
+                        ) : (
+                            <form onSubmit={handleSubscribe} className="space-y-4">
+                                <div className="bg-blue-50 rounded-lg p-3 flex justify-between items-center">
+                                    <span className="font-semibold text-gray-900">Selected: {selectedPlan.name}</span>
+                                    <button type="button" onClick={() => setSelectedPlan(null)} className="text-sm text-gray-600 hover:underline">Change</button>
+                                </div>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Card number</label>
+                                        <input type="text" inputMode="numeric" autoComplete="cc-number" value={cardNumber} onChange={(e) => setCardNumber(e.target.value.replace(/[^\d\s]/g, '').slice(0, 19))} placeholder="4242 4242 4242 4242" className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Name on card</label>
+                                        <input type="text" autoComplete="cc-name" value={cardName} onChange={(e) => setCardName(e.target.value)} placeholder="As shown on card" className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Expiry (MM/YY)</label>
+                                            <input type="text" autoComplete="cc-exp" value={cardExpiry} onChange={(e) => setCardExpiry(e.target.value)} placeholder="MM/YY" className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">CVV</label>
+                                            <input type="password" autoComplete="cc-csc" value={cardCvv} onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="•••" maxLength="4" className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Billing ZIP</label>
+                                            <input type="text" autoComplete="postal-code" value={billingZip} onChange={(e) => setBillingZip(e.target.value)} placeholder="Postal code" className="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+                                        </div>
+                                    </div>
+                                    {(selectedPlan.name === 'Premium' || selectedPlan.name === 'Family') && (
+                                        <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+                                            <p className="text-sm font-semibold text-blue-900 mb-1">Optional: Last Wish Video</p>
+                                            <p className="text-xs text-blue-800 mb-2">$6.99 per video (max 5 min each). Add at checkout or any day after subscribing.</p>
+                                            <div className="flex items-center gap-3">
+                                                <label className="text-xs text-gray-700">Videos</label>
+                                                <input type="number" min="0" max="20" value={lastWishVideoCount} onChange={(e) => setLastWishVideoCount(Math.max(0, Math.min(20, Number(e.target.value) || 0)))} className="w-20 px-2 py-1 border border-gray-300 rounded-lg text-sm" />
+                                                <span className="text-xs text-gray-700">Add-on: <strong>${(lastWishVideoCount * 6.99).toFixed(2)}</strong></span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <p className="text-xs text-gray-500">Payment is processed securely. In production this connects to Stripe; this page is a UI flow only.</p>
+                                </div>
+                                <button type="submit" className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition">
+                                    Subscribe — 1st Month Free
+                                </button>
+                            </form>
+                        )}
+                        <button onClick={() => onNavigate('home')} className="w-full mt-4 border border-gray-300 text-gray-600 py-2 rounded-lg hover:bg-gray-50">
+                            Return to Home
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // Permanently Disabled Screen
+        const PermanentlyDisabledScreen = ({ onNavigate }) => (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+                <div className="max-w-md w-full bg-white rounded-xl card-shadow-lg p-8 text-center">
+                    <i data-lucide="x-octagon" className="w-16 h-16 text-red-500 mx-auto mb-4"></i>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Account Permanently Disabled</h1>
+                    <p className="text-gray-600 mb-6">Your subscription was not renewed within the 30-day grace period. Your account has been permanently disabled and cannot be restored.</p>
+                    <button onClick={() => onNavigate('home')} className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition">
+                        Return to Home
+                    </button>
+                </div>
+            </div>
+        );
+
+        // Plan-based feature gating and upgrade/downgrade
+        const PLAN_RANK = { Basic: 1, Premium: 2, Family: 3 };
+        const PLAN_PRICES = { Basic: 9, Premium: 19, Family: 29 };
+        const FEATURE_PLANS = {
+            'dashboard': 'Basic', 'assets': 'Basic', 'legal': 'Basic', 'trusted': 'Basic', 'activity': 'Basic',
+            'digital': 'Premium', 'triggers': 'Premium', 'disclosure-preview': 'Premium', 'estate-planner': 'Premium',
+            'security-architecture': 'Basic', 'affiliate-dashboard': 'Basic', 'generate-will': 'Premium'
+        };
+        const FEATURE_NAMES = {
+            'assets': 'Assets & Liabilities', 'legal': 'Legal Documents', 'trusted': 'Trusted People', 'activity': 'Activity Monitoring',
+            'digital': 'Digital Life', 'triggers': 'Trigger Management', 'disclosure-preview': 'Disclosure Preview', 'estate-planner': 'Estate Planner',
+            'affiliate-dashboard': 'Affiliate Dashboard', 'generate-will': 'Generate Will?'
+        };
+        const canAccessFeature = (featureId) => {
+            const sub = productionData.subscription;
+            if (!sub || !sub.plan || sub.status !== 'active') return false;
+            const required = FEATURE_PLANS[featureId] || 'Basic';
+            return (PLAN_RANK[sub.plan] || 0) >= (PLAN_RANK[required] || 0);
+        };
+        const ChangePlanModal = ({ currentPlan, onClose, onSubscriptionChange }) => {
+            const [targetPlan, setTargetPlan] = React.useState(null);
+            const sub = productionData.subscription;
+            const wasDowngraded = sub.downgradedAt && sub.previousPlan;
+            const monthsSinceDowngrade = wasDowngraded && sub.downgradedAt
+                ? Math.max(1, Math.ceil((new Date() - new Date(sub.downgradedAt)) / (30 * 24 * 60 * 60 * 1000)))
+                : 0;
+            const retroactiveAmount = targetPlan && monthsSinceDowngrade ? PLAN_PRICES[targetPlan] * monthsSinceDowngrade : 0;
+            const handleConfirm = (mode) => {
+                if (!targetPlan) return;
+                const p = productionData.subscription;
+                const isUpg = (PLAN_RANK[targetPlan] || 0) > (PLAN_RANK[currentPlan] || 0);
+                const isDown = (PLAN_RANK[targetPlan] || 0) < (PLAN_RANK[currentPlan] || 0);
+                p.plan = targetPlan;
+                if (isDown) { p.downgradedAt = new Date().toISOString(); p.previousPlan = currentPlan; }
+                else if (mode === 'retroactive' || mode === 'new' || (wasDowngraded && isUpg)) { p.downgradedAt = null; p.previousPlan = null; }
+                if (mode === 'new' && wasDowngraded && (PLAN_RANK[targetPlan] || 0) >= 2) {
+                    productionData.digitalAssets = [];
+                    productionData.estatePlanner = { personal: { fullName: "", dob: "", address: "" }, executor: { name: "", relationship: "", phone: "", backup: "" }, guardians: { primary: "", backup: "", notes: "" }, allocation: "", specialInstructions: "", funeral: "" };
+                }
+                onSubscriptionChange && onSubscriptionChange(); onClose();
+            };
+            const isUpgrade = targetPlan && (PLAN_RANK[targetPlan] || 0) > (PLAN_RANK[currentPlan] || 0);
+            const isDowngrade = targetPlan && (PLAN_RANK[targetPlan] || 0) < (PLAN_RANK[currentPlan] || 0);
+            return (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+                    <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">Change Plan</h2>
+                        <p className="text-sm text-gray-600 mb-4">Current plan: <strong>{currentPlan}</strong></p>
+                        <div className="space-y-2 mb-4">
+                            {['Basic', 'Premium', 'Family'].filter(p => p !== currentPlan).map(plan => (
+                                <button key={plan} onClick={() => setTargetPlan(plan)} className={`w-full p-3 rounded-lg border-2 text-left ${targetPlan === plan ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                                    <span className="font-semibold">{plan}</span> — ${PLAN_PRICES[plan]}/mo
+                                </button>
+                            ))}
+                        </div>
+                        {targetPlan && isDowngrade && (
+                            <p className="text-sm text-amber-700 mb-4">You will lose access to {currentPlan}-only features (Digital Life, Triggers, Disclosure Preview, Estate Planner).</p>
+                        )}
+                        {targetPlan && wasDowngraded && isUpgrade && (
+                            <div className="space-y-3 mb-4 p-3 bg-gray-50 rounded-lg">
+                                <p className="text-sm font-semibold text-gray-900">You previously downgraded. Choose how to upgrade:</p>
+                                <button onClick={() => handleConfirm('retroactive')} className="w-full p-3 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800">Pay retroactive ${retroactiveAmount} ({monthsSinceDowngrade} mo × ${PLAN_PRICES[targetPlan]}) — Keep existing documents</button>
+                                <button onClick={() => handleConfirm('new')} className="w-full p-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">Pay new subscription fee — Upload new documents only (lose access to old)</button>
+                            </div>
+                        )}
+                        {targetPlan && (!wasDowngraded || !isUpgrade) && (
+                            <div className="flex gap-2">
+                                <button onClick={() => handleConfirm()} className="flex-1 bg-blue-900 text-white py-2 rounded-lg font-semibold hover:bg-blue-800">{isDowngrade ? 'Downgrade' : 'Upgrade'}</button>
+                                <button onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-lg">Cancel</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+        const UpgradePromptPage = ({ featureName, requiredPlan, onNavigate }) => (
+            <div className="bg-white rounded-xl card-shadow p-8 max-w-md mx-auto text-center">
+                <i data-lucide="lock" className="w-16 h-16 text-amber-500 mx-auto mb-4"></i>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">{featureName} requires {requiredPlan}</h2>
+                <p className="text-gray-600 text-sm mb-6">Upgrade your plan to access this feature.</p>
+                <button onClick={() => onNavigate('dashboard')} className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800">Go to Dashboard to Upgrade</button>
+            </div>
+        );
+
         // Signup Page Component
         const SignupPage = ({ onNavigate, onSignup, country, setCountry, language, setLanguage, t }) => {
             const [formData, setFormData] = useState({
@@ -1044,6 +2301,8 @@
             const handleSubmit = (e) => {
                 e.preventDefault();
                 if (formData.agreedToDisclaimer) {
+                    productionData.user.email = formData.email;
+                    productionData.user.name = formData.name;
                     onSignup(formData.name);
                 }
             };
@@ -1063,6 +2322,12 @@
                             </div>
                             <h2 className="text-3xl font-bold text-gray-900">Create Your Account</h2>
                             <p className="text-gray-600 mt-2">Start organizing your estate today</p>
+                            <p className="text-sm text-gray-600 mt-3">
+                                <a href="./LCP%20-%20Production%20Demo.html" target="_blank" rel="noopener noreferrer" className="text-blue-900 font-semibold hover:underline">
+                                    Open the demo app
+                                </a>
+                                <span className="text-gray-500"> — same experience with sample data only</span>
+                            </p>
                         </div>
 
                         <div className="bg-white rounded-xl card-shadow-lg p-8">
@@ -1240,19 +2505,112 @@
         };
 
         // Dashboard Component
-        const Dashboard = ({ onNavigate, userDisplayName = "" }) => {
+        const Dashboard = ({ onNavigate, userDisplayName = "", onSubscriptionChange }) => {
+            const [showChangePlan, setShowChangePlan] = useState(false);
             const user = productionData.user;
+            const sub = productionData.subscription;
+            const subscribed = hasActiveSubscription();
+            const connectStripePayouts = () => {
+                window.open('https://connect.stripe.com/express/oauth/authorize', '_blank', 'noopener,noreferrer');
+                productionData.stripeConnectPayoutsEnabled = true;
+                if (onSubscriptionChange) onSubscriptionChange();
+            };
+            const handleCancelSubscription = () => {
+                if (!window.confirm('Cancel your subscription? You will lose access immediately. You have 30 days to pay and restore access.')) return;
+                sub.status = 'cancelled';
+                sub.cancelledAt = new Date().toISOString();
+                const end = new Date();
+                end.setDate(end.getDate() + 30);
+                sub.gracePeriodEndsAt = end.toISOString();
+                if (onSubscriptionChange) onSubscriptionChange();
+            };
             const statusColor = user.status === 'Active' ? 'green' : user.status === 'Escalation' ? 'red' : 'yellow';
             const firstName = userDisplayName ? userDisplayName.trim().split(/\s+/)[0] : "there";
             const assetCount = productionData.assets.length;
             const totalValue = productionData.assets.reduce((sum, a) => sum + (a.value || 0), 0);
             const verifiedCount = productionData.trustedPeople.filter(p => p.verified).length;
+            const referralStats = {
+                total: 0,
+                active: 0,
+                expectedPayout: 0,
+                paidOut: 0,
+                tier: 'Bronze'
+            };
 
             return (
                 <div>
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {firstName}</h1>
                         <p className="text-gray-600">Your estate continuity dashboard</p>
+
+                        {!subscribed && (
+                            <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4 max-w-2xl">
+                                <p className="text-sm font-semibold text-amber-900 mb-2">Free account — features locked</p>
+                                <p className="text-xs text-amber-800 mb-3">You can browse <strong>Pricing</strong> and this dashboard. Subscribe to unlock vault features, uploads, and affiliate withdrawals.</p>
+                                <div className="flex flex-wrap gap-2">
+                                    <button type="button" onClick={() => onNavigate('pricing')} className="px-4 py-2 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800">View pricing</button>
+                                    <button type="button" onClick={() => { productionData.subscription.pendingCheckoutPlan = null; onNavigate('subscribe-checkout'); }} className="px-4 py-2 border border-blue-900 text-blue-900 rounded-lg text-sm font-semibold hover:bg-blue-50">Subscribe now</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Subscription panel */}
+                        {sub && sub.status === 'active' && subscribed && (
+                            <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl border-l-4 border-green-500">
+                                <div className="flex items-start justify-between gap-4 flex-wrap">
+                                    <div>
+                                        <h2 className="text-sm font-semibold text-gray-900">Subscription — Active</h2>
+                                        <p className="text-xs text-gray-600 mt-1">
+                                            {sub.firstMonthFree ? "1st month free • " : ""}Plan: {sub.plan || 'Basic'} • Cancel anytime.
+                                        </p>
+                                        <p className="mt-2 text-xs text-amber-700">
+                                            If you cancel, you lose access immediately. Pay within 30 days to restore access; otherwise your account will be permanently disabled.
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-2 flex-shrink-0">
+                                        <button onClick={() => setShowChangePlan(true)} className="px-3 py-1.5 text-sm font-medium border border-blue-900 text-blue-900 rounded-lg hover:bg-blue-50 transition">
+                                            Change Plan
+                                        </button>
+                                        <button onClick={handleCancelSubscription} className="text-sm font-semibold text-red-600 hover:text-red-700 whitespace-nowrap">
+                                            Cancel Subscription
+                                        </button>
+                                    </div>
+                                </div>
+                                {showChangePlan && <ChangePlanModal currentPlan={sub.plan || 'Basic'} onClose={() => setShowChangePlan(false)} onSubscriptionChange={onSubscriptionChange} />}
+                            </div>
+                        )}
+
+                        {subscribed && (
+                            <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl border-l-4 border-indigo-500">
+                                <h2 className="text-sm font-semibold text-gray-900 mb-1">Referral payouts (Stripe)</h2>
+                                <p className="text-xs text-gray-600 mb-3">Connect Stripe to receive referral commission withdrawals to your account.</p>
+                                {productionData.stripeConnectPayoutsEnabled ? (
+                                    <p className="text-sm text-green-700 font-medium">Stripe Connect enabled — you can withdraw from the Affiliate Dashboard.</p>
+                                ) : (
+                                    <div className="flex flex-wrap gap-2 items-center">
+                                        <button type="button" onClick={connectStripePayouts} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700">
+                                            Connect Stripe for payouts
+                                        </button>
+                                        <a href="https://stripe.com/connect" target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-700 underline hover:text-indigo-900">How Stripe Connect works</a>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Refer a Friend panel */}
+                        <div className="mt-4 bg-white rounded-xl card-shadow p-4 max-w-xl">
+                            <div className="flex items-start justify-between gap-4">
+                                <div>
+                                    <h2 className="text-sm font-semibold text-gray-900">Refer a Friend</h2>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                        Share your referral code to invite a friend. This is a placeholder and will be wired to live tracking later.
+                                    </p>
+                                    <p className="mt-3 text-xs text-gray-700">
+                                        Your code: <span className="font-mono font-semibold">LC-REF-CODE</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <LegalDisclaimer />
@@ -1299,7 +2657,7 @@
                     {/* Quick Actions */}
                     <div className="bg-white rounded-xl card-shadow p-6 mb-8">
                         <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-                        <div className="grid md:grid-cols-3 gap-4">
+                        <div className="grid md:grid-cols-4 gap-4">
                             <button onClick={() => onNavigate('assets')} className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left">
                                 <i data-lucide="plus" className="w-6 h-6 text-blue-900"></i>
                                 <div>
@@ -1321,6 +2679,42 @@
                                     <p className="text-sm text-gray-600">Confirm your status</p>
                                 </div>
                             </button>
+                            <button onClick={() => onNavigate('affiliate-dashboard')} className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition text-left">
+                                <i data-lucide="sparkles" className="w-6 h-6 text-green-700"></i>
+                                <div>
+                                    <p className="font-semibold text-gray-900">Refer &amp; Earn</p>
+                                    <p className="text-sm text-gray-600">Invite friends and track rewards</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Referrals & Rewards */}
+                    <div className="bg-white rounded-xl card-shadow p-6 mb-8">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-bold text-gray-900">Referrals &amp; Rewards</h2>
+                            <button onClick={() => onNavigate('affiliate-dashboard')} className="text-sm text-blue-900 font-semibold hover:underline">
+                                View program details
+                            </button>
+                        </div>
+                        <div className="grid md:grid-cols-4 gap-4">
+                            <div>
+                                <p className="text-xs text-gray-500 mb-1">Total referrals</p>
+                                <p className="text-2xl font-bold text-gray-900">{referralStats.total}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 mb-1">Active (paid accounts)</p>
+                                <p className="text-2xl font-bold text-gray-900">{referralStats.active}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 mb-1">Expected payout</p>
+                                <p className="text-2xl font-bold text-gray-900">${referralStats.expectedPayout.toFixed(2)}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 mb-1">Paid out</p>
+                                <p className="text-2xl font-bold text-gray-900">${referralStats.paidOut.toFixed(2)}</p>
+                                <p className="text-xs text-green-700 mt-1">Tier: {referralStats.tier}</p>
+                            </div>
                         </div>
                     </div>
 
@@ -1340,6 +2734,44 @@
                                 </div>
                             )}
                         </div>
+                    </div>
+                </div>
+            );
+        };
+
+
+        const CustomInputCategoryCard = ({ title, subtitle, addButtonLabel = 'Add custom entry' }) => {
+            const [label, setLabel] = useState('');
+            const [value, setValue] = useState('');
+            const [entries, setEntries] = useState([]);
+
+            const handleAdd = () => {
+                const cleanLabel = label.trim();
+                const cleanValue = value.trim();
+                if (!cleanLabel || !cleanValue) return;
+                setEntries((prev) => [...prev, { id: `${Date.now()}-${Math.random()}`, label: cleanLabel, value: cleanValue }]);
+                setLabel('');
+                setValue('');
+            };
+
+            return (
+                <div className="bg-white rounded-xl card-shadow p-6 mt-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">{title}</h3>
+                    <p className="text-sm text-gray-600 mb-4">{subtitle}</p>
+                    <div className="grid md:grid-cols-2 gap-3 mb-3">
+                        <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Custom label / category name" className="px-3 py-2 border border-gray-300 rounded-lg" />
+                        <input value={value} onChange={(e) => setValue(e.target.value)} placeholder="Custom details / value" className="px-3 py-2 border border-gray-300 rounded-lg" />
+                    </div>
+                    <button type="button" onClick={handleAdd} className="bg-blue-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-800 transition">{addButtonLabel}</button>
+                    <div className="mt-4 space-y-2">
+                        {entries.length === 0 ? (
+                            <p className="text-sm text-gray-500">No custom entries yet.</p>
+                        ) : entries.map((entry) => (
+                            <div key={entry.id} className="border border-gray-200 rounded-lg p-3">
+                                <p className="text-sm font-semibold text-gray-900">{entry.label}</p>
+                                <p className="text-sm text-gray-700">{entry.value}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             );
@@ -1431,6 +2863,8 @@
                             </div>
                         ))}
                     </div>
+
+                    <CustomInputCategoryCard title="Add custom asset category" subtitle="Create additional asset or liability categories and label them your way." addButtonLabel="Add custom asset category" />
                 </div>
             );
         };
@@ -1517,6 +2951,8 @@
                             ))}
                         </div>
                     </div>
+
+                    <CustomInputCategoryCard title="Add custom legal document category" subtitle="Add more legal document types and labels for your situation." addButtonLabel="Add custom legal document type" />
                 </div>
             );
         };
@@ -1596,6 +3032,8 @@
                             ))}
                         </div>
                     </div>
+
+                    <CustomInputCategoryCard title="Add custom trusted person role" subtitle="Create additional trusted roles and labels beyond the default options." addButtonLabel="Add custom trusted role" />
                 </div>
             );
         };
@@ -1683,6 +3121,8 @@
                             ))}
                         </div>
                     </div>
+
+                    <CustomInputCategoryCard title="Add custom digital life category" subtitle="Define and label additional digital platforms or accounts." addButtonLabel="Add custom digital category" />
                 </div>
             );
         };
@@ -1903,6 +3343,8 @@
                             <p className={`leading-relaxed ${!planner.funeral ? 'text-gray-400' : 'text-gray-900'}`}>{place(planner.funeral)}</p>
                         </div>
                     </div>
+
+                    <CustomInputCategoryCard title="Add custom estate planner input" subtitle="Create additional planner sections, labels, and notes for special situations." addButtonLabel="Add custom planner field" />
                 </div>
             );
         };
@@ -2310,9 +3752,15 @@
         // App Layout with Sidebar
         const AppLayout = ({ children, currentPage, onNavigate, country, setCountry, language, setLanguage, t }) => {
             const [sidebarOpen, setSidebarOpen] = useState(false);
+            useEffect(() => {
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
+            }, [sidebarOpen]);
 
             const navigation = [
                 { id: 'dashboard', name: 'Dashboard', icon: 'layout-dashboard' },
+                { id: 'pricing', name: 'Pricing', icon: 'tag' },
+                { id: 'generate-will', name: 'Generate Will?', icon: 'file-signature' },
+                { id: 'affiliate-dashboard', name: 'Affiliate', icon: 'gift' },
                 { id: 'estate-planner', name: 'Estate Planner', icon: 'file-edit' },
                 { id: 'legal', name: 'Legal Documents', icon: 'file-text' },
                 { id: 'assets', name: 'Assets & Liabilities', icon: 'building' },
@@ -2326,8 +3774,11 @@
 
             return (
                 <div className="min-h-screen bg-gray-50 flex">
+                    {sidebarOpen && (
+                        <div className="fixed inset-0 bg-black/40 z-30 md:hidden" onClick={() => setSidebarOpen(false)} aria-hidden="true" />
+                    )}
                     {/* Sidebar */}
-                    <div className={`${sidebarOpen ? 'block' : 'hidden'} md:block w-64 bg-white border-r fixed md:static h-full z-20 overflow-y-auto`}>
+                    <div className={`${sidebarOpen ? 'block' : 'hidden'} md:block w-64 bg-white border-r fixed inset-y-0 left-0 md:inset-auto md:static z-40 h-screen md:h-full min-h-0 overflow-y-auto`}>
                         <div className="p-6 border-b">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
@@ -2365,9 +3816,9 @@
                     {/* Main Content */}
                     <div className="flex-1 overflow-auto">
                         {/* Top Bar */}
-                        <div className="bg-white border-b p-4 flex items-center justify-between sticky top-0 z-10">
+                        <div className="bg-white border-b p-4 flex items-center justify-between sticky top-0 z-50">
                             <div className="flex items-center gap-3">
-                                <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden">
+                                <button type="button" aria-label={sidebarOpen ? 'Close menu' : 'Open menu'} onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-2 -ml-2 text-gray-800">
                                     <i data-lucide={sidebarOpen ? 'x' : 'menu'} className="w-6 h-6"></i>
                                 </button>
                                 <div className="flex items-center gap-2">
@@ -2397,11 +3848,14 @@
                                         <button onClick={() => onNavigate('privacy-policy')} className="text-gray-300 hover:text-white transition">Privacy Policy</button>
                                         <button onClick={() => onNavigate('terms-of-service')} className="text-gray-300 hover:text-white transition">Terms</button>
                                         <button onClick={() => onNavigate('legal-disclaimer')} className="text-gray-300 hover:text-white transition">Disclaimer</button>
-                                        <button onClick={() => onNavigate('help-center')} className="text-gray-300 hover:text-white transition">Help Center</button>
-                                        <button onClick={() => onNavigate('contact-us')} className="text-gray-300 hover:text-white transition">Contact</button>
-                                        <button onClick={() => onNavigate('faq')} className="text-gray-300 hover:text-white transition">FAQ</button>
-                                        <a href="./LCP%20-%20Production.html" className="text-gray-300 hover:text-white transition">Production</a>
-                                        <button onClick={() => onNavigate('affiliate-program')} className="text-gray-300 hover:text-white transition">Affiliate Program</button>
+                                        <button onClick={() => onNavigate('price-package-explained')} className="text-gray-300 hover:text-white transition">Price Package Explained</button>
+                                        <button onClick={() => onNavigate('faq')} className="text-gray-300 hover:text-white transition">Interactive FAQ</button>
+                                        <button onClick={() => onNavigate('help-center')} className="text-gray-300 hover:text-white transition">AI Support</button>
+                                        <a href="tel:4003833707" className="text-gray-300 hover:text-white transition">Live Agent: 400 383 3707</a>
+                                        <button onClick={() => onNavigate('contact-us')} className="text-gray-300 hover:text-white transition">Live Agent Contact Form</button>
+                                        <button onClick={() => onNavigate('plan-checklist')} className="text-gray-300 hover:text-white transition">Interactive Plan Checklist</button>
+                                        <a href="./LCP%20-%20Production%20Demo.html" className="text-gray-300 hover:text-white transition">Demo</a>
+                                        <button onClick={() => onNavigate('affiliate-program')} className="text-[#015DE7] hover:text-white transition">Affiliate Program</button>
                                     </div>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-4">
@@ -2419,8 +3873,17 @@
             const [currentPage, setCurrentPage] = useState('home');
             const [isAuthenticated, setIsAuthenticated] = useState(false);
             const [userDisplayName, setUserDisplayName] = useState('');
+            const [subVersion, setSubVersion] = useState(0);
             const [country, setCountry] = useState(() => typeof localStorage !== 'undefined' ? (localStorage.getItem('lv_country') || 'US') : 'US');
             const [language, setLanguage] = useState(() => typeof localStorage !== 'undefined' ? (localStorage.getItem('lv_language') || 'en') : 'en');
+
+            const handleRestoreSubscription = () => {
+                productionData.subscription.status = 'active';
+                productionData.subscription.cancelledAt = null;
+                productionData.subscription.gracePeriodEndsAt = null;
+                setSubVersion(v => v + 1);
+            };
+            const handleSubscriptionChange = () => { setSubVersion(v => v + 1); };
 
             useEffect(() => { try { localStorage.setItem('lv_country', country); } catch (e) {} }, [country]);
             useEffect(() => { try { localStorage.setItem('lv_language', language); } catch (e) {} }, [language]);
@@ -2484,8 +3947,8 @@
                 if (currentPage === 'legal-disclaimer') {
                     return <LegalDisclaimerPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
-                if (currentPage === 'support') {
-                    return <SupportPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                if (currentPage === 'price-package-explained') {
+                    return <PricePackageExplainedPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
                 if (currentPage === 'help-center') {
                     return <HelpCenterPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
@@ -2496,36 +3959,66 @@
                 if (currentPage === 'faq') {
                     return <FAQPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
-                if (currentPage === 'security-architecture') {
-                    return <SecurityArchitecturePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                if (currentPage === 'plan-checklist') {
+                    return <PlanChecklistPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                }
+                if (currentPage === 'generate-will') {
+                    return <GenerateWillPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} isAuthenticated={false} />;
                 }
                 if (currentPage === 'affiliate-program') {
                     return <AffiliateProgramPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
+                // Guest: rules only. Logged-in: dashboard is handled in renderPage (authenticated).
+                if (currentPage === 'security-architecture') {
+                    return <SecurityArchitecturePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                }
                 return <HomePage onNavigate={handleNavigate} onGetStarted={handleGetStarted} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
             }
 
-            // Authenticated app pages
+            // Authenticated app pages - check subscription access
+            const sub = productionData.subscription;
+            if (sub && sub.status === 'permanently_disabled') {
+                return <PermanentlyDisabledScreen onNavigate={handleNavigate} />;
+            }
+            if (sub && sub.status === 'cancelled') {
+                return <AccessRevokedScreen onNavigate={handleNavigate} onRestore={handleRestoreSubscription} />;
+            }
+
+            const gatePage = (pageId, PageComponent, props = {}) => {
+                if (!hasActiveSubscription()) {
+                    return <SubscribeRequiredScreen onNavigate={handleNavigate} onSubscribed={() => { setCurrentPage('dashboard'); handleSubscriptionChange(); }} />;
+                }
+                if (!canAccessFeature(pageId)) {
+                    const required = FEATURE_PLANS[pageId] || 'Basic';
+                    const name = FEATURE_NAMES[pageId] || pageId;
+                    return <UpgradePromptPage featureName={name} requiredPlan={required} onNavigate={handleNavigate} />;
+                }
+                return <PageComponent {...props} />;
+            };
             const renderPage = () => {
                 switch (currentPage) {
                     case 'dashboard':
-                        return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} />;
+                        return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} onSubscriptionChange={handleSubscriptionChange} />;
+                    case 'pricing':
+                        return <PricingPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} embeddedInApp={true} onChoosePlanSubscribe={(planName) => { productionData.subscription.pendingCheckoutPlan = planName; setCurrentPage('subscribe-checkout'); }} />;
+                    case 'subscribe-checkout':
+                        return <SubscribeRequiredScreen onNavigate={handleNavigate} onSubscribed={() => { setCurrentPage('dashboard'); handleSubscriptionChange(); }} />;
                     case 'assets':
-                        return <AssetsPage />;
+                        return gatePage('assets', AssetsPage);
                     case 'legal':
-                        return <LegalDocumentsPage />;
+                        return gatePage('legal', LegalDocumentsPage);
                     case 'trusted':
-                        return <TrustedPeoplePage />;
+                        return gatePage('trusted', TrustedPeoplePage);
                     case 'digital':
-                        return <DigitalLifePage />;
+                        return gatePage('digital', DigitalLifePage);
                     case 'activity':
-                        return <ActivityPage />;
+                        return gatePage('activity', ActivityPage);
                     case 'estate-planner':
-                        return <EstatePlannerPage />;
+                        return gatePage('estate-planner', EstatePlannerPage);
                     case 'triggers':
-                        return <TriggersPage />;
+                        return gatePage('triggers', TriggersPage);
                     case 'disclosure-preview':
-                        return <DisclosurePreviewPage />;
+                        return gatePage('disclosure-preview', DisclosurePreviewPage);
                     case 'security-architecture':
                         return <SecurityArchitecturePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} embedded />;
                     case 'privacy-policy':
@@ -2534,15 +4027,22 @@
                         return <TermsOfServicePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'legal-disclaimer':
                         return <LegalDisclaimerPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
-                    case 'support':
-                        return <SupportPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    case 'price-package-explained':
+                        return <PricePackageExplainedPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'help-center':
                         return <HelpCenterPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'contact-us':
                         return <ContactUsPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'faq':
                         return <FAQPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    case 'plan-checklist':
+                        return <PlanChecklistPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    case 'generate-will':
+                        return gatePage('generate-will', GenerateWillPage, { onNavigate: handleNavigate, country, setCountry, language, setLanguage, t: tLang, isAuthenticated: true });
+                    case 'affiliate-dashboard':
+                        return gatePage('affiliate-dashboard', AffiliateDashboardPage, { onNavigate: handleNavigate, isDemo: false, showRules: false });
                     case 'affiliate-program':
+                        // Authenticated view of rules page
                         return <AffiliateProgramPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     default:
                         return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} />;

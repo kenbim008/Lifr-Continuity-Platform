@@ -339,7 +339,18 @@ Public app continues to use subscriber-scoped Supabase client + RLS.
 | Support Agent | https://admin.legacyvault.app/support |
 | Login (all) | https://admin.legacyvault.app/login |
 
-Until the admin app is deployed, add DNS + Vercel domain when ready. The public site stays at **https://lifr-continuity-platform.vercel.app**.
+**Working demo backend (static prototype on Vercel):**
+
+| URL | Purpose |
+|-----|---------|
+| https://lifr-continuity-platform.vercel.app/admin | Admin login |
+| https://lifr-continuity-platform.vercel.app/admin/super | Super Admin dashboard |
+| https://lifr-continuity-platform.vercel.app/admin/operations | Operations dashboard |
+| https://lifr-continuity-platform.vercel.app/admin/support | Support dashboard |
+
+Demo sign-in: `super@legacyvault.demo` / `ops@legacyvault.demo` / `support@legacyvault.demo` — password **`demo123`** for all.
+
+Production admin (future): `https://admin.legacyvault.app`. Public site: **https://lifr-continuity-platform.vercel.app**.
 
 ---
 

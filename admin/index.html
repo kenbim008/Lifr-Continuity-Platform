@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LegacyVault Admin Portal (Demo)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100">
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const DEMO_USERS = [
+            { email: 'super@legacyvault.demo', password: 'demo123', role: 'super_admin', label: 'Super Admin', home: 'super' },
+            { email: 'ops@legacyvault.demo', password: 'demo123', role: 'operations_admin', label: 'Operations Admin', home: 'operations' },
+            { email: 'support@legacyvault.demo', password: 'demo123', role: 'support_agent', label: 'Support Agent', home: 'support' },
+        ];
+
+        const ROLE_RANK = { support_agent: 1, operations_admin: 2, super_admin: 3 };
+
+        const canAccess = (userRole, requiredMin) => {
+            const need = { super: 3, operations: 2, support: 1 };
+            const map = { super_admin: 3, operations_admin: 2, support_agent: 1 };
+            return (map[userRole] || 0) >= (need[requiredMin] || 0);
+        };
+
+        const parseRoute = () => {
+            const parts = (window.location.pathname || '').replace(/\/$/, '').split('/').filter(Boolean);
+            const adminIdx = parts.indexOf('admin');
+            const page = adminIdx >= 0 && parts[adminIdx + 1] ? parts[adminIdx + 1] : 'login';
+            return { page };
+        };
+
+        const setPath = (page) => {
+            const next = page === 'login' ? '/admin' : `/admin/${page}`;
+            if (window.location.pathname !== next) {
+                window.history.pushState({}, '', next);
+            }
+        };
+
+        const Stat = ({ label, value, sub }) => (
+            <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <p className="text-xs text-slate-500 uppercase tracking-wide">{label}</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">{value}</p>
+                {sub && <p className="text-xs text-slate-500 mt-1">{sub}</p>}
+            </div>
+        );
+
+        const LoginPage = ({ onLogin, error }) => {
+            const [email, setEmail] = useState('super@legacyvault.demo');
+            const [password, setPassword] = useState('demo123');
+            return (
+                <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 to-blue-900">
+                    <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-12 h-12 bg-blue-900 rounded-xl flex items-center justify-center">
+                                <i data-lucide="shield" className="w-7 h-7 text-white"></i>
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-bold text-slate-900">LegacyVault Admin</h1>
+                                <p className="text-sm text-slate-500">Demo backend portal</p>
+                            </div>
+                        </div>
+                        {error && <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-800 text-sm">{error}</div>}
+                        <form onSubmit={(e) => { e.preventDefault(); onLogin(email.trim(), password); }} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg" required />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg" required />
+                            </div>
+                            <button type="submit" className="w-full bg-blue-900 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-800">Sign in</button>
+                        </form>
+                        <div className="mt-6 p-4 bg-blue-50 rounded-lg text-sm text-blue-900">
+                            <p className="font-semibold mb-2">Demo accounts (password: demo123)</p>
+                            <ul className="space-y-1 text-xs">
+                                {DEMO_USERS.map((u) => (
+                                    <li key={u.email}><button type="button" className="underline hover:no-underline" onClick={() => { setEmail(u.email); setPassword(u.password); }}>{u.email}</button> — {u.label}</li>
+                                ))}
+                            </ul>
+                        </div>
+                        <p className="mt-4 text-center text-xs text-slate-500">
+                            <a href="../LCP%20-%20Production.html" className="text-blue-900 hover:underline">← Back to public site</a>
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+
+        const Shell = ({ user, page, onNav, onLogout, children }) => {
+            const nav = [
+                { id: 'super', label: 'Super Admin', min: 'super', icon: 'crown' },
+                { id: 'operations', label: 'Operations', min: 'operations', icon: 'settings' },
+                { id: 'support', label: 'Support', min: 'support', icon: 'headphones' },
+            ];
+            return (
+                <div className="min-h-screen flex flex-col">
+                    <header className="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <i data-lucide="shield" className="w-6 h-6"></i>
+                            <span className="font-bold">LegacyVault Admin</span>
+                            <span className="text-xs bg-amber-500 text-slate-900 px-2 py-0.5 rounded-full font-semibold">DEMO</span>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                            <span className="text-slate-300">{user.label}</span>
+                            <button onClick={onLogout} className="text-slate-300 hover:text-white">Sign out</button>
+                        </div>
+                    </header>
+                    <div className="flex flex-1">
+                        <aside className="w-56 bg-white border-r border-slate-200 p-3 hidden md:block">
+                            {nav.map((item) => canAccess(user.role, item.min) ? (
+                                <button key={item.id} onClick={() => onNav(item.id)} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg mb-1 text-sm ${page === item.id ? 'bg-blue-50 text-blue-900 font-semibold' : 'text-slate-700 hover:bg-slate-50'}`}>
+                                    <i data-lucide={item.icon} className="w-4 h-4"></i>
+                                    {item.label}
+                                </button>
+                            ) : null)}
+                        </aside>
+                        <main className="flex-1 p-6 max-w-6xl mx-auto w-full">{children}</main>
+                    </div>
+                </div>
+            );
+        };
+
+        const SuperDashboard = () => (
+            <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-slate-900">Super Admin</h2>
+                <p className="text-slate-600 text-sm">Full platform control — billing, security, admin users, audit.</p>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Stat label="MRR" value="$12,480" sub="Demo data" />
+                    <Stat label="Active subs" value="642" />
+                    <Stat label="Admins" value="3" />
+                    <Stat label="Open audits" value="0" />
+                </div>
+                <div className="bg-white rounded-xl border p-4">
+                    <h3 className="font-semibold mb-2">Super-only actions</h3>
+                    <ul className="text-sm text-slate-600 list-disc list-inside space-y-1">
+                        <li>Manage Operations & Support admin accounts</li>
+                        <li>Stripe & plan configuration</li>
+                        <li>Full audit log & security settings</li>
+                    </ul>
+                </div>
+            </div>
+        );
+
+        const OperationsDashboard = () => (
+            <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-slate-900">Operations</h2>
+                <p className="text-slate-600 text-sm">Subscribers, billing, Will enquiries, affiliates.</p>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Stat label="Signups today" value="14" />
+                    <Stat label="Failed payments" value="3" />
+                    <Stat label="Will enquiries" value="7" />
+                    <Stat label="Refunds pending" value="1" />
+                </div>
+                <div className="bg-white rounded-xl border overflow-hidden">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-slate-50"><tr><th className="p-3">Subscriber</th><th className="p-3">Plan</th><th className="p-3">Status</th></tr></thead>
+                        <tbody>
+                            <tr className="border-t"><td className="p-3">john@email.com</td><td className="p-3">Premium</td><td className="p-3 text-green-700">Active</td></tr>
+                            <tr className="border-t"><td className="p-3">sarah@email.com</td><td className="p-3">Family</td><td className="p-3 text-green-700">Active</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+
+        const SupportDashboard = () => (
+            <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-slate-900">Support</h2>
+                <p className="text-slate-600 text-sm">Will guidance (400 383 3707), enquiries, bot escalations.</p>
+                <div className="grid sm:grid-cols-3 gap-4">
+                    <Stat label="My queue" value="4" />
+                    <Stat label="New today" value="2" />
+                    <Stat label="Contacted" value="12" />
+                </div>
+                <div className="space-y-3">
+                    {[
+                        { name: 'Alex M.', topic: 'Will creation enquiry', status: 'New' },
+                        { name: 'Pat K.', topic: 'Premium plan question', status: 'In progress' },
+                    ].map((t, i) => (
+                        <div key={i} className="bg-white rounded-xl border p-4 flex justify-between items-center">
+                            <div>
+                                <p className="font-semibold">{t.name}</p>
+                                <p className="text-sm text-slate-500">{t.topic}</p>
+                            </div>
+                            <span className="text-xs font-semibold px-2 py-1 bg-amber-100 text-amber-900 rounded">{t.status}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const Unauthorized = ({ user, onGoHome }) => (
+            <div className="min-h-screen flex items-center justify-center p-4">
+                <div className="text-center max-w-md">
+                    <i data-lucide="lock" className="w-12 h-12 text-amber-500 mx-auto mb-4"></i>
+                    <h2 className="text-xl font-bold mb-2">Access denied</h2>
+                    <p className="text-slate-600 text-sm mb-4">Your role ({user.label}) cannot open this section.</p>
+                    <button onClick={onGoHome} className="bg-blue-900 text-white px-4 py-2 rounded-lg">Go to my dashboard</button>
+                </div>
+            </div>
+        );
+
+        const App = () => {
+            const [user, setUser] = useState(() => {
+                try { return JSON.parse(sessionStorage.getItem('lv_admin_demo') || 'null'); } catch { return null; }
+            });
+            const [page, setPage] = useState(() => parseRoute().page);
+            const [loginError, setLoginError] = useState('');
+
+            useEffect(() => {
+                const onPop = () => setPage(parseRoute().page);
+                window.addEventListener('popstate', onPop);
+                return () => window.removeEventListener('popstate', onPop);
+            }, []);
+
+            useEffect(() => {
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
+            }, [page, user]);
+
+            const handleLogin = (email, password) => {
+                const found = DEMO_USERS.find((u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+                if (!found) {
+                    setLoginError('Invalid demo credentials. Use one of the accounts below with password demo123.');
+                    return;
+                }
+                setLoginError('');
+                setUser(found);
+                sessionStorage.setItem('lv_admin_demo', JSON.stringify(found));
+                setPath(found.home);
+                setPage(found.home);
+            };
+
+            const handleLogout = () => {
+                setUser(null);
+                sessionStorage.removeItem('lv_admin_demo');
+                setPath('login');
+                setPage('login');
+            };
+
+            const handleNav = (p) => {
+                if (!canAccess(user.role, p)) {
+                    setPath('unauthorized');
+                    setPage('unauthorized');
+                    return;
+                }
+                setPath(p);
+                setPage(p);
+            };
+
+            useEffect(() => {
+                if (!user) {
+                    if (page !== 'login') { setPath('login'); setPage('login'); }
+                    return;
+                }
+                if (page === 'login') {
+                    setPath(user.home);
+                    setPage(user.home);
+                    return;
+                }
+                if (page === 'unauthorized') return;
+                if (!canAccess(user.role, page)) {
+                    setPath('unauthorized');
+                    setPage('unauthorized');
+                }
+            }, [user, page]);
+
+            if (!user || page === 'login') {
+                return <LoginPage onLogin={handleLogin} error={loginError} />;
+            }
+
+            if (page === 'unauthorized') {
+                return <Unauthorized user={user} onGoHome={() => handleNav(user.home)} />;
+            }
+
+            let content = <SupportDashboard />;
+            if (page === 'super') content = <SuperDashboard />;
+            else if (page === 'operations') content = <OperationsDashboard />;
+            else if (page === 'support') content = <SupportDashboard />;
+
+            return (
+                <Shell user={user} page={page} onNav={handleNav} onLogout={handleLogout}>
+                    {content}
+                </Shell>
+            );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>

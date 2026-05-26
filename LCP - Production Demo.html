@@ -290,12 +290,12 @@
                                 <div>
                                     <h4 className="font-bold mb-4">Support</h4>
                                     <div className="space-y-2 text-gray-400 text-sm">
-                                        <button onClick={() => onNavigate('help-center')} className="block hover:text-white transition text-left w-full">Help Center</button>
+                                        <button onClick={() => onNavigate('help-center')} className="flex items-center gap-2 hover:text-white transition text-left w-full">
+                                            <i data-lucide="headphones" className="w-4 h-4 flex-shrink-0"></i>
+                                            <span>Customer Support</span>
+                                        </button>
                                         <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
                                         <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">Interactive FAQ</button>
-                                        <button onClick={() => onNavigate('help-center')} className="block hover:text-white transition text-left w-full">AI Support</button>
-                                        <a href="tel:4003833707" className="block hover:text-white transition text-left w-full">Live Agent: 400 383 3707</a>
-                                        <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Live Agent Contact Form</button>
                                         <button onClick={() => onNavigate('plan-checklist')} className="block hover:text-white transition text-left w-full">Interactive Plan Checklist</button>
                                         <a href="./LCP%20-%20Production%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
                                         <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
@@ -509,10 +509,11 @@
                                 <button key={topic.id} onClick={() => setActiveTopic(topic.id)} className={`px-3 py-1.5 rounded-full text-sm ${activeTopic === topic.id ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{topic.label}</button>
                             ))}
                         </div>
-                        <div className="rounded-xl border border-gray-200 p-4 flex flex-wrap gap-3">
-                            <button onClick={() => props.onNavigate('help-center')} className="text-sm font-semibold text-blue-900 hover:underline">AI Support</button>
-                            <a href="tel:4003833707" className="text-sm font-semibold text-blue-900 hover:underline">Live Agent: 400 383 3707</a>
-                            <button onClick={() => props.onNavigate('contact-us')} className="text-sm font-semibold text-blue-900 hover:underline">Contact form</button>
+                        <div className="rounded-xl border border-gray-200 p-4 flex flex-wrap gap-3 items-center">
+                            <button onClick={() => props.onNavigate('help-center')} className="inline-flex items-center gap-2 text-sm font-semibold text-blue-900 hover:underline">
+                                <i data-lucide="headphones" className="w-4 h-4"></i>
+                                Customer Support
+                            </button>
                         </div>
                         {faqs.filter((f) => activeTopic === 'all' || !f.topic || f.topic === activeTopic).map((f, idx) => (
                             <details key={idx} className="border border-gray-200 rounded-lg p-4">
@@ -581,24 +582,57 @@
             );
         };
 
-        const HelpCenterPage = (props) => {
-            const [messages, setMessages] = useState([{ from: 'bot', text: "Hi—I'm the LegacyVault virtual assistant. What do you need help with?" }]);
+        const getSupportBotReply = (question, onNavigate) => {
+            const q = question.toLowerCase();
+            if (/will|testament|executor|beneficiar|codicil/.test(q)) {
+                return 'Will planning is personal — one Will does not fit every situation. Use Generate Will? for a guided draft (not legal advice). For personalized guidance call 400 383 3707 or submit a Will creation enquiry on Contact Us.';
+            }
+            if (/price|plan|premium|family|basic|subscription|cost|\$|billing/.test(q)) {
+                return 'Plans: Basic $9/mo, Premium $19/mo, Family $29/mo (annual discounts available). Premium & Family include discounted Will generation pricing. Last Wish videos: optional $6.99 per video, max 5 minutes each — add at checkout or anytime after subscribing.';
+            }
+            if (/last wish|video|instruction/.test(q)) {
+                return 'Premium and Family subscribers can add instruction / Last Wish videos for $6.99 per video (each up to 5 minutes). Add them during subscription or any day after from your account.';
+            }
+            if (/password|login|sign in|mfa|account/.test(q)) {
+                return 'For sign-in issues, verify your email and password, and check your MFA device. Reset credentials from the login page or use Contact Us if you are locked out.';
+            }
+            if (/trigger|disclosure|check-in|inactive/.test(q)) {
+                return 'Disclosure is conditional — never automatic. Set check-in schedules in Activity Monitoring, configure triggers in Trigger Management, and review Disclosure Preview before anything is released.';
+            }
+            if (/security|encrypt|privacy|gdpr|pipeda/.test(q)) {
+                return 'We use TLS in transit and a vault model aligned with SOC 2, ISO 27001, GDPR, and PIPEDA practices. Open Security & Compliance for the full architecture.';
+            }
+            if (/asset|document|upload|legal/.test(q)) {
+                return 'Start by adding assets under Assets & Liabilities, uploading documents under Legal Documents, and inviting trusted people with the right roles. Use Estate Planner for guided inputs.';
+            }
+            if (/cancel|refund|upgrade|downgrade/.test(q)) {
+                return 'You can change plans from your dashboard. Subscriptions include a 1st month free trial when you subscribe with a card on file. See Pricing for plan details.';
+            }
+            if (/hello|hi|hey|help/.test(q)) {
+                return 'Hello! Ask me about setup, pricing, Wills, triggers, security, or your subscription. I respond instantly to common questions.';
+            }
+            return 'I can help with setup, plans, Wills, triggers, security, and billing. Try asking about a specific topic, or browse Interactive FAQ for more answers.';
+        };
+
+        const HelpCenterPage = ({ embeddedInApp, onNavigate, ...shellProps }) => {
+            const [messages, setMessages] = useState([{ from: 'bot', text: "Hi! I'm your LegacyVault Customer Support assistant. Ask me anything — I respond live to your questions." }]);
             const [input, setInput] = useState('');
+            const chatEndRef = React.useRef(null);
+
+            useEffect(() => {
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
+            }, [messages]);
+
+            useEffect(() => {
+                if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+            }, [messages]);
 
             const add = (msg) => setMessages((m) => [...m, msg]);
+            const reply = (text) => add({ from: 'bot', text: getSupportBotReply(text, onNavigate) });
+
             const handleIntent = (intent) => {
                 add({ from: 'user', text: intent });
-                if (intent === 'Getting started') {
-                    add({ from: 'bot', text: 'Start with: (1) Add assets, (2) Upload legal documents, (3) Add trusted people, (4) Configure activity monitoring. Then review Trigger Management and Disclosure Preview.' });
-                } else if (intent === 'Security & encryption') {
-                    add({ from: 'bot', text: 'We use encryption in transit (TLS) and a vault model designed for client-side encryption. For the full blueprint, open Security & Compliance.' });
-                } else if (intent === 'Account & login') {
-                    add({ from: 'bot', text: 'If you cannot sign in, confirm your email/password and MFA device. Use Contact Us for account recovery assistance.' });
-                } else if (intent === 'Disclosure triggers') {
-                    add({ from: 'bot', text: 'Disclosure is conditional. Configure check-ins and triggers, then define recipients and access rules. Disclosure is never automatic without safeguards.' });
-                } else {
-                    add({ from: 'bot', text: 'I can help with setup, account questions, triggers, and security. You can also use Contact Us to reach a human.' });
-                }
+                reply(intent);
             };
 
             const handleSend = (e) => {
@@ -607,54 +641,68 @@
                 if (!text) return;
                 setInput('');
                 add({ from: 'user', text });
-                add({ from: 'bot', text: 'Thanks—this virtual help center provides self-serve guidance. For human support, please use Contact Us.' });
+                reply(text);
             };
 
-            return (
-                <PublicPageShell {...props} title="Help Center" subtitle="Virtual assistant + self-serve support.">
-                    <div className="space-y-6">
-                        <div className="grid md:grid-cols-2 gap-3">
-                            {['Getting started', 'Account & login', 'Disclosure triggers', 'Security & encryption'].map((label) => (
-                                <button key={label} onClick={() => handleIntent(label)} className="border border-gray-200 rounded-lg p-3 text-left hover:bg-gray-50 transition">
-                                    <span className="font-semibold text-gray-900">{label}</span>
-                                    <p className="text-xs text-gray-600 mt-1">Tap to get guided steps</p>
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="border border-gray-200 rounded-xl overflow-hidden">
-                            <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <i data-lucide="bot" className="w-5 h-5 text-blue-900"></i>
-                                    <span className="font-semibold text-gray-900">Virtual Help Center</span>
-                                </div>
-                                <button onClick={() => props.onNavigate('contact-us')} className="text-sm text-blue-900 font-semibold hover:underline">
-                                    Contact Us
-                                </button>
-                            </div>
-                            <div className="p-4 space-y-3 max-h-[360px] overflow-auto bg-white">
-                                {messages.map((m, idx) => (
-                                    <div key={idx} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                        <div className={`${m.from === 'user' ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-900'} rounded-2xl px-4 py-2 max-w-[80%] text-sm`}>
-                                            {m.text}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            <form onSubmit={handleSend} className="p-3 border-t border-gray-200 bg-white flex gap-2">
-                                <input value={input} onChange={(e) => setInput(e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Type a question…" />
-                                <button className="bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 transition" type="submit">Send</button>
-                            </form>
-                        </div>
-
-                        <div className="text-sm text-gray-600">
-                            For detailed security questions, see{' '}
-                            <button onClick={() => props.onNavigate('security-architecture')} className="text-blue-900 font-semibold hover:underline">
-                                Security &amp; Compliance
+            const chatPanel = (
+                <div className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-3">
+                        {['Getting started', 'Account & login', 'Disclosure triggers', 'Security & encryption'].map((label) => (
+                            <button key={label} type="button" onClick={() => handleIntent(label)} className="border border-gray-200 rounded-lg p-3 text-left hover:bg-gray-50 transition">
+                                <span className="font-semibold text-gray-900">{label}</span>
+                                <p className="text-xs text-gray-600 mt-1">Quick topic</p>
                             </button>
-                            .
-                        </div>
+                        ))}
                     </div>
+
+                    <div className="border border-gray-200 rounded-xl overflow-hidden">
+                        <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center gap-2">
+                            <span className="relative flex h-2.5 w-2.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                            </span>
+                            <i data-lucide="bot" className="w-5 h-5 text-blue-900"></i>
+                            <span className="font-semibold text-gray-900">Customer Support</span>
+                            <span className="text-xs text-gray-500 ml-auto">Live</span>
+                        </div>
+                        <div className="p-4 space-y-3 max-h-[420px] overflow-auto bg-white">
+                            {messages.map((m, idx) => (
+                                <div key={idx} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`${m.from === 'user' ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-900'} rounded-2xl px-4 py-2 max-w-[85%] text-sm`}>
+                                        {m.text}
+                                    </div>
+                                </div>
+                            ))}
+                            <div ref={chatEndRef} />
+                        </div>
+                        <form onSubmit={handleSend} className="p-3 border-t border-gray-200 bg-white flex gap-2">
+                            <input value={input} onChange={(e) => setInput(e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ask a question…" aria-label="Your question" />
+                            <button className="bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 transition" type="submit">Send</button>
+                        </form>
+                    </div>
+
+                    <p className="text-sm text-gray-600">
+                        For detailed security information, see{' '}
+                        <button type="button" onClick={() => onNavigate('security-architecture')} className="text-blue-900 font-semibold hover:underline">Security &amp; Compliance</button>.
+                    </p>
+                </div>
+            );
+
+            if (embeddedInApp) {
+                return (
+                    <div>
+                        <div className="mb-8">
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Customer Support</h1>
+                            <p className="text-gray-600">Chat live with our support bot — type your question below.</p>
+                        </div>
+                        {chatPanel}
+                    </div>
+                );
+            }
+
+            return (
+                <PublicPageShell {...shellProps} onNavigate={onNavigate} title="Customer Support" subtitle="Chat live with our support bot.">
+                    {chatPanel}
                 </PublicPageShell>
             );
         };
@@ -1313,12 +1361,12 @@
                                 <div>
                                     <h4 className="font-bold mb-4">Support</h4>
                                     <div className="space-y-2 text-gray-400 text-sm">
-                                        <button onClick={() => onNavigate('help-center')} className="block hover:text-white transition text-left w-full">Help Center</button>
+                                        <button onClick={() => onNavigate('help-center')} className="flex items-center gap-2 hover:text-white transition text-left w-full">
+                                            <i data-lucide="headphones" className="w-4 h-4 flex-shrink-0"></i>
+                                            <span>Customer Support</span>
+                                        </button>
                                         <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
                                         <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">Interactive FAQ</button>
-                                        <button onClick={() => onNavigate('help-center')} className="block hover:text-white transition text-left w-full">AI Support</button>
-                                        <a href="tel:4003833707" className="block hover:text-white transition text-left w-full">Live Agent: 400 383 3707</a>
-                                        <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Live Agent Contact Form</button>
                                         <button onClick={() => onNavigate('plan-checklist')} className="block hover:text-white transition text-left w-full">Interactive Plan Checklist</button>
                                         <a href="./LCP%20-%20Production%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
                                         <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
@@ -1996,12 +2044,12 @@
                                 <div>
                                     <h4 className="font-bold mb-4">Support</h4>
                                     <div className="space-y-2 text-gray-400 text-sm">
-                                        <button onClick={() => onNavigate('help-center')} className="block hover:text-white transition text-left w-full">Help Center</button>
+                                        <button onClick={() => onNavigate('help-center')} className="flex items-center gap-2 hover:text-white transition text-left w-full">
+                                            <i data-lucide="headphones" className="w-4 h-4 flex-shrink-0"></i>
+                                            <span>Customer Support</span>
+                                        </button>
                                         <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
                                         <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">Interactive FAQ</button>
-                                        <button onClick={() => onNavigate('help-center')} className="block hover:text-white transition text-left w-full">AI Support</button>
-                                        <a href="tel:4003833707" className="block hover:text-white transition text-left w-full">Live Agent: 400 383 3707</a>
-                                        <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Live Agent Contact Form</button>
                                         <button onClick={() => onNavigate('plan-checklist')} className="block hover:text-white transition text-left w-full">Interactive Plan Checklist</button>
                                         <a href="./LCP%20-%20Production%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
                                         <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
@@ -3850,9 +3898,10 @@
                                         <button onClick={() => onNavigate('legal-disclaimer')} className="text-gray-300 hover:text-white transition">Disclaimer</button>
                                         <button onClick={() => onNavigate('price-package-explained')} className="text-gray-300 hover:text-white transition">Price Package Explained</button>
                                         <button onClick={() => onNavigate('faq')} className="text-gray-300 hover:text-white transition">Interactive FAQ</button>
-                                        <button onClick={() => onNavigate('help-center')} className="text-gray-300 hover:text-white transition">AI Support</button>
-                                        <a href="tel:4003833707" className="text-gray-300 hover:text-white transition">Live Agent: 400 383 3707</a>
-                                        <button onClick={() => onNavigate('contact-us')} className="text-gray-300 hover:text-white transition">Live Agent Contact Form</button>
+                                        <button onClick={() => onNavigate('help-center')} className="inline-flex items-center gap-1.5 text-gray-300 hover:text-white transition">
+                                            <i data-lucide="headphones" className="w-4 h-4"></i>
+                                            Customer Support
+                                        </button>
                                         <button onClick={() => onNavigate('plan-checklist')} className="text-gray-300 hover:text-white transition">Interactive Plan Checklist</button>
                                         <a href="./LCP%20-%20Production%20Demo.html" className="text-gray-300 hover:text-white transition">Demo</a>
                                         <button onClick={() => onNavigate('affiliate-program')} className="text-[#015DE7] hover:text-white transition">Affiliate Program</button>
@@ -4030,7 +4079,7 @@
                     case 'price-package-explained':
                         return <PricePackageExplainedPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'help-center':
-                        return <HelpCenterPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <HelpCenterPage embeddedInApp onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'contact-us':
                         return <ContactUsPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'faq':

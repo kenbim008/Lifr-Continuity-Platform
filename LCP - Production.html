@@ -170,6 +170,20 @@
             </div>
         );
 
+
+        const IS_DEMO_APP = false;
+        const PRODUCTION_APP_URL = '/';
+
+        const DemoModeBanner = () => (
+            IS_DEMO_APP ? (
+                <div className="bg-[#015DE7] text-white px-4 py-2.5 text-center text-sm z-[100] border-b border-blue-800">
+                    <span className="font-semibold">Demo app</span>
+                    <span className="mx-2 opacity-90 hidden sm:inline">— pre-populated sample data for exploration only. Not the live production site.</span>
+                    <a href={PRODUCTION_APP_URL} className="ml-2 underline font-semibold hover:text-blue-100 whitespace-nowrap">Production site →</a>
+                </div>
+            ) : null
+        );
+
         const BRAND_LEGACY_COLOR = '#214398';
         const BRAND_VAULT_COLOR = '#D97706';
         const BrandWordmark = ({ className = '' }) => (
@@ -221,7 +235,7 @@
                                 <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
                                 <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">Interactive FAQ</button>
                                 <button onClick={() => onNavigate('plan-checklist')} className="block hover:text-white transition text-left w-full">Interactive Plan Checklist</button>
-                                <a href="./LCP%20-%20Production%20Demo.html" className="block text-[#015DE7] hover:text-blue-300 transition">Demo (with sample data)</a>
+                                <a href="/demo" className="block text-[#015DE7] hover:text-blue-300 transition">Demo (with sample data)</a>
                                 <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
                             </div>
                         </div>
@@ -825,6 +839,103 @@
                                 </tbody>
                             </table>
                         </div>
+                    </section>
+
+
+                    <section>
+                        <h2 className="text-lg font-bold text-gray-900 mb-2">3-Year Revenue Generation Plan (Professional Affiliate)</h2>
+                        <p className="mb-3">
+                            Illustrative projection for a committed affiliate promoting LegacyVault. Assumes a blended average plan of $18/month,
+                            30% recurring commission in Year 1 (Bronze), 35% in Year 2 (Silver), and 40% in Year 3 (Gold), with each referred
+                            subscriber paying commission for up to 12 months. Actual results depend on audience, conversion, and retention.
+                        </p>
+                        <div className="overflow-x-auto mb-4">
+                            <table className="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr className="border-b-2 border-gray-200">
+                                        <th className="py-2 px-3 font-bold text-gray-900">Year</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Focus</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">New paying referrals</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Active at year-end</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Avg. commission rate</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Est. annual commission</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr className="border-b border-gray-100 bg-blue-50/50">
+                                        <td className="py-2 px-3 font-semibold">Year 1</td>
+                                        <td className="py-2 px-3">Foundation — workshops, email list, 2–6 referrals/month ramp</td>
+                                        <td className="py-2 px-3">36</td>
+                                        <td className="py-2 px-3">24</td>
+                                        <td className="py-2 px-3">30% (Bronze)</td>
+                                        <td className="py-2 px-3 font-semibold text-green-800">~$1,550</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-100 bg-blue-50/30">
+                                        <td className="py-2 px-3 font-semibold">Year 2</td>
+                                        <td className="py-2 px-3">Scale — content, partnerships, 6–10 referrals/month</td>
+                                        <td className="py-2 px-3">84</td>
+                                        <td className="py-2 px-3">72</td>
+                                        <td className="py-2 px-3">35% (Silver)</td>
+                                        <td className="py-2 px-3 font-semibold text-green-800">~$5,540</td>
+                                    </tr>
+                                    <tr className="bg-blue-50/20">
+                                        <td className="py-2 px-3 font-semibold">Year 3</td>
+                                        <td className="py-2 px-3">Authority — speaking, institutional referrals, 10–15/month</td>
+                                        <td className="py-2 px-3">132</td>
+                                        <td className="py-2 px-3">150</td>
+                                        <td className="py-2 px-3">40% (Gold)</td>
+                                        <td className="py-2 px-3 font-semibold text-green-800">~$15,120</td>
+                                    </tr>
+                                    <tr className="border-t-2 border-gray-300 font-semibold">
+                                        <td className="py-2 px-3" colSpan="5">3-year cumulative (illustrative)</td>
+                                        <td className="py-2 px-3 text-green-800">~$22,210</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h3 className="text-base font-bold text-gray-900 mb-2">Year 1 monthly ramp (illustrative)</h3>
+                        <div className="overflow-x-auto mb-3">
+                            <table className="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr className="border-b-2 border-gray-200">
+                                        <th className="py-2 px-3 font-bold text-gray-900">Quarter</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">New referrals</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Est. quarterly commission</th>
+                                        <th className="py-2 px-3 font-bold text-gray-900">Milestone</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr className="border-b border-gray-100">
+                                        <td className="py-2 px-3">Q1</td>
+                                        <td className="py-2 px-3">6</td>
+                                        <td className="py-2 px-3">~$195</td>
+                                        <td className="py-2 px-3">Launch content &amp; first conversions</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-100">
+                                        <td className="py-2 px-3">Q2</td>
+                                        <td className="py-2 px-3">9</td>
+                                        <td className="py-2 px-3">~$340</td>
+                                        <td className="py-2 px-3">Reach Silver tier (6+ sales/month)</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-100">
+                                        <td className="py-2 px-3">Q3</td>
+                                        <td className="py-2 px-3">10</td>
+                                        <td className="py-2 px-3">~$430</td>
+                                        <td className="py-2 px-3">Webinar series &amp; advisor co-marketing</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="py-2 px-3">Q4</td>
+                                        <td className="py-2 px-3">11</td>
+                                        <td className="py-2 px-3">~$585</td>
+                                        <td className="py-2 px-3">Year-end estate-planning campaign</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <ul className="list-disc list-inside space-y-1 text-xs text-gray-600">
+                            <li>Year 2 adds Silver bonuses ($50) and higher volume; Year 3 adds Gold quarterly bonuses and featured partner listing.</li>
+                            <li>Mix example: 40% Basic ($9), 45% Premium ($19), 15% Family ($29) — adjust projections if your audience skews higher.</li>
+                        </ul>
                     </section>
 
                     <section>
@@ -2230,7 +2341,7 @@
                             <h2 className="text-3xl font-bold text-gray-900">Create Your Account</h2>
                             <p className="text-gray-600 mt-2">Start organizing your estate today</p>
                             <p className="text-sm text-gray-600 mt-3">
-                                <a href="./LCP%20-%20Production%20Demo.html" target="_blank" rel="noopener noreferrer" className="text-blue-900 font-semibold hover:underline">
+                                <a href="/demo" className="text-blue-900 font-semibold hover:underline">
                                     Open the demo app
                                 </a>
                                 <span className="text-gray-500"> — same experience with sample data only</span>

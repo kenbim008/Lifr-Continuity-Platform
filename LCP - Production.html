@@ -179,7 +179,84 @@
             </span>
         );
 
-        const PublicPageShell = ({ title, subtitle, onNavigate, country, setCountry, language, setLanguage, t, children }) => {
+        const SiteFooter = ({ onNavigate, t }) => (
+            <footer className="bg-gray-900 text-white py-12">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid md:grid-cols-4 gap-8 mb-8">
+                        <div>
+                            <div className="flex items-center gap-2 mb-4">
+                                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="shield" className="w-5 h-5 text-white"></i>
+                                </div>
+                                <span className="font-bold">LegacyVault</span>
+                            </div>
+                            <p className="text-gray-400 text-sm">Clarity When It Matters</p>
+                        </div>
+                        <div>
+                            <h4 className="font-bold mb-4">Product</h4>
+                            <div className="space-y-2 text-gray-400 text-sm">
+                                <button onClick={() => onNavigate('home', '#how-it-works')} className="block hover:text-white transition text-left w-full">{t('nav_how')}</button>
+                                <button onClick={() => onNavigate('home', '#features')} className="block hover:text-white transition text-left w-full">{t('nav_features')}</button>
+                                <button onClick={() => onNavigate('home', '#security')} className="block hover:text-white transition text-left w-full">{t('nav_security')}</button>
+                                <button onClick={() => onNavigate('security-architecture')} className="block hover:text-white transition text-left w-full">{t('nav_security_arch')}</button>
+                                <button onClick={() => onNavigate('pricing')} className="block hover:text-white transition text-left w-full">{t('nav_pricing')}</button>
+                                <button onClick={() => onNavigate('price-package-explained')} className="block hover:text-white transition text-left w-full">Price Package Explained</button>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 className="font-bold mb-4">Legal</h4>
+                            <div className="space-y-2 text-gray-400 text-sm">
+                                <button onClick={() => onNavigate('privacy-policy')} className="block hover:text-white transition text-left w-full">Privacy Policy</button>
+                                <button onClick={() => onNavigate('terms-of-service')} className="block hover:text-white transition text-left w-full">Terms of Service</button>
+                                <button onClick={() => onNavigate('legal-disclaimer')} className="block hover:text-white transition text-left w-full">Legal Disclaimer</button>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 className="font-bold mb-4">Support</h4>
+                            <div className="space-y-2 text-gray-400 text-sm">
+                                <button onClick={() => onNavigate('help-center')} className="flex items-center gap-2 hover:text-white transition text-left w-full">
+                                    <i data-lucide="headphones" className="w-4 h-4 flex-shrink-0"></i>
+                                    <span>Customer Support</span>
+                                </button>
+                                <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
+                                <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">Interactive FAQ</button>
+                                <button onClick={() => onNavigate('plan-checklist')} className="block hover:text-white transition text-left w-full">Interactive Plan Checklist</button>
+                                <a href="./LCP%20-%20Production%20Demo.html" className="block text-[#015DE7] hover:text-blue-300 transition">Demo (with sample data)</a>
+                                <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
+                            </div>
+                        </div>
+                        <div className="md:col-span-4 flex flex-wrap items-center justify-center gap-4 pt-4 border-t border-gray-800 mt-4 text-center">
+                            <span className="text-xs text-gray-400">Connect with us:</span>
+                            <div className="flex flex-wrap items-center justify-center gap-3 text-gray-300">
+                                <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                    <i data-lucide="linkedin" className="w-4 h-4"></i><span>LinkedIn</span>
+                                </a>
+                                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                    <i data-lucide="twitter" className="w-4 h-4"></i><span>Twitter</span>
+                                </a>
+                                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                    <i data-lucide="facebook" className="w-4 h-4"></i><span>Facebook</span>
+                                </a>
+                                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                    <i data-lucide="instagram" className="w-4 h-4"></i><span>Instagram</span>
+                                </a>
+                                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
+                                    <i data-lucide="youtube" className="w-4 h-4"></i><span>YouTube</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
+                        <p className="mb-2">© 2026 LegacyVault. All rights reserved.</p>
+                        <p className="text-xs">
+                            <strong>Important:</strong> LegacyVault does not replace, override, or supersede a legally executed Will or estate document.
+                        </p>
+                    </div>
+                </div>
+            </footer>
+        );
+
+        const PublicPageShell = ({ title, subtitle, onNavigate, country, setCountry, language, setLanguage, t, hideFooter = false, children }) => {
             const [mobileNavOpen, setMobileNavOpen] = useState(false);
             useEffect(() => {
                 try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
@@ -237,80 +314,7 @@
                         </div>
                     </div>
 
-                    <footer className="bg-gray-900 text-white py-12">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="grid md:grid-cols-4 gap-8 mb-8">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                                            <i data-lucide="shield" className="w-5 h-5 text-white"></i>
-                                        </div>
-                                        <span className="font-bold">LegacyVault</span>
-                                    </div>
-                                    <p className="text-gray-400 text-sm">Clarity When It Matters</p>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-4">Product</h4>
-                                    <div className="space-y-2 text-gray-400 text-sm">
-                                        <button onClick={() => onNavigate('home', '#how-it-works')} className="block hover:text-white transition text-left w-full">{t('nav_how')}</button>
-                                        <button onClick={() => onNavigate('home', '#features')} className="block hover:text-white transition text-left w-full">{t('nav_features')}</button>
-                                        <button onClick={() => onNavigate('home', '#security')} className="block hover:text-white transition text-left w-full">{t('nav_security')}</button>
-                                        <button onClick={() => onNavigate('security-architecture')} className="block hover:text-white transition text-left w-full">{t('nav_security_arch')}</button>
-                                        <button onClick={() => onNavigate('pricing')} className="block hover:text-white transition text-left w-full">{t('nav_pricing')}</button>
-                                        <button onClick={() => onNavigate('price-package-explained')} className="block hover:text-white transition text-left w-full">Price Package Explained</button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-4">Legal</h4>
-                                    <div className="space-y-2 text-gray-400 text-sm">
-                                        <button onClick={() => onNavigate('privacy-policy')} className="block hover:text-white transition text-left w-full">Privacy Policy</button>
-                                        <button onClick={() => onNavigate('terms-of-service')} className="block hover:text-white transition text-left w-full">Terms of Service</button>
-                                        <button onClick={() => onNavigate('legal-disclaimer')} className="block hover:text-white transition text-left w-full">Legal Disclaimer</button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-4">Support</h4>
-                                    <div className="space-y-2 text-gray-400 text-sm">
-                                        <button onClick={() => onNavigate('help-center')} className="flex items-center gap-2 hover:text-white transition text-left w-full">
-                                            <i data-lucide="headphones" className="w-4 h-4 flex-shrink-0"></i>
-                                            <span>Customer Support</span>
-                                        </button>
-                                        <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
-                                        <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">Interactive FAQ</button>
-                                        <button onClick={() => onNavigate('plan-checklist')} className="block hover:text-white transition text-left w-full">Interactive Plan Checklist</button>
-                                        <a href="./LCP%20-%20Production%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
-                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
-                                    </div>
-                                </div>
-                                <div className="md:col-span-4 flex flex-wrap items-center justify-center gap-4 pt-4 border-t border-gray-800 mt-4 text-center">
-                                    <span className="text-xs text-gray-400">Connect with us:</span>
-                                    <div className="flex flex-wrap items-center justify-center gap-3 text-gray-300">
-                                        <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
-                                            <i data-lucide="linkedin" className="w-4 h-4"></i><span>LinkedIn</span>
-                                        </a>
-                                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
-                                            <i data-lucide="twitter" className="w-4 h-4"></i><span>Twitter</span>
-                                        </a>
-                                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
-                                            <i data-lucide="facebook" className="w-4 h-4"></i><span>Facebook</span>
-                                        </a>
-                                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
-                                            <i data-lucide="instagram" className="w-4 h-4"></i><span>Instagram</span>
-                                        </a>
-                                        <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs">
-                                            <i data-lucide="youtube" className="w-4 h-4"></i><span>YouTube</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-                                <p className="mb-2">© 2026 LegacyVault. All rights reserved.</p>
-                                <p className="text-xs">
-                                    <strong>Important:</strong> LegacyVault does not replace, override, or supersede a legally executed Will or estate document.
-                                </p>
-                            </div>
-                        </div>
-                    </footer>
+                    {!hideFooter && <SiteFooter onNavigate={onNavigate} t={t} />}
                 </div>
             );
         };
@@ -1307,70 +1311,7 @@
                         </div>
                     </div>
 
-                    {/* Footer */}
-                    <footer className="bg-gray-900 text-white py-12">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="grid md:grid-cols-4 gap-8 mb-8">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                                            <i data-lucide="shield" className="w-5 h-5 text-white"></i>
-                                        </div>
-                                        <span className="font-bold">LegacyVault</span>
-                                    </div>
-                                    <p className="text-gray-400 text-sm">Clarity When It Matters</p>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-4">Product</h4>
-                                    <div className="space-y-2 text-gray-400 text-sm">
-                                        <button onClick={() => onNavigate('home', '#how-it-works')} className="block hover:text-white transition text-left w-full">{t('nav_how')}</button>
-                                        <button onClick={() => onNavigate('home', '#features')} className="block hover:text-white transition text-left w-full">{t('nav_features')}</button>
-                                        <button onClick={() => onNavigate('home', '#security')} className="block hover:text-white transition text-left w-full">{t('nav_security')}</button>
-                                        <button onClick={() => onNavigate('security-architecture')} className="block hover:text-white transition text-left w-full">{t('nav_security_arch')}</button>
-                                        <button onClick={() => onNavigate('pricing')} className="block hover:text-white transition text-left w-full">{t('nav_pricing')}</button>
-                                        <button onClick={() => onNavigate('price-package-explained')} className="block hover:text-white transition text-left w-full">Price Package Explained</button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-4">Legal</h4>
-                                    <div className="space-y-2 text-gray-400 text-sm">
-                                        <button onClick={() => onNavigate('privacy-policy')} className="block hover:text-white transition text-left w-full">Privacy Policy</button>
-                                        <button onClick={() => onNavigate('terms-of-service')} className="block hover:text-white transition text-left w-full">Terms of Service</button>
-                                        <button onClick={() => onNavigate('legal-disclaimer')} className="block hover:text-white transition text-left w-full">Legal Disclaimer</button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-4">Support</h4>
-                                    <div className="space-y-2 text-gray-400 text-sm">
-                                        <button onClick={() => onNavigate('help-center')} className="flex items-center gap-2 hover:text-white transition text-left w-full">
-                                            <i data-lucide="headphones" className="w-4 h-4 flex-shrink-0"></i>
-                                            <span>Customer Support</span>
-                                        </button>
-                                        <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
-                                        <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">Interactive FAQ</button>
-                                        <button onClick={() => onNavigate('plan-checklist')} className="block hover:text-white transition text-left w-full">Interactive Plan Checklist</button>
-                                        <a href="./LCP%20-%20Production%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
-                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
-                                    </div>
-                                </div>
-                                <div className="md:col-span-4 flex flex-wrap items-center justify-center gap-4 pt-4 border-t border-gray-800 mt-4 text-center">
-                                    <span className="text-xs text-gray-400">Connect with us:</span>
-                                    <div className="flex flex-wrap items-center justify-center gap-3 text-gray-300">
-                                        <a href="mailto:support@legacyvault.com" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="mail" className="w-4 h-4"></i><span>Email</span></a>
-                                        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="facebook" className="w-4 h-4"></i><span>Facebook</span></a>
-                                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="twitter" className="w-4 h-4"></i><span>Twitter</span></a>
-                                        <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="linkedin" className="w-4 h-4"></i><span>LinkedIn</span></a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-                                <p className="mb-2">© 2026 LegacyVault. All rights reserved.</p>
-                                <p className="text-xs">
-                                    <strong>Important:</strong> LegacyVault does not replace, override, or supersede a legally executed Will or estate document.
-                                </p>
-                            </div>
-                        </div>
-                    </footer>
+                    {!embeddedInApp && <SiteFooter onNavigate={onNavigate} t={t} />}
                 </div>
             );
         };
@@ -1990,70 +1931,7 @@
                         </div>
                     </section>
 
-                    {/* Footer */}
-                    <footer className="bg-gray-900 text-white py-12">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="grid md:grid-cols-4 gap-8 mb-8">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                                            <i data-lucide="shield" className="w-5 h-5 text-white"></i>
-                                        </div>
-                                        <span className="font-bold">LegacyVault</span>
-                                    </div>
-                                    <p className="text-gray-400 text-sm">Clarity When It Matters</p>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-4">Product</h4>
-                                    <div className="space-y-2 text-gray-400 text-sm">
-                                        <a href="#how-it-works" className="block hover:text-white transition">{t('nav_how')}</a>
-                                        <a href="#features" className="block hover:text-white transition">{t('nav_features')}</a>
-                                        <a href="#security" className="block hover:text-white transition">{t('nav_security')}</a>
-                                        <button onClick={() => onNavigate('security-architecture')} className="block hover:text-white transition text-left w-full">{t('nav_security_arch')}</button>
-                                        <button onClick={() => onNavigate('pricing')} className="block hover:text-white transition text-left w-full">{t('nav_pricing')}</button>
-                                        <button onClick={() => onNavigate('price-package-explained')} className="block hover:text-white transition text-left w-full">Price Package Explained</button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-4">Legal</h4>
-                                    <div className="space-y-2 text-gray-400 text-sm">
-                                        <button onClick={() => onNavigate('privacy-policy')} className="block hover:text-white transition text-left w-full">Privacy Policy</button>
-                                        <button onClick={() => onNavigate('terms-of-service')} className="block hover:text-white transition text-left w-full">Terms of Service</button>
-                                        <button onClick={() => onNavigate('legal-disclaimer')} className="block hover:text-white transition text-left w-full">Legal Disclaimer</button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-4">Support</h4>
-                                    <div className="space-y-2 text-gray-400 text-sm">
-                                        <button onClick={() => onNavigate('help-center')} className="flex items-center gap-2 hover:text-white transition text-left w-full">
-                                            <i data-lucide="headphones" className="w-4 h-4 flex-shrink-0"></i>
-                                            <span>Customer Support</span>
-                                        </button>
-                                        <button onClick={() => onNavigate('contact-us')} className="block hover:text-white transition text-left w-full">Contact Us</button>
-                                        <button onClick={() => onNavigate('faq')} className="block hover:text-white transition text-left w-full">Interactive FAQ</button>
-                                        <button onClick={() => onNavigate('plan-checklist')} className="block hover:text-white transition text-left w-full">Interactive Plan Checklist</button>
-                                        <a href="./LCP%20-%20Production%20Demo.html" className="block hover:text-white transition">Demo (with sample data)</a>
-                                        <button onClick={() => onNavigate('affiliate-program')} className="block hover:text-white transition text-left w-full text-[#015DE7]">Affiliate Program</button>
-                                    </div>
-                                </div>
-                                <div className="md:col-span-4 flex flex-wrap items-center justify-center gap-4 pt-4 border-t border-gray-800 mt-4 text-center">
-                                    <span className="text-xs text-gray-400">Connect with us:</span>
-                                    <div className="flex flex-wrap items-center justify-center gap-3 text-gray-300">
-                                        <a href="mailto:support@legacyvault.com" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="mail" className="w-4 h-4"></i><span>Email</span></a>
-                                        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="facebook" className="w-4 h-4"></i><span>Facebook</span></a>
-                                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="twitter" className="w-4 h-4"></i><span>Twitter</span></a>
-                                        <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1 text-xs"><i data-lucide="linkedin" className="w-4 h-4"></i><span>LinkedIn</span></a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-                                <p className="mb-2">© 2026 LegacyVault. All rights reserved.</p>
-                                <p className="text-xs">
-                                    <strong>Important:</strong> LegacyVault does not replace, override, or supersede a legally executed Will or estate document.
-                                </p>
-                            </div>
-                        </div>
-                    </footer>
+                    <SiteFooter onNavigate={onNavigate} t={t} />
                 </div>
             );
         };
@@ -3867,32 +3745,7 @@
                             {children}
                         </div>
 
-                        <footer className="bg-gray-900 text-white py-10 mt-8">
-                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                    <div className="text-sm text-gray-300">
-                                        © 2026 LegacyVault. <span className="text-gray-400">Clarity When It Matters.</span>
-                                    </div>
-                                    <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-                                        <button onClick={() => onNavigate('privacy-policy')} className="text-gray-300 hover:text-white transition">Privacy Policy</button>
-                                        <button onClick={() => onNavigate('terms-of-service')} className="text-gray-300 hover:text-white transition">Terms</button>
-                                        <button onClick={() => onNavigate('legal-disclaimer')} className="text-gray-300 hover:text-white transition">Disclaimer</button>
-                                        <button onClick={() => onNavigate('price-package-explained')} className="text-gray-300 hover:text-white transition">Price Package Explained</button>
-                                        <button onClick={() => onNavigate('faq')} className="text-gray-300 hover:text-white transition">Interactive FAQ</button>
-                                        <button onClick={() => onNavigate('help-center')} className="inline-flex items-center gap-1.5 text-gray-300 hover:text-white transition">
-                                            <i data-lucide="headphones" className="w-4 h-4"></i>
-                                            Customer Support
-                                        </button>
-                                        <button onClick={() => onNavigate('plan-checklist')} className="text-gray-300 hover:text-white transition">Interactive Plan Checklist</button>
-                                        <a href="./LCP%20-%20Production%20Demo.html" className="text-gray-300 hover:text-white transition">Demo</a>
-                                        <button onClick={() => onNavigate('affiliate-program')} className="text-[#015DE7] hover:text-white transition">Affiliate Program</button>
-                                    </div>
-                                </div>
-                                <p className="text-xs text-gray-500 mt-4">
-                                    <strong>Important:</strong> LegacyVault does not replace, override, or supersede a legally executed Will or estate document.
-                                </p>
-                            </div>
-                        </footer>
+                        <SiteFooter onNavigate={onNavigate} t={t} />
                     </div>
                 </div>
             );
@@ -4052,28 +3905,28 @@
                     case 'security-architecture':
                         return <SecurityArchitecturePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} embedded />;
                     case 'privacy-policy':
-                        return <PrivacyPolicyPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <PrivacyPolicyPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'terms-of-service':
-                        return <TermsOfServicePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <TermsOfServicePage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'legal-disclaimer':
-                        return <LegalDisclaimerPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <LegalDisclaimerPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'price-package-explained':
-                        return <PricePackageExplainedPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <PricePackageExplainedPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'help-center':
                         return <HelpCenterPage embeddedInApp onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'contact-us':
-                        return <ContactUsPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <ContactUsPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'faq':
-                        return <FAQPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <FAQPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'plan-checklist':
-                        return <PlanChecklistPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <PlanChecklistPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'generate-will':
                         return gatePage('generate-will', GenerateWillPage, { onNavigate: handleNavigate, country, setCountry, language, setLanguage, t: tLang, isAuthenticated: true });
                     case 'affiliate-dashboard':
                         return gatePage('affiliate-dashboard', AffiliateDashboardPage, { onNavigate: handleNavigate, isDemo: false, showRules: false });
                     case 'affiliate-program':
                         // Authenticated view of rules page
-                        return <AffiliateProgramPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <AffiliateProgramPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     default:
                         return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} />;
                 }

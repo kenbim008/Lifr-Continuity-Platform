@@ -77,7 +77,7 @@
             return map[lang] || map.en || key;
         };
 
-        // Demo Data Store (same app as production — sample data for presentation)
+        // Demo Data Store (cloned from production — sample data for presentation only)
         const productionData = {
             user: {
                 name: "John Anderson",
@@ -99,9 +99,21 @@
                 pendingCheckoutPlan: null
             },
             stripeConnectPayoutsEnabled: true,
+            onboarding: {
+                completed: true,
+                stage: 5,
+                jurisdiction: { country: 'CA', region: 'Alberta' },
+                roadmapEntries: [
+                    { id: 1, category: 'Legal Documents', institution: 'Riverside Law Firm', ownership: 'Personal name', locationClue: 'Original Will on file; reference under full legal name', locationTags: ['law_firm'] },
+                    { id: 2, category: 'Financial Accounts', institution: 'TD Waterhouse', ownership: 'Personal name', locationClue: 'Black fireproof box, master bedroom closet — 2025 tax folder', locationTags: ['physical_safe'] },
+                    { id: 3, category: 'Digital Legacy', institution: '1Password', ownership: 'Personal name', locationClue: 'Recovery key printed inside family album, living room shelf', locationTags: ['physical_safe'] }
+                ],
+                digitalKeys: { method: 'manager', emergencyKitLocation: 'Printed inside family album on living room shelf', physicalStorageLocation: '' },
+                navigator: { name: 'Sarah Anderson', email: 'sarah@email.com', permissionTier: 'conditional' }
+            },
             assets: [
                 { id: 1, category: "Real Estate", title: "Primary Residence", value: 450000, location: "123 Main St, Calgary, AB", beneficiary: "Sarah Anderson", type: "Inform Only" },
-                { id: 2, category: "Bank Accounts", title: "TD Checking Account", value: 25000, location: "TD Bank - Account #****4567", beneficiary: "Sarah Anderson", type: "Provide Document" },
+                { id: 2, category: "Bank Accounts", title: "TD Checking Account", value: 25000, location: "TD Bank — see estate roadmap", beneficiary: "Sarah Anderson", type: "Provide Document" },
                 { id: 3, category: "Investment Accounts", title: "RRSP Portfolio", value: 180000, location: "Questrade Account", beneficiary: "Children Trust", type: "Provide Contact Details" },
                 { id: 4, category: "Business Interests", title: "Tech Startup LLC", value: 75000, location: "Alberta Corporation", beneficiary: "Business Partner", type: "Release Trigger" }
             ],
@@ -111,7 +123,7 @@
                 { id: 3, type: "Living Will", name: "Healthcare Directive", uploaded: "2024-01-15", size: "890 KB", recipients: ["Spouse", "Children"] }
             ],
             trustedPeople: [
-                { id: 1, name: "Sarah Anderson", email: "sarah@email.com", phone: "+1-555-0101", role: "Executor", accessLevel: "Full Access", verified: true },
+                { id: 1, name: "Sarah Anderson", email: "sarah@email.com", phone: "+1-555-0101", role: "Navigator", accessLevel: "Conditional — 7-day switch", verified: true },
                 { id: 2, name: "Michael Chen", email: "michael@email.com", phone: "+1-555-0102", role: "Trusted Contact", accessLevel: "Concern Verification", verified: true },
                 { id: 3, name: "Jennifer Smith", email: "jennifer@email.com", phone: "+1-555-0103", role: "Legal Advisor", accessLevel: "Legal Documents Only", verified: false },
                 { id: 4, name: "David Anderson", email: "david@email.com", phone: "+1-555-0104", role: "Beneficiary", accessLevel: "View Only - Post Trigger", verified: true }
@@ -131,6 +143,7 @@
                 funeral: "Cremation preferred. Memorial service at Riverside Chapel. Donations to Heart & Stroke Foundation."
             }
         };
+
 
         // Legal Disclaimer Component
         const LegalDisclaimer = ({ variant = "banner" }) => {
@@ -1265,7 +1278,7 @@
 
             return (
                 <div className="min-h-screen bg-gray-50">
-                    {/* Navigation */}
+                    {!embeddedInApp && (
                     <nav className="bg-white border-b sticky top-0 z-50">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div className="relative z-[80] flex justify-between items-center h-16 bg-white">
@@ -1310,6 +1323,7 @@
                             )}
                         </div>
                     </nav>
+                    )}
 
                     {/* Pricing Header */}
                     <div className="bg-gradient-to-b from-blue-50 to-white py-16">
@@ -3090,6 +3104,7 @@
 
             return (
                 <div className="min-h-screen bg-gray-50 flex flex-col">
+                    <DemoModeBanner />
                     {country != null && (
                         <div className="bg-white border-b py-2 px-4 flex justify-end">
                             <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />
@@ -4604,34 +4619,34 @@
                     return <PricingPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
                 if (currentPage === 'privacy-policy') {
-                    return <PrivacyPolicyPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return <PrivacyPolicyPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
                 if (currentPage === 'terms-of-service') {
-                    return <TermsOfServicePage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return <TermsOfServicePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
                 if (currentPage === 'legal-disclaimer') {
-                    return <LegalDisclaimerPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return <LegalDisclaimerPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
                 if (currentPage === 'price-package-explained') {
-                    return <PricePackageExplainedPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return <PricePackageExplainedPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
                 if (currentPage === 'help-center') {
                     return <HelpCenterPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
                 if (currentPage === 'contact-us') {
-                    return <ContactUsPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return <ContactUsPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
                 if (currentPage === 'faq') {
-                    return <FAQPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return <FAQPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
                 if (currentPage === 'plan-checklist') {
-                    return <PlanChecklistPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return <PlanChecklistPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
                 if (currentPage === 'generate-will') {
                     return <GenerateWillPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} isAuthenticated={false} />;
                 }
                 if (currentPage === 'affiliate-program') {
-                    return <AffiliateProgramPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return <AffiliateProgramPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                 }
                 // Guest: rules only. Logged-in: dashboard is handled in renderPage (authenticated).
                 if (currentPage === 'security-architecture') {
@@ -4697,28 +4712,28 @@
                     case 'security-architecture':
                         return <SecurityArchitecturePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} embedded />;
                     case 'privacy-policy':
-                        return <PrivacyPolicyPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <PrivacyPolicyPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'terms-of-service':
-                        return <TermsOfServicePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <TermsOfServicePage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'legal-disclaimer':
-                        return <LegalDisclaimerPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <LegalDisclaimerPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'price-package-explained':
-                        return <PricePackageExplainedPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <PricePackageExplainedPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'help-center':
                         return <HelpCenterPage embeddedInApp onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'contact-us':
-                        return <ContactUsPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <ContactUsPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'faq':
-                        return <FAQPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <FAQPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'plan-checklist':
-                        return <PlanChecklistPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <PlanChecklistPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     case 'generate-will':
                         return gatePage('generate-will', GenerateWillPage, { onNavigate: handleNavigate, country, setCountry, language, setLanguage, t: tLang, isAuthenticated: true });
                     case 'affiliate-dashboard':
                         return gatePage('affiliate-dashboard', AffiliateDashboardPage, { onNavigate: handleNavigate, isDemo: true, showRules: false });
                     case 'affiliate-program':
                         // Authenticated view of rules page
-                        return <AffiliateProgramPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                        return <AffiliateProgramPage hideFooter onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
                     default:
                         return <Dashboard onNavigate={handleNavigate} userDisplayName={userDisplayName} />;
                 }

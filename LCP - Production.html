@@ -286,6 +286,7 @@
             }, [mobileNavOpen]);
             return (
                 <div className="min-h-screen bg-gray-50">
+                    <DemoModeBanner />
                     <nav className="bg-white border-b sticky top-0 z-50">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div className="relative z-[80] flex justify-between items-center h-16 bg-white">
@@ -1037,7 +1038,7 @@
                     alert('No withdrawable balance right now.');
                     return;
                 }
-                if (!window.confirm(`Withdraw $${pending.toFixed(2)} to your connected Stripe account? (Demo — no real transfer.)`)) return;
+                if (!window.confirm(`Withdraw $${pending.toFixed(2)} to your connected Stripe account?${IS_DEMO_APP ? ' (Demo — no real transfer.)' : ''}`)) return;
                 alert('Withdrawal initiated. In production this uses Stripe Connect payouts.');
             };
 
@@ -1254,7 +1255,7 @@
 
             return (
                 <div className="min-h-screen bg-gray-50">
-                    {/* Navigation */}
+                    {!embeddedInApp && (
                     <nav className="bg-white border-b sticky top-0 z-50">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div className="relative z-[80] flex justify-between items-center h-16 bg-white">
@@ -1299,6 +1300,7 @@
                             )}
                         </div>
                     </nav>
+                    )}
 
                     {/* Pricing Header */}
                     <div className="bg-gradient-to-b from-blue-50 to-white py-16">
@@ -1893,6 +1895,7 @@
             }, [mobileNavOpen]);
             return (
                 <div className="min-h-screen">
+                    <DemoModeBanner />
                     {/* Navigation */}
                     <nav className="bg-white border-b sticky top-0 z-50">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -4439,7 +4442,9 @@
             ];
 
             return (
-                <div className="min-h-screen bg-gray-50 flex">
+                <div className="min-h-screen bg-gray-50 flex flex-col">
+                    <DemoModeBanner />
+                    <div className="flex flex-1 min-h-0">
                     {sidebarOpen && (
                         <div className="fixed inset-0 bg-black/40 z-30 md:hidden" onClick={() => setSidebarOpen(false)} aria-hidden="true" />
                     )}
@@ -4509,6 +4514,7 @@
                         </div>
 
                         <SiteFooter onNavigate={onNavigate} t={t} />
+                    </div>
                     </div>
                 </div>
             );

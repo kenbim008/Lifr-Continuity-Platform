@@ -613,8 +613,14 @@
             if (/security|encrypt|privacy|gdpr|pipeda/.test(q)) {
                 return 'We use TLS in transit and a vault model aligned with SOC 2, ISO 27001, GDPR, and PIPEDA practices. Open Security & Compliance for the full architecture.';
             }
-            if (/asset|document|upload|legal/.test(q)) {
-                return 'Start by adding assets under Assets & Liabilities, uploading documents under Legal Documents, and inviting trusted people with the right roles. Use Estate Planner for guided inputs.';
+            if (/asset|document|upload|legal|roadmap|onboarding|navigator|data guard|estate discovery/.test(q)) {
+                return 'Use Secure Setup to build a data-minimal estate roadmap (no passwords or account numbers). Your Navigator sees location clues only. Open Estate Roadmap to preview the directory.';
+            }
+            if (/affiliate|referral|commission|stripe/.test(q)) {
+                return 'The Affiliate Program pays recurring commissions on referred subscriptions. Connect Stripe from your dashboard to withdraw earnings. See Affiliate Program for the 3-year revenue plan.';
+            }
+            if (/demo|sample/.test(q)) {
+                return 'The demo app uses sample data only (John Anderson example). Production is clean with no pre-filled vault data. Use the footer link Demo (with sample data).';
             }
             if (/cancel|refund|upgrade|downgrade/.test(q)) {
                 return 'You can change plans from your dashboard. Subscriptions include a 1st month free trial when you subscribe with a card on file. See Pricing for plan details.';
@@ -623,6 +629,105 @@
                 return 'Hello! Ask me about setup, pricing, Wills, triggers, security, or your subscription. I respond instantly to common questions.';
             }
             return 'I can help with setup, plans, Wills, triggers, security, and billing. Try asking about a specific topic, or browse Interactive FAQ for more answers.';
+        };
+
+        const ChatBotWidget = ({ onNavigate, currentPage }) => {
+            const [open, setOpen] = useState(false);
+            const [messages, setMessages] = useState([
+                { from: 'bot', text: "Hi! I'm your LegacyVault assistant. Ask about setup, pricing, security, Wills, or your estate roadmap." }
+            ]);
+            const [input, setInput] = useState('');
+            const chatEndRef = React.useRef(null);
+
+            useEffect(() => {
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
+            }, [open, messages]);
+
+            useEffect(() => {
+                if (open && chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+            }, [messages, open]);
+
+            if (currentPage === 'help-center') return null;
+
+            const add = (msg) => setMessages((m) => [...m, msg]);
+            const reply = (text) => add({ from: 'bot', text: getSupportBotReply(text, onNavigate) });
+
+            const handleIntent = (label) => {
+                add({ from: 'user', text: label });
+                reply(label);
+            };
+
+            const handleSend = (e) => {
+                e.preventDefault();
+                const text = input.trim();
+                if (!text) return;
+                setInput('');
+                add({ from: 'user', text });
+                reply(text);
+            };
+
+            return (
+                <>
+                    {open && (
+                        <div className="fixed bottom-24 right-4 sm:right-6 z-[200] w-[min(calc(100vw-2rem),380px)] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[min(70vh,520px)]">
+                            <div className="bg-blue-900 text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
+                                <div className="flex items-center gap-2">
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-300 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
+                                    </span>
+                                    <i data-lucide="bot" className="w-5 h-5"></i>
+                                    <span className="font-semibold text-sm">Customer Support</span>
+                                </div>
+                                <button type="button" onClick={() => setOpen(false)} className="p-1 hover:bg-blue-800 rounded-lg transition" aria-label="Close chat">
+                                    <i data-lucide="x" className="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <div className="px-3 pt-3 pb-2 flex flex-wrap gap-1.5 flex-shrink-0 border-b border-gray-100">
+                                {['Pricing', 'Secure setup', 'Generate Will?', 'Contact'].map((label) => (
+                                    <button key={label} type="button" onClick={() => handleIntent(label)} className="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-gray-700 hover:bg-blue-50 hover:border-blue-200 transition">
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[200px]">
+                                {messages.map((m, idx) => (
+                                    <div key={idx} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`${m.from === 'user' ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-900'} rounded-2xl px-3 py-2 max-w-[90%] text-sm leading-relaxed`}>
+                                            {m.text}
+                                        </div>
+                                    </div>
+                                ))}
+                                <div ref={chatEndRef} />
+                            </div>
+                            <form onSubmit={handleSend} className="p-3 border-t border-gray-200 flex gap-2 flex-shrink-0 bg-white">
+                                <input
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Type your question…"
+                                    aria-label="Chat message"
+                                />
+                                <button type="submit" className="bg-blue-900 text-white px-3 py-2 rounded-lg font-semibold hover:bg-blue-800 transition text-sm">Send</button>
+                            </form>
+                            <div className="px-3 pb-2 text-center flex-shrink-0">
+                                <button type="button" onClick={() => { setOpen(false); onNavigate('help-center'); }} className="text-xs text-blue-900 font-semibold hover:underline">
+                                    Open full Help Center
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    <button
+                        type="button"
+                        onClick={() => setOpen((v) => !v)}
+                        className={`fixed bottom-6 right-4 sm:right-6 z-[200] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition ${open ? 'bg-gray-700 hover:bg-gray-800' : 'bg-blue-900 hover:bg-blue-800'} text-white`}
+                        aria-label={open ? 'Close support chat' : 'Open support chat'}
+                        aria-expanded={open}
+                    >
+                        <i data-lucide={open ? 'x' : 'message-circle'} className="w-7 h-7"></i>
+                    </button>
+                </>
+            );
         };
 
         const HelpCenterPage = ({ embeddedInApp, onNavigate, ...shellProps }) => {
@@ -4582,64 +4687,73 @@
                 if (hash) window.location.hash = hash;
             };
 
+            const renderWithChat = (content) => (
+                <>
+                    {content}
+                    {currentPage !== 'help-center' && (
+                        <ChatBotWidget onNavigate={handleNavigate} currentPage={currentPage} />
+                    )}
+                </>
+            );
+
             // Public pages
             if (!isAuthenticated) {
                 if (currentPage === 'signup') {
-                    return <SignupPage onNavigate={handleNavigate} onSignup={handleSignup} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return renderWithChat(<SignupPage onNavigate={handleNavigate} onSignup={handleSignup} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
                 }
                 if (currentPage === 'login') {
-                    return <LoginPage onNavigate={handleNavigate} onLogin={handleLogin} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return renderWithChat(<LoginPage onNavigate={handleNavigate} onLogin={handleLogin} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
                 }
                 if (currentPage === 'pricing') {
-                    return <PricingPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return renderWithChat(<PricingPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
                 }
                 if (currentPage === 'privacy-policy') {
-                    return <PrivacyPolicyPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return renderWithChat(<PrivacyPolicyPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
                 }
                 if (currentPage === 'terms-of-service') {
-                    return <TermsOfServicePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return renderWithChat(<TermsOfServicePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
                 }
                 if (currentPage === 'legal-disclaimer') {
-                    return <LegalDisclaimerPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return renderWithChat(<LegalDisclaimerPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
                 }
                 if (currentPage === 'price-package-explained') {
-                    return <PricePackageExplainedPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return renderWithChat(<PricePackageExplainedPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
                 }
                 if (currentPage === 'help-center') {
-                    return <HelpCenterPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return renderWithChat(<HelpCenterPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
                 }
                 if (currentPage === 'contact-us') {
-                    return <ContactUsPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return renderWithChat(<ContactUsPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
                 }
                 if (currentPage === 'faq') {
-                    return <FAQPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return renderWithChat(<FAQPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
                 }
                 if (currentPage === 'plan-checklist') {
-                    return <PlanChecklistPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return renderWithChat(<PlanChecklistPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
                 }
                 if (currentPage === 'generate-will') {
-                    return <GenerateWillPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} isAuthenticated={false} />;
+                    return renderWithChat(<GenerateWillPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} isAuthenticated={false} />);
                 }
                 if (currentPage === 'affiliate-program') {
-                    return <AffiliateProgramPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return renderWithChat(<AffiliateProgramPage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
                 }
                 // Guest: rules only. Logged-in: dashboard is handled in renderPage (authenticated).
                 if (currentPage === 'security-architecture') {
-                    return <SecurityArchitecturePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                    return renderWithChat(<SecurityArchitecturePage onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
                 }
-                return <HomePage onNavigate={handleNavigate} onGetStarted={handleGetStarted} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                return renderWithChat(<HomePage onNavigate={handleNavigate} onGetStarted={handleGetStarted} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
             }
 
             // Authenticated app pages - check subscription access
             const sub = productionData.subscription;
             if (sub && sub.status === 'permanently_disabled') {
-                return <PermanentlyDisabledScreen onNavigate={handleNavigate} />;
+                return renderWithChat(<PermanentlyDisabledScreen onNavigate={handleNavigate} />);
             }
             if (sub && sub.status === 'cancelled') {
-                return <AccessRevokedScreen onNavigate={handleNavigate} onRestore={handleRestoreSubscription} />;
+                return renderWithChat(<AccessRevokedScreen onNavigate={handleNavigate} onRestore={handleRestoreSubscription} />);
             }
             if (currentPage === 'home') {
-                return <HomePage onNavigate={handleNavigate} onGetStarted={handleGetStarted} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
+                return renderWithChat(<HomePage onNavigate={handleNavigate} onGetStarted={handleGetStarted} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />);
             }
 
             const gatePage = (pageId, PageComponent, props = {}) => {
@@ -4714,11 +4828,11 @@
                 }
             };
 
-            return (
+            return renderWithChat((
                 <AppLayout currentPage={currentPage} onNavigate={handleNavigate} onLogout={handleLogout} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang}>
                     {renderPage()}
                 </AppLayout>
-            );
+            ));
         };
 
         // Render the app

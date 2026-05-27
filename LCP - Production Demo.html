@@ -304,13 +304,15 @@
                                     <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-6 h-6 text-white"></i>
                                     </div>
-                                    <BrandWordmark className="text-xl font-bold" />
+                                    <button type="button" onClick={() => onNavigate('home')} className="text-xl font-bold hover:text-blue-900 transition-colors">
+                                        <BrandWordmark />
+                                    </button>
                                 </div>
                                 <div className="hidden md:flex items-center gap-6">
                                     {country != null && <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />}
-                                    <button onClick={() => onNavigate('home')} className="text-gray-600 hover:text-gray-900">{t('nav_home')}</button>
-                                    <button onClick={() => onNavigate('pricing')} className="text-gray-600 hover:text-gray-900">{t('nav_pricing')}</button>
-                                    <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900">{t('nav_signin')}</button>
+                                    <button onClick={() => onNavigate('home')} className="text-gray-600 hover:text-blue-900 transition-colors">{t('nav_home')}</button>
+                                    <button onClick={() => onNavigate('pricing')} className="text-gray-600 hover:text-blue-900 transition-colors">{t('nav_pricing')}</button>
+                                    <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-blue-900 transition-colors">{t('nav_signin')}</button>
                                     <button onClick={() => onNavigate('generate-will')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">Generate Will?</button>
                                     <button onClick={() => onNavigate('signup')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">{t('nav_get_started')}</button>
                                 </div>
@@ -327,9 +329,9 @@
                                                 <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />
                                             </div>
                                         )}
-                                        <button type="button" onClick={() => { onNavigate('home'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_home')}</button>
-                                        <button type="button" onClick={() => { onNavigate('pricing'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_pricing')}</button>
-                                        <button type="button" onClick={() => { onNavigate('login'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_signin')}</button>
+                                        <button type="button" onClick={() => { onNavigate('home'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-blue-900 transition-colors text-left py-2">{t('nav_home')}</button>
+                                        <button type="button" onClick={() => { onNavigate('pricing'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-blue-900 transition-colors text-left py-2">{t('nav_pricing')}</button>
+                                        <button type="button" onClick={() => { onNavigate('login'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-blue-900 transition-colors text-left py-2">{t('nav_signin')}</button>
                                         <button type="button" onClick={() => { onNavigate('generate-will'); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">Generate Will?</button>
                                         <button type="button" onClick={() => { onNavigate('signup'); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">{t('nav_get_started')}</button>
                                     </div>
@@ -1139,7 +1141,7 @@
                     <div className="bg-white rounded-xl card-shadow overflow-hidden">
                         <div className="flex border-b border-gray-200">
                             {tabs.map((tab) => (
-                                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-6 py-4 font-medium border-b-2 transition ${activeTab === tab.id ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>
+                                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-6 py-4 font-medium border-b-2 transition ${activeTab === tab.id ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-600 hover:text-blue-900'}`}>
                                     <i data-lucide={tab.icon} className="w-4 h-4"></i>
                                     {tab.label}
                                 </button>
@@ -1271,14 +1273,16 @@
                                     <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-6 h-6 text-white"></i>
                                     </div>
-                                    <BrandWordmark className="text-xl font-bold" />
+                                    <button type="button" onClick={() => onNavigate('home')} className="text-xl font-bold hover:text-blue-900 transition-colors">
+                                        <BrandWordmark />
+                                    </button>
                                 </div>
                                 <div className="hidden md:flex items-center gap-6">
                                     {country != null && <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />}
-                                    <button onClick={() => onNavigate('home')} className="text-gray-600 hover:text-gray-900">{t('nav_home')}</button>
-                                    <button onClick={() => onNavigate('home', '#how-it-works')} className="text-gray-600 hover:text-gray-900">{t('nav_how')}</button>
+                                    <button onClick={() => onNavigate('home')} className="text-gray-600 hover:text-blue-900 transition-colors">{t('nav_home')}</button>
+                                    <button onClick={() => onNavigate('home', '#how-it-works')} className="text-gray-600 hover:text-blue-900 transition-colors">{t('nav_how')}</button>
                                     <button onClick={() => onNavigate('pricing')} className="text-blue-900 font-semibold">{t('nav_pricing')}</button>
-                                    <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900">{t('nav_signin')}</button>
+                                    <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-blue-900 transition-colors">{t('nav_signin')}</button>
                                     <button onClick={() => onNavigate('generate-will')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">Generate Will?</button>
                                     <button onClick={() => onNavigate('signup')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">{t('nav_get_started')}</button>
                                 </div>
@@ -1295,10 +1299,10 @@
                                                 <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />
                                             </div>
                                         )}
-                                        <button type="button" onClick={() => { onNavigate('home'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_home')}</button>
-                                        <button type="button" onClick={() => { onNavigate('home', '#how-it-works'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_how')}</button>
+                                        <button type="button" onClick={() => { onNavigate('home'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-blue-900 transition-colors text-left py-2">{t('nav_home')}</button>
+                                        <button type="button" onClick={() => { onNavigate('home', '#how-it-works'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-blue-900 transition-colors text-left py-2">{t('nav_how')}</button>
                                         <button type="button" onClick={() => { onNavigate('pricing'); setMobileNavOpen(false); }} className="text-blue-900 font-semibold text-left py-2">{t('nav_pricing')}</button>
-                                        <button type="button" onClick={() => { onNavigate('login'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_signin')}</button>
+                                        <button type="button" onClick={() => { onNavigate('login'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-blue-900 transition-colors text-left py-2">{t('nav_signin')}</button>
                                         <button type="button" onClick={() => { onNavigate('generate-will'); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">Generate Will?</button>
                                         <button type="button" onClick={() => { onNavigate('signup'); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">{t('nav_get_started')}</button>
                                     </div>
@@ -1909,14 +1913,16 @@
                                     <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-6 h-6 text-white"></i>
                                     </div>
-                                    <BrandWordmark className="text-xl font-bold" />
+                                    <button type="button" onClick={() => onNavigate('home')} className="text-xl font-bold hover:text-blue-900 transition-colors">
+                                        <BrandWordmark />
+                                    </button>
                                 </div>
                                 <div className="hidden md:flex items-center gap-6">
                                     {country != null && <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />}
-                                    <button onClick={() => onNavigate('home')} className="text-gray-600 hover:text-gray-900">Home</button>
-                                    <a href="#how-it-works" className="text-gray-600 hover:text-gray-900">{t('nav_how')}</a>
+                                    <button onClick={() => onNavigate('home')} className="text-gray-600 hover:text-blue-900 transition-colors">Home</button>
+                                    <a href="#how-it-works" className="text-gray-600 hover:text-blue-900 transition-colors">{t('nav_how')}</a>
                                     <button onClick={() => onNavigate('pricing')} className="text-blue-900 font-semibold hover:text-blue-800">{t('nav_pricing')}</button>
-                                    <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900">{t('nav_signin')}</button>
+                                    <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-blue-900 transition-colors">{t('nav_signin')}</button>
                                     <button onClick={() => onNavigate('generate-will')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">Generate Will?</button>
                                     <button onClick={onGetStarted} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">{t('nav_get_started')}</button>
                                 </div>
@@ -1933,10 +1939,10 @@
                                                 <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />
                                             </div>
                                         )}
-                                        <button type="button" onClick={() => { onNavigate('home'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">Home</button>
-                                        <a href="#how-it-works" onClick={() => setMobileNavOpen(false)} className="text-gray-700 hover:text-gray-900 py-2">{t('nav_how')}</a>
+                                        <button type="button" onClick={() => { onNavigate('home'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-blue-900 transition-colors text-left py-2">Home</button>
+                                        <a href="#how-it-works" onClick={() => setMobileNavOpen(false)} className="text-gray-700 hover:text-blue-900 transition-colors py-2">{t('nav_how')}</a>
                                         <button type="button" onClick={() => { onNavigate('pricing'); setMobileNavOpen(false); }} className="text-blue-900 font-semibold text-left py-2">{t('nav_pricing')}</button>
-                                        <button type="button" onClick={() => { onNavigate('login'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-gray-900 text-left py-2">{t('nav_signin')}</button>
+                                        <button type="button" onClick={() => { onNavigate('login'); setMobileNavOpen(false); }} className="text-gray-700 hover:text-blue-900 transition-colors text-left py-2">{t('nav_signin')}</button>
                                         <button type="button" onClick={() => { onNavigate('generate-will'); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">Generate Will?</button>
                                         <button type="button" onClick={() => { onGetStarted(); setMobileNavOpen(false); }} className="mt-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-left font-semibold">{t('nav_get_started')}</button>
                                     </div>
@@ -2579,7 +2585,13 @@
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">Country</label>
                                 <select
                                     value={ob.jurisdiction.country}
-                                    onChange={(e) => { ob.jurisdiction.country = e.target.value; ob.jurisdiction.region = ''; }}
+                                    onChange={(e) => {
+                                        const nextCountry = e.target.value;
+                                        const nextRegions = REGION_LIST[nextCountry] || [];
+                                        ob.jurisdiction.country = nextCountry;
+                                        ob.jurisdiction.region = nextRegions.length > 0 ? nextRegions[0] : '';
+                                        if (setCountry) setCountry(nextCountry);
+                                    }}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                                 >
                                     <option value="">Select country</option>
@@ -2663,7 +2675,14 @@
                                     {(draft.category === 'Financial Accounts' || draft.category === 'Legal Documents') ? (
                                         <>
                                             <label className="block text-sm font-semibold text-gray-700 mb-2">Institution or location type</label>
-                                            <select value={draft.institution} onChange={(e) => setDraft({ ...draft, institution: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-3">
+                                            <select value={draft.institution} onChange={(e) => {
+                                                const nextInstitution = e.target.value;
+                                                setDraft({
+                                                    ...draft,
+                                                    institution: nextInstitution,
+                                                    customInstitution: nextInstitution !== 'Other (type below)' ? nextInstitution : draft.customInstitution
+                                                });
+                                            }} className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-3">
                                                 <option value="">Select or type below</option>
                                                 {(draft.category === 'Financial Accounts' ? FINANCIAL_INSTITUTIONS : ['Home safe', 'Law firm', 'Bank safety deposit', 'Family member', 'Other (type below)']).map((x) => (
                                                     <option key={x} value={x}>{x}</option>
@@ -4231,13 +4250,15 @@
                                     <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-6 h-6 text-white"></i>
                                     </div>
-                                    <BrandWordmark className="text-xl font-bold" />
+                                    <button type="button" onClick={() => onNavigate('home')} className="text-xl font-bold hover:text-blue-900 transition-colors">
+                                        <BrandWordmark />
+                                    </button>
                                 </div>
                                 <div className="hidden md:flex items-center gap-6">
                                     {country != null && <HeaderLocaleBar country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={t} />}
-                                    <button onClick={() => onNavigate('home')} className="text-gray-600 hover:text-gray-900">{t('nav_home')}</button>
+                                    <button onClick={() => onNavigate('home')} className="text-gray-600 hover:text-blue-900 transition-colors">{t('nav_home')}</button>
                                     <button onClick={() => onNavigate('pricing')} className="text-blue-900 font-semibold">{t('nav_pricing')}</button>
-                                    <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-gray-900">{t('nav_signin')}</button>
+                                    <button onClick={() => onNavigate('login')} className="text-gray-600 hover:text-blue-900 transition-colors">{t('nav_signin')}</button>
                                     <button onClick={() => onNavigate('signup')} className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">{t('nav_get_started')}</button>
                                 </div>
                             </div>
@@ -4255,7 +4276,7 @@
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`flex items-center gap-2 px-6 py-3 font-semibold border-b-2 transition ${activeTab === tab.id ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-600 hover:text-gray-900'}`}
+                                    className={`flex items-center gap-2 px-6 py-3 font-semibold border-b-2 transition ${activeTab === tab.id ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-600 hover:text-blue-900'}`}
                                 >
                                     <i data-lucide={tab.icon} className="w-4 h-4"></i>
                                     {t(tab.labelKey)}
@@ -4406,7 +4427,7 @@
         };
 
         // App Layout with Sidebar
-        const AppLayout = ({ children, currentPage, onNavigate, country, setCountry, language, setLanguage, t }) => {
+        const AppLayout = ({ children, currentPage, onNavigate, onLogout, country, setCountry, language, setLanguage, t }) => {
             const [sidebarOpen, setSidebarOpen] = useState(false);
             useEffect(() => {
                 try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
@@ -4444,7 +4465,9 @@
                                 <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                                     <i data-lucide="shield" className="w-6 h-6 text-white"></i>
                                 </div>
-                                <BrandWordmark className="text-lg font-bold" />
+                                <button type="button" onClick={() => onNavigate('home')} className="text-lg font-bold hover:text-blue-900 transition-colors">
+                                    <BrandWordmark />
+                                </button>
                             </div>
                         </div>
                         <nav className="p-4">
@@ -4467,7 +4490,7 @@
                             ))}
                         </nav>
                         <div className="p-4 border-t mt-auto">
-                            <button onClick={() => onNavigate('home')} className="w-full text-sm text-gray-600 hover:text-gray-900 text-left px-4 py-2">
+                            <button onClick={() => onLogout && onLogout()} className="w-full text-sm text-gray-600 hover:text-blue-900 transition-colors text-left px-4 py-2">
                                 {t ? t('nav_sign_out') : 'Sign Out'}
                             </button>
                         </div>
@@ -4485,7 +4508,9 @@
                                     <div className="w-8 h-8 bg-blue-900 rounded-lg flex items-center justify-center">
                                         <i data-lucide="shield" className="w-5 h-5 text-white"></i>
                                     </div>
-                                    <BrandWordmark className="font-bold" />
+                                    <button type="button" onClick={() => onNavigate('home')} className="font-bold hover:text-blue-900 transition-colors">
+                                        <BrandWordmark />
+                                    </button>
                                 </div>
                             </div>
                             {country != null && setCountry && language != null && setLanguage && t && (
@@ -4557,12 +4582,14 @@
                 setCurrentPage('signup');
             };
 
+            const handleLogout = () => {
+                setIsAuthenticated(false);
+                setCurrentPage('home');
+            };
+
             const handleNavigate = (page, hash) => {
                 setCurrentPage(page);
                 if (hash) window.location.hash = hash;
-                if (page === 'home') {
-                    setIsAuthenticated(false);
-                }
             };
 
             // Public pages
@@ -4620,6 +4647,9 @@
             }
             if (sub && sub.status === 'cancelled') {
                 return <AccessRevokedScreen onNavigate={handleNavigate} onRestore={handleRestoreSubscription} />;
+            }
+            if (currentPage === 'home') {
+                return <HomePage onNavigate={handleNavigate} onGetStarted={handleGetStarted} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang} />;
             }
 
             const gatePage = (pageId, PageComponent, props = {}) => {
@@ -4695,7 +4725,7 @@
             };
 
             return (
-                <AppLayout currentPage={currentPage} onNavigate={handleNavigate} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang}>
+                <AppLayout currentPage={currentPage} onNavigate={handleNavigate} onLogout={handleLogout} country={country} setCountry={setCountry} language={language} setLanguage={setLanguage} t={tLang}>
                     {renderPage()}
                 </AppLayout>
             );

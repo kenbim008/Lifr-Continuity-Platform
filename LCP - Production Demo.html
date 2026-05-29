@@ -149,6 +149,28 @@
         };
 
 
+        const ESTATE_ROADMAP_FEATURES = [
+            'Privacy-first Secure Setup (5-stage onboarding)',
+            'Jurisdictional anchor & localized checklist',
+            'Data-minimal asset mapping (clues only — no account numbers)',
+            'Digital keys route mapping (not a password vault)',
+            'Navigator assignment (immediate or 7-day conditional access)',
+            'Estate Discovery Directory (printable roadmap view)',
+            'DATA GUARD active on every entry',
+            'Basic activity monitoring & proof-of-life check-ins'
+        ];
+        const ESTATE_VAULT_EXTRA_FEATURES = [
+            'Everything in Estate Roadmap',
+            'Encrypted document & asset vault',
+            'Legal document upload & storage',
+            'Digital Life Manager',
+            'Advanced trigger logic & disclosure controls',
+            'Estate Planner guided inputs',
+            'Discounted Will generation pricing',
+            'Multi-recipient disclosure & audit logs',
+            'AI estate summary (Premium & Family)'
+        ];
+
         // Legal Disclaimer Component
         const LegalDisclaimer = ({ variant = "banner" }) => {
             if (variant === "banner") {
@@ -530,20 +552,24 @@
         const FAQPage = (props) => {
             const [activeTopic, setActiveTopic] = useState('all');
             const faqs = [
+                { q: 'What is the Estate Roadmap?', a: 'The Estate Roadmap (Basic plan) is a data-minimal secure setup: jurisdiction checklist, location clues for assets, digital key routes, and Navigator access — without storing passwords or account numbers.', topic: 'roadmap' },
+                { q: 'What is the Estate Vault?', a: 'The Estate Vault (Premium and Family) includes everything in the Estate Roadmap plus encrypted document storage, Digital Life, advanced triggers, Estate Planner, Will generation pricing, and more.', topic: 'roadmap' },
+                { q: 'Can I see my Secure Setup summary after finishing?', a: 'Yes. When you complete Secure Setup you see a full summary, then can open the Estate Roadmap directory or go to your dashboard anytime.', topic: 'roadmap' },
                 { q: 'Does LegacyVault replace a Will?', a: 'No. LegacyVault does not replace, override, or supersede a legally executed Will or estate document.' },
-                { q: 'Do you store passwords or crypto keys?', a: 'No. Store instructions and references only. Do not store passwords, private keys, or recovery phrases in plain text.' },
-                { q: 'How does conditional disclosure work?', a: 'Disclosure occurs only after configured trigger conditions and safeguards.' },
-                { q: 'Who can access my information?', a: 'Only designated recipients with the access levels you set, under your trigger and verification rules.' },
+                { q: 'Do you store passwords or crypto keys?', a: 'No. The Roadmap stores clues only. Do not enter passwords, private keys, or recovery phrases.' },
+                { q: 'How does conditional disclosure work?', a: 'Disclosure occurs only after configured trigger conditions and safeguards (Estate Vault — Premium+).', topic: 'triggers' },
+                { q: 'Who can access my information?', a: 'Only your designated Navigator and trusted contacts, under the permission tier and trigger rules you set.' },
                 { q: 'What security standards do you follow?', a: 'We align to SOC 2, ISO 27001, GDPR, and PIPEDA practices. See Security & Compliance for details.', topic: 'security' },
-                { q: 'Why should I speak to your team before creating a Will?', a: 'One Will does not fit all situations. Our team can guide you to the right setup and help you decide when legal counsel is needed.', topic: 'will' },
-                { q: 'How can I reach Will creation support?', a: 'Call 400 383 3707 for guidance, or submit a Contact Us Will creation enquiry form and our team will get back to you.', topic: 'will' },
-                { q: 'Do Premium and Family plans support Last Wish videos?', a: 'Yes. Premium and Family subscribers can add instruction / last wish videos for $6.99 per video (max 5 minutes each), during subscription or any time after.', topic: 'pricing' },
+                { q: 'What is included in Basic vs Premium vs Family?', a: 'Basic ($9/mo): full Estate Roadmap. Premium ($19/mo): Roadmap + Estate Vault + up to 1 Last Wish video add-on ($6.99). Family ($29/mo): Premium + up to 4 users + up to 4 Last Wish videos.', topic: 'pricing' },
+                { q: 'Why should I speak to your team before creating a Will?', a: 'One Will does not fit all situations. Premium & Family include discounted Will generation. Call 400 383 3707 for guidance.', topic: 'will' },
+                { q: 'How can I reach Will creation support?', a: 'Call 400 383 3707 or submit a Will creation enquiry on Contact Us.', topic: 'will' },
+                { q: 'How does the Affiliate Program work?', a: 'Earn recurring commissions on referred Basic, Premium, and Family subscriptions. See Affiliate Program for the 3-year plan and connect Stripe on your dashboard to withdraw.', topic: 'affiliate' },
             ];
             return (
                 <PublicPageShell {...props} title="FAQ" subtitle="Comprehensive interactive FAQ — filter topics, get answers, or connect with support.">
                     <div className="space-y-4">
                         <div className="flex flex-wrap gap-2">
-                            {[{ id: 'all', label: 'All' }, { id: 'will', label: 'Will Guidance' }, { id: 'pricing', label: 'Pricing' }, { id: 'security', label: 'Security' }].map((topic) => (
+                            {[{ id: 'all', label: 'All' }, { id: 'roadmap', label: 'Roadmap & Vault' }, { id: 'pricing', label: 'Pricing' }, { id: 'triggers', label: 'Triggers' }, { id: 'will', label: 'Will' }, { id: 'affiliate', label: 'Affiliate' }, { id: 'security', label: 'Security' }].map((topic) => (
                                 <button key={topic.id} onClick={() => setActiveTopic(topic.id)} className={`px-3 py-1.5 rounded-full text-sm ${activeTopic === topic.id ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{topic.label}</button>
                             ))}
                         </div>
@@ -622,40 +648,71 @@
 
         const getSupportBotReply = (question, onNavigate) => {
             const q = question.toLowerCase();
-            if (/will|testament|executor|beneficiar|codicil/.test(q)) {
-                return 'Will planning is personal — one Will does not fit every situation. Use Generate Will? for a guided draft (not legal advice). For personalized guidance call 400 383 3707 or submit a Will creation enquiry on Contact Us.';
+            const reply = (text, actions = []) => ({ text, actions });
+            if (/roadmap|secure setup|onboarding|navigator|data guard|clue/.test(q)) {
+                return reply(
+                    'Estate Roadmap (Basic plan) is data-minimal: Secure Setup builds location clues for your Navigator — never passwords or account numbers. After completion you get a printable summary and Estate Discovery Directory.',
+                    [{ label: 'Start Secure Setup', page: 'onboarding' }, { label: 'View Roadmap pricing', page: 'pricing' }, { label: 'Interactive FAQ', page: 'faq' }]
+                );
             }
-            if (/price|plan|premium|family|basic|subscription|cost|\$|billing/.test(q)) {
-                return 'Plans: Basic $9/mo, Premium $19/mo, Family $29/mo (annual discounts available). Premium & Family include discounted Will generation pricing. Last Wish videos: optional $6.99 per video, max 5 minutes each — add at checkout or anytime after subscribing.';
+            if (/vault|premium|encrypt|document upload/.test(q)) {
+                return reply(
+                    'Estate Vault = Estate Roadmap + encrypted storage, triggers, Digital Life, Estate Planner, and more. Premium ($19/mo) includes up to 1 optional Last Wish video add-on. Family ($29/mo) adds up to 4 users and up to 4 videos.',
+                    [{ label: 'Compare plans', page: 'pricing' }, { label: 'Package explained', page: 'price-package-explained' }]
+                );
+            }
+            if (/will|testament|executor|beneficiar|codicil/.test(q)) {
+                return reply(
+                    'Will planning is personal — one Will does not fit every situation. Premium & Family include discounted Will generation. Call 400 383 3707 or use Contact Us for guidance.',
+                    [{ label: 'Generate Will?', page: 'generate-will' }, { label: 'Contact Us', page: 'contact-us' }]
+                );
+            }
+            if (/price|plan|family|basic|subscription|cost|\$|billing/.test(q)) {
+                return reply(
+                    'Basic ($9/mo) = full Estate Roadmap. Premium ($19/mo) = Estate Vault + up to 1 Last Wish video ($6.99 each, max 5 min). Family ($29/mo) = Premium + up to 4 users + up to 4 Last Wish videos at $6.99 each.',
+                    [{ label: 'View pricing', page: 'pricing' }, { label: 'Plan checklist', page: 'plan-checklist' }]
+                );
             }
             if (/last wish|video|instruction/.test(q)) {
-                return 'Premium and Family subscribers can add instruction / Last Wish videos for $6.99 per video (each up to 5 minutes). Add them during subscription or any day after from your account.';
+                return reply(
+                    'Last Wish videos are optional add-ons at $6.99 per video (max 5 minutes). Premium: max 1 at checkout. Family: max 4. Add more anytime from your account after subscribing.',
+                    [{ label: 'Pricing', page: 'pricing' }]
+                );
             }
             if (/password|login|sign in|mfa|account/.test(q)) {
-                return 'For sign-in issues, verify your email and password, and check your MFA device. Reset credentials from the login page or use Contact Us if you are locked out.';
+                return reply('For sign-in issues, verify email/password and MFA. Use Contact Us if locked out.', [{ label: 'Sign in', page: 'login' }, { label: 'Contact Us', page: 'contact-us' }]);
             }
             if (/trigger|disclosure|check-in|inactive/.test(q)) {
-                return 'Disclosure is conditional — never automatic. Set check-in schedules in Activity Monitoring, configure triggers in Trigger Management, and review Disclosure Preview before anything is released.';
+                return reply(
+                    'Triggers are Estate Vault features (Premium+). Configure types in Trigger Management, set check-ins in Activity Monitoring, and preview releases in Disclosure Preview. Use “Run test trigger” for a safe simulation.',
+                    [{ label: 'Trigger Management', page: 'triggers' }, { label: 'Disclosure Preview', page: 'disclosure-preview' }]
+                );
             }
             if (/security|encrypt|privacy|gdpr|pipeda/.test(q)) {
-                return 'We use TLS in transit and a vault model aligned with SOC 2, ISO 27001, GDPR, and PIPEDA practices. Open Security & Compliance for the full architecture.';
-            }
-            if (/asset|document|upload|legal|roadmap|onboarding|navigator|data guard|estate discovery/.test(q)) {
-                return 'Use Secure Setup to build a data-minimal estate roadmap (no passwords or account numbers). Your Navigator sees location clues only. Open Estate Roadmap to preview the directory.';
+                return reply('TLS in transit, vault encryption, SOC 2 / ISO 27001 / GDPR / PIPEDA aligned practices.', [{ label: 'Security architecture', page: 'security-architecture' }]);
             }
             if (/affiliate|referral|commission|stripe/.test(q)) {
-                return 'The Affiliate Program pays recurring commissions on referred subscriptions. Connect Stripe from your dashboard to withdraw earnings. See Affiliate Program for the 3-year revenue plan.';
+                return reply(
+                    'The Affiliate Program pays recurring commissions on Basic, Premium, and Family referrals. Connect Stripe from your dashboard to withdraw. See the 3-year revenue plan on the Affiliate Program page.',
+                    [{ label: 'Affiliate Program', page: 'affiliate-program' }, { label: 'Affiliate Dashboard', page: 'affiliate-dashboard' }]
+                );
             }
             if (/demo|sample/.test(q)) {
-                return 'The demo app uses sample data only (John Anderson example). Production is clean with no pre-filled vault data. Use the footer link Demo (with sample data).';
+                return reply('Demo uses sample data (John Anderson). Production starts empty.', [{ label: 'Home', page: 'home' }]);
             }
             if (/cancel|refund|upgrade|downgrade/.test(q)) {
-                return 'You can change plans from your dashboard. Subscriptions include a 1st month free trial when you subscribe with a card on file. See Pricing for plan details.';
+                return reply('Change plans from your dashboard. New subscribers: 1st month free with card on file.', [{ label: 'Pricing', page: 'pricing' }]);
             }
             if (/hello|hi|hey|help/.test(q)) {
-                return 'Hello! Ask me about setup, pricing, Wills, triggers, security, or your subscription. I respond instantly to common questions.';
+                return reply(
+                    'Hi! I can help with Estate Roadmap vs Estate Vault, pricing, Secure Setup, triggers, Wills, and affiliates. Tap a quick topic below or type your question.',
+                    [{ label: 'Estate Roadmap', page: 'onboarding' }, { label: 'Pricing', page: 'pricing' }, { label: 'FAQ', page: 'faq' }]
+                );
             }
-            return 'I can help with setup, plans, Wills, triggers, security, and billing. Try asking about a specific topic, or browse Interactive FAQ for more answers.';
+            return reply(
+                'Try: “What is Estate Roadmap?”, “Premium vs Family”, “How do triggers work?”, or “Affiliate program”.',
+                [{ label: 'FAQ', page: 'faq' }, { label: 'Help Center', page: 'help-center' }, { label: 'Pricing', page: 'pricing' }]
+            );
         };
 
         const ChatBotWidget = ({ onNavigate, currentPage }) => {
@@ -677,11 +734,15 @@
             if (currentPage === 'help-center') return null;
 
             const add = (msg) => setMessages((m) => [...m, msg]);
-            const reply = (text) => add({ from: 'bot', text: getSupportBotReply(text, onNavigate) });
+            const botReply = (text) => {
+                const res = getSupportBotReply(text, onNavigate);
+                const payload = typeof res === 'string' ? { text: res, actions: [] } : res;
+                add({ from: 'bot', text: payload.text, actions: payload.actions || [] });
+            };
 
             const handleIntent = (label) => {
                 add({ from: 'user', text: label });
-                reply(label);
+                botReply(label);
             };
 
             const handleSend = (e) => {
@@ -690,7 +751,7 @@
                 if (!text) return;
                 setInput('');
                 add({ from: 'user', text });
-                reply(text);
+                botReply(text);
             };
 
             return (
@@ -711,7 +772,7 @@
                                 </button>
                             </div>
                             <div className="px-3 pt-3 pb-2 flex flex-wrap gap-1.5 flex-shrink-0 border-b border-gray-100">
-                                {['Pricing', 'Secure setup', 'Generate Will?', 'Contact'].map((label) => (
+                                {['Estate Roadmap', 'Estate Vault', 'Pricing', 'Triggers', 'Affiliate'].map((label) => (
                                     <button key={label} type="button" onClick={() => handleIntent(label)} className="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-gray-700 hover:bg-blue-50 hover:border-blue-200 transition">
                                         {label}
                                     </button>
@@ -719,10 +780,19 @@
                             </div>
                             <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[200px]">
                                 {messages.map((m, idx) => (
-                                    <div key={idx} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    <div key={idx} className={`flex flex-col ${m.from === 'user' ? 'items-end' : 'items-start'}`}>
                                         <div className={`${m.from === 'user' ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-900'} rounded-2xl px-3 py-2 max-w-[90%] text-sm leading-relaxed`}>
                                             {m.text}
                                         </div>
+                                        {m.from === 'bot' && m.actions && m.actions.length > 0 && (
+                                            <div className="flex flex-wrap gap-1.5 mt-1.5 max-w-[90%]">
+                                                {m.actions.map((act) => (
+                                                    <button key={act.label} type="button" onClick={() => { setOpen(false); onNavigate(act.page); }} className="text-xs px-2 py-1 rounded-full bg-white border border-blue-200 text-blue-900 font-semibold hover:bg-blue-50">
+                                                        {act.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                                 <div ref={chatEndRef} />
@@ -771,11 +841,15 @@
             }, [messages]);
 
             const add = (msg) => setMessages((m) => [...m, msg]);
-            const reply = (text) => add({ from: 'bot', text: getSupportBotReply(text, onNavigate) });
+            const botReply = (text) => {
+                const res = getSupportBotReply(text, onNavigate);
+                const payload = typeof res === 'string' ? { text: res, actions: [] } : res;
+                add({ from: 'bot', text: payload.text, actions: payload.actions || [] });
+            };
 
             const handleIntent = (intent) => {
                 add({ from: 'user', text: intent });
-                reply(intent);
+                botReply(intent);
             };
 
             const handleSend = (e) => {
@@ -784,13 +858,13 @@
                 if (!text) return;
                 setInput('');
                 add({ from: 'user', text });
-                reply(text);
+                botReply(text);
             };
 
             const chatPanel = (
                 <div className="space-y-6">
                     <div className="grid md:grid-cols-2 gap-3">
-                        {['Getting started', 'Account & login', 'Disclosure triggers', 'Security & encryption'].map((label) => (
+                        {['Estate Roadmap', 'Estate Vault pricing', 'Disclosure triggers', 'Affiliate program'].map((label) => (
                             <button key={label} type="button" onClick={() => handleIntent(label)} className="border border-gray-200 rounded-lg p-3 text-left hover:bg-gray-50 transition">
                                 <span className="font-semibold text-gray-900">{label}</span>
                                 <p className="text-xs text-gray-600 mt-1">Quick topic</p>
@@ -810,10 +884,19 @@
                         </div>
                         <div className="p-4 space-y-3 max-h-[420px] overflow-auto bg-white">
                             {messages.map((m, idx) => (
-                                <div key={idx} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                <div key={idx} className={`flex flex-col ${m.from === 'user' ? 'items-end' : 'items-start'}`}>
                                     <div className={`${m.from === 'user' ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-900'} rounded-2xl px-4 py-2 max-w-[85%] text-sm`}>
                                         {m.text}
                                     </div>
+                                    {m.from === 'bot' && m.actions && m.actions.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mt-2 max-w-[85%]">
+                                            {m.actions.map((act) => (
+                                                <button key={act.label} type="button" onClick={() => onNavigate(act.page)} className="text-xs px-3 py-1.5 rounded-full border border-blue-200 text-blue-900 font-semibold hover:bg-blue-50">
+                                                    {act.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                             <div ref={chatEndRef} />
@@ -1338,31 +1421,38 @@
             const plans = [
                 {
                     name: 'Basic',
+                    product: 'Estate Roadmap',
                     monthlyPrice: 9,
                     annualPrice: 90,
-                    description: 'Essential estate organization',
+                    description: 'Full Estate Roadmap — data-minimal planning for your Navigator',
                     features: [
-                        'Asset storage',
-                        'Legal document upload',
-                        'Trusted contacts',
-                        'Basic activity monitoring'
+                        'Complete Secure Setup (5-stage onboarding)',
+                        'Jurisdictional anchor & localized checklist',
+                        'Asset mapping with location clues only (no account numbers)',
+                        'Digital keys route mapping',
+                        'Navigator assignment (immediate or 7-day conditional)',
+                        'Estate Discovery Directory & printable summary',
+                        'DATA GUARD on every field',
+                        'Basic activity monitoring & proof-of-life check-ins'
                     ],
                     color: 'blue',
-                    icon: 'shield',
+                    icon: 'map',
                 },
                 {
                     name: 'Premium',
+                    product: 'Estate Vault',
                     monthlyPrice: 19,
                     annualPrice: 190,
-                    description: 'Advanced protection and insights',
+                    description: 'Estate Roadmap plus the full encrypted Estate Vault',
                     features: [
-                        'Advanced trigger logic',
-                        'Digital asset manager',
-                        'Discounted Will Generation pricing',
-                        'Optional Last Wish Video ($6.99/video, max 5 min each)',
+                        'Everything in Estate Roadmap (Basic)',
+                        'Encrypted asset & legal document vault',
+                        'Digital Life Manager',
+                        'Advanced trigger logic & disclosure preview',
+                        'Estate Planner & discounted Will generation',
+                        'Multi-recipient disclosure & audit logs',
                         'AI estate summary',
-                        'Multi-recipient disclosure control',
-                        'Audit logs'
+                        'Up to 1 optional Last Wish video — $6.99 each (max 5 min)'
                     ],
                     color: 'purple',
                     icon: 'crown',
@@ -1370,15 +1460,16 @@
                 },
                 {
                     name: 'Family',
+                    product: 'Estate Vault',
                     monthlyPrice: 29,
                     annualPrice: 290,
-                    description: 'Complete family protection',
+                    description: 'Premium Estate Vault for households (up to 4 users)',
                     features: [
-                        'Up to 4 users',
-                        'Shared family vault',
-                        'Cross-visibility options',
-                        'Discounted Will Generation pricing',
-                        'Optional Last Wish Video ($6.99/video, max 5 min each)'
+                        'Everything in Premium Estate Vault',
+                        'Up to 4 user accounts under one subscription',
+                        'Shared family vault & cross-visibility options',
+                        'Up to 4 optional Last Wish videos — $6.99 each (max 5 min per video)',
+                        'Discounted Will generation for each household member'
                     ],
                     color: 'green',
                     icon: 'users'
@@ -1440,8 +1531,11 @@
                             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                                 Simple, Transparent Pricing
                             </h1>
-                            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-                                Choose the plan that fits your family's needs. All plans include bank-level security and conditional disclosure.
+                            <p className="text-xl text-gray-600 mb-4 max-w-2xl mx-auto">
+                                <strong>Basic</strong> = Estate Roadmap only. <strong>Premium &amp; Family</strong> = Estate Vault (Roadmap + encrypted vault).
+                            </p>
+                            <p className="text-sm text-gray-500 mb-8 max-w-3xl mx-auto">
+                                All plans use bank-level security. Vault plans add document storage, triggers, and advanced disclosure controls.
                             </p>
                             <p className="text-sm text-gray-500 mb-2 max-w-3xl mx-auto">
                                 Will generation provides a structured template draft and execution checklist. It is not legal advice and may require jurisdiction-specific attorney review. Need legal help? Call 400 383 3707.
@@ -1504,6 +1598,7 @@
                                                 <i data-lucide={plan.icon} className={`w-8 h-8 text-${plan.color}-600`}></i>
                                             </div>
                                             
+                                            <p className="text-xs font-bold uppercase tracking-wide text-blue-900 mb-1">{plan.product}</p>
                                             <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
                                             <p className="text-gray-600 mb-4">{plan.description}</p>
                                             
@@ -1577,84 +1672,39 @@
         const PricePackageExplainedPage = (props) => {
             const packages = [
                 {
-                    title: '1. Basic Plan',
+                    title: '1. Basic Plan — Estate Roadmap',
                     price: '$9 /month (or $90 /year)',
-                    intro: 'Designed for individuals looking for essential organization and a secure place to store vital documents.',
-                    features: [
-                        {
-                            name: 'Asset Storage',
-                            meaning: 'A digital inventory where you can list financial accounts, physical properties, and valuables so heirs are not searching for missing assets.'
-                        },
-                        {
-                            name: 'Legal Document Upload',
-                            meaning: 'Secure storage for digital copies of your Will, Power of Attorney, or Trust documents.'
-                        },
-                        {
-                            name: 'Trusted Contacts',
-                            meaning: 'You designate specific people who will be notified or granted access to certain information based on specific conditions (like your passing).'
-                        },
-                        {
-                            name: 'Basic Activity Monitoring',
-                            meaning: 'A proof-of-life check where the system monitors your logins to ensure you are still active; if inactivity persists, it triggers your disclosure plan.'
-                        }
-                    ]
+                    intro: 'The complete data-minimal Estate Roadmap product. No encrypted document vault — only secure clues and Navigator directions.',
+                    features: ESTATE_ROADMAP_FEATURES.map((name) => ({
+                        name,
+                        meaning: name.includes('DATA GUARD') ? 'Blocks sensitive entries and reminds you never to store account numbers or passwords.' : 'Included in your Basic subscription at no extra charge.'
+                    }))
                 },
                 {
-                    title: '2. Premium Plan',
+                    title: '2. Premium Plan — Estate Vault',
                     price: '$19 /month (or $190 /year)',
-                    intro: 'The most popular choice, offering more intelligent automation and granular control over how information is released.',
+                    intro: 'Estate Roadmap plus the full Estate Vault: encrypted storage, triggers, Digital Life, Estate Planner, and more.',
                     features: [
-                        {
-                            name: 'Advanced Trigger Logic',
-                            meaning: 'More complex if/then scenarios for releasing data (for example, requiring verification from multiple doctors or legal entities before the vault unlocks).'
-                        },
-                        {
-                            name: 'Digital Asset Manager',
-                            meaning: 'Specifically handles digital footprints, such as social media logins, crypto keys, or cloud photo storage.'
-                        },
-                        {
-                            name: 'AI Estate Summary',
-                            meaning: 'Uses AI to scan your uploaded documents and create a simplified cheat sheet for your heirs, highlighting the most important instructions.'
-                        },
-                        {
-                            name: 'Discounted Will Generation Pricing',
-                            meaning: 'Premium members receive discounted Will generation pricing with guided support. One Will does not fit all situations — contact our team at 400 383 3707 for guidance.'
-                        },
-                        {
-                            name: 'Last Wish Video (transparent pricing)',
-                            meaning: 'Premium & Family only — optional $6.99 per instruction / last wish video (max 5 min each). Add during subscription or any time after.'
-                        },
-                        {
-                            name: 'Multi-recipient Disclosure',
-                            meaning: 'Allows you to tailor different packages of information for different people (for example, your spouse gets everything, but your business partner only gets company logins).'
-                        },
-                        {
-                            name: 'Audit Logs',
-                            meaning: 'A transparent history showing exactly who accessed what and when, providing a security trail for your peace of mind.'
-                        }
+                        { name: 'Full Estate Roadmap (all Basic features)', meaning: 'Everything in the Basic plan is included.' },
+                        { name: 'Encrypted asset & legal document vault', meaning: 'Store inventories and document copies with bank-level encryption.' },
+                        { name: 'Digital Life Manager', meaning: 'Organize social, email, cloud, and digital asset instructions.' },
+                        { name: 'Advanced trigger logic & disclosure preview', meaning: 'Configure safeguards; disclosure is never automatic without verification.' },
+                        { name: 'Estate Planner & discounted Will generation', meaning: 'Guided inputs and template Will draft tooling (not legal advice).' },
+                        { name: 'Multi-recipient disclosure & audit logs', meaning: 'Different packages for different people; immutable access history.' },
+                        { name: 'AI estate summary', meaning: 'Simplified heir cheat sheet from your uploaded materials.' },
+                        { name: 'Up to 1 Last Wish video add-on', meaning: 'Optional $6.99 per video (max 5 min each) at checkout or anytime after subscribing.' }
                     ]
                 },
                 {
-                    title: '3. Family Plan',
+                    title: '3. Family Plan — Estate Vault (Household)',
                     price: '$29 /month (or $290 /year)',
-                    intro: 'Best for households or couples who want to manage their legacies collectively.',
+                    intro: 'Premium Estate Vault for up to four household members, with shared vault options and more Last Wish video capacity.',
                     features: [
-                        {
-                            name: 'Up to 4 Users',
-                            meaning: 'Provides individual accounts for family members under one subscription.'
-                        },
-                        {
-                            name: 'Shared Family Vault',
-                            meaning: 'A common area for documents that affect everyone, such as home insurance policies, family photos, or utility information.'
-                        },
-                        {
-                            name: 'Cross-visibility Options',
-                            meaning: 'Allows partners to see each other\'s progress and organization status without necessarily revealing private details until the trigger occurs.'
-                        },
-                        {
-                            name: 'Discounted Will Generation Pricing',
-                            meaning: 'Household-level access to Will draft generation and execution guidance for each subscriber profile in the plan.'
-                        }
+                        { name: 'Everything in Premium Estate Vault', meaning: 'All Premium vault and roadmap capabilities.' },
+                        { name: 'Up to 4 user accounts', meaning: 'Individual logins under one household subscription.' },
+                        { name: 'Shared family vault & cross-visibility', meaning: 'Household documents and planning progress where you allow it.' },
+                        { name: 'Up to 4 Last Wish video add-ons', meaning: 'Optional $6.99 per video (max 5 min each) — up to four at checkout or after subscribe.' },
+                        { name: 'Discounted Will generation per member', meaning: 'Each household profile can use Will draft tooling with guidance.' }
                     ]
                 }
             ];
@@ -2090,9 +2140,60 @@
                             <p className="text-lg text-blue-200 mb-8 max-w-2xl mx-auto">
                                 Prepared. Protected. Connected.
                             </p>
-                            <button onClick={onGetStarted} className="bg-white text-blue-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 transition shadow-lg">
-                                Start Your Plan
-                            </button>
+                            <div className="flex flex-wrap justify-center gap-4">
+                                <button onClick={onGetStarted} className="bg-white text-blue-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 transition shadow-lg">
+                                    Start Your Plan
+                                </button>
+                                <button onClick={() => onNavigate('pricing')} className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white/10 transition">
+                                    View Pricing
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Estate Roadmap vs Estate Vault */}
+                    <section id="products" className="py-20 bg-white border-b border-gray-200">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <h2 className="text-4xl font-bold text-center mb-3 text-gray-900">Two ways to protect your legacy</h2>
+                            <p className="text-center text-gray-600 mb-12 max-w-3xl mx-auto">
+                                Start with the <strong>Estate Roadmap</strong> (clues only, no honey pot) or choose the full <strong>Estate Vault</strong> — Roadmap plus encrypted storage, triggers, and vault features.
+                            </p>
+                            <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                                <div className="rounded-2xl border-2 border-blue-200 bg-blue-50/40 p-8 flex flex-col">
+                                    <div className="w-14 h-14 bg-blue-900 rounded-xl flex items-center justify-center mb-4">
+                                        <i data-lucide="map" className="w-8 h-8 text-white"></i>
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Estate Roadmap</h3>
+                                    <p className="text-gray-600 mb-4 text-sm">Data-minimal secure setup: your Navigator gets directions, not passwords or account numbers.</p>
+                                    <ul className="text-sm text-gray-700 space-y-2 mb-6 flex-1 list-disc list-inside">
+                                        {ESTATE_ROADMAP_FEATURES.slice(0, 6).map((f, i) => <li key={i}>{f}</li>)}
+                                    </ul>
+                                    <p className="text-xs text-blue-900 font-semibold mb-4">Included in Basic plan ($9/mo)</p>
+                                    <button type="button" onClick={() => onNavigate('signup')} className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition mb-2">
+                                        Start Estate Roadmap
+                                    </button>
+                                    <button type="button" onClick={() => onNavigate('pricing')} className="w-full border border-blue-900 text-blue-900 py-3 rounded-lg font-semibold hover:bg-blue-50 transition">
+                                        Roadmap pricing (Basic)
+                                    </button>
+                                </div>
+                                <div className="rounded-2xl border-2 border-amber-300 bg-amber-50/30 p-8 flex flex-col ring-2 ring-amber-200">
+                                    <div className="w-14 h-14 bg-amber-600 rounded-xl flex items-center justify-center mb-4">
+                                        <i data-lucide="archive" className="w-8 h-8 text-white"></i>
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Estate Vault</h3>
+                                    <p className="text-gray-600 mb-4 text-sm">Everything in the Roadmap <strong>plus</strong> encrypted vault, documents, triggers, and advanced disclosure.</p>
+                                    <ul className="text-sm text-gray-700 space-y-2 mb-6 flex-1 list-disc list-inside">
+                                        {ESTATE_VAULT_EXTRA_FEATURES.slice(0, 6).map((f, i) => <li key={i}>{f}</li>)}
+                                    </ul>
+                                    <p className="text-xs text-amber-900 font-semibold mb-4">Premium from $19/mo · Family up to 4 users $29/mo</p>
+                                    <button type="button" onClick={() => onNavigate('signup')} className="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition mb-2">
+                                        Get Estate Vault
+                                    </button>
+                                    <button type="button" onClick={() => onNavigate('pricing')} className="w-full border border-amber-700 text-amber-900 py-3 rounded-lg font-semibold hover:bg-amber-50 transition">
+                                        Compare Vault plans
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </section>
 
@@ -2335,10 +2436,10 @@
                                     {(selectedPlan.name === 'Premium' || selectedPlan.name === 'Family') && (
                                         <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
                                             <p className="text-sm font-semibold text-blue-900 mb-1">Optional: Last Wish Video</p>
-                                            <p className="text-xs text-blue-800 mb-2">$6.99 per video (max 5 min each). Add at checkout or any day after subscribing.</p>
+                                            <p className="text-xs text-blue-800 mb-2">$6.99 per video (max 5 min each). Premium: up to 1 video. Family: up to 4 videos.</p>
                                             <div className="flex items-center gap-3">
                                                 <label className="text-xs text-gray-700">Videos</label>
-                                                <input type="number" min="0" max="20" value={lastWishVideoCount} onChange={(e) => setLastWishVideoCount(Math.max(0, Math.min(20, Number(e.target.value) || 0)))} className="w-20 px-2 py-1 border border-gray-300 rounded-lg text-sm" />
+                                                <input type="number" min="0" max={selectedPlan.name === 'Family' ? 4 : 1} value={lastWishVideoCount} onChange={(e) => setLastWishVideoCount(Math.max(0, Math.min(selectedPlan.name === 'Family' ? 4 : 1, Number(e.target.value) || 0)))} className="w-20 px-2 py-1 border border-gray-300 rounded-lg text-sm" />
                                                 <span className="text-xs text-gray-700">Add-on: <strong>${(lastWishVideoCount * 6.99).toFixed(2)}</strong></span>
                                             </div>
                                         </div>
@@ -2376,14 +2477,16 @@
         const PLAN_RANK = { Basic: 1, Premium: 2, Family: 3 };
         const PLAN_PRICES = { Basic: 9, Premium: 19, Family: 29 };
         const FEATURE_PLANS = {
-            'dashboard': 'Basic', 'assets': 'Basic', 'legal': 'Basic', 'trusted': 'Basic', 'activity': 'Basic',
-            'digital': 'Premium', 'triggers': 'Premium', 'disclosure-preview': 'Premium', 'estate-planner': 'Premium',
-            'security-architecture': 'Basic', 'affiliate-dashboard': 'Basic', 'generate-will': 'Premium'
+            'dashboard': 'Basic', 'onboarding': 'Basic', 'estate-discovery': 'Basic', 'activity': 'Basic',
+            'security-architecture': 'Basic', 'affiliate-dashboard': 'Basic', 'affiliate-program': 'Basic',
+            'assets': 'Premium', 'legal': 'Premium', 'trusted': 'Premium', 'digital': 'Premium',
+            'triggers': 'Premium', 'disclosure-preview': 'Premium', 'estate-planner': 'Premium', 'generate-will': 'Premium'
         };
         const FEATURE_NAMES = {
-            'assets': 'Assets & Liabilities', 'legal': 'Legal Documents', 'trusted': 'Trusted People', 'activity': 'Activity Monitoring',
-            'digital': 'Digital Life', 'triggers': 'Trigger Management', 'disclosure-preview': 'Disclosure Preview', 'estate-planner': 'Estate Planner',
-            'affiliate-dashboard': 'Affiliate Dashboard', 'generate-will': 'Generate Will?'
+            'assets': 'Assets & Liabilities (Estate Vault)', 'legal': 'Legal Documents (Estate Vault)', 'trusted': 'Trusted People (Estate Vault)',
+            'activity': 'Activity Monitoring', 'digital': 'Digital Life (Estate Vault)', 'triggers': 'Trigger Management',
+            'disclosure-preview': 'Disclosure Preview', 'estate-planner': 'Estate Planner', 'estate-discovery': 'Estate Roadmap',
+            'onboarding': 'Secure Setup', 'affiliate-dashboard': 'Affiliate Dashboard', 'affiliate-program': 'Affiliate Program', 'generate-will': 'Generate Will?'
         };
         const canAccessFeature = (featureId) => {
             const sub = productionData.subscription;
@@ -2599,8 +2702,60 @@
             }
         };
 
+        const SecureSetupSummary = ({ ob, onNavigate, onDone }) => {
+            const countryName = COUNTRY_LIST.find((c) => c.code === ob.jurisdiction.country)?.name || ob.jurisdiction.country || '—';
+            const entries = ob.roadmapEntries || [];
+            const dk = ob.digitalKeys || {};
+            const nav = ob.navigator || {};
+            useEffect(() => { try { lucide.createIcons(); } catch (e) {} }, []);
+
+            return (
+                <div className="max-w-2xl mx-auto">
+                    <div className="bg-white rounded-xl card-shadow-lg p-8 border-2 border-green-200">
+                        <div className="text-center mb-6">
+                            <i data-lucide="check-circle" className="w-16 h-16 text-green-600 mx-auto mb-3"></i>
+                            <h1 className="text-2xl font-bold text-gray-900">Secure Setup complete</h1>
+                            <p className="text-gray-600 text-sm mt-2">Your Estate Roadmap summary — review before sharing with your Navigator.</p>
+                        </div>
+                        <div className="space-y-4 text-sm">
+                            <div className="p-4 bg-gray-50 rounded-lg">
+                                <p className="font-semibold text-gray-900 mb-1">Jurisdiction</p>
+                                <p className="text-gray-700">{countryName}{ob.jurisdiction.region ? ' / ' + ob.jurisdiction.region : ''}</p>
+                            </div>
+                            <div className="p-4 bg-gray-50 rounded-lg">
+                                <p className="font-semibold text-gray-900 mb-1">Mapped items</p>
+                                <p className="text-gray-700">{entries.length} location clue{entries.length !== 1 ? 's' : ''} across your roadmap</p>
+                                {entries.length > 0 && (
+                                    <ul className="mt-2 list-disc list-inside text-gray-600 max-h-32 overflow-y-auto">
+                                        {entries.map((e) => <li key={e.id}>{e.category}: {e.institution || 'Item'}</li>)}
+                                    </ul>
+                                )}
+                            </div>
+                            <div className="p-4 bg-gray-50 rounded-lg">
+                                <p className="font-semibold text-gray-900 mb-1">Digital keys route</p>
+                                <p className="text-gray-700">{dk.method === 'manager' ? 'Password manager — ' + (dk.emergencyKitLocation || 'location not specified') : dk.method === 'written' ? 'Written — ' + (dk.physicalStorageLocation || 'location not specified') : 'Not specified'}</p>
+                            </div>
+                            <div className="p-4 bg-gray-50 rounded-lg">
+                                <p className="font-semibold text-gray-900 mb-1">Navigator</p>
+                                <p className="text-gray-700">{nav.name || '—'}{nav.email ? ' · ' + nav.email : ''}</p>
+                                <p className="text-xs text-gray-500 mt-1">{nav.permissionTier === 'immediate' ? 'Immediate access' : 'Conditional access (7-day switch)'}</p>
+                            </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-3 mt-8">
+                            <button type="button" onClick={() => onNavigate('estate-discovery')} className="flex-1 bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800">View Estate Roadmap</button>
+                            <button type="button" onClick={onDone} className="flex-1 border border-gray-300 py-3 rounded-lg font-semibold text-gray-800 hover:bg-gray-50">Go to Dashboard</button>
+                        </div>
+                        <button type="button" onClick={() => onNavigate('pricing')} className="w-full mt-3 text-sm text-blue-900 font-semibold hover:underline">
+                            Upgrade to Estate Vault (Premium) →
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
         const OnboardingFlow = ({ onNavigate, onComplete, setCountry }) => {
             const ob = productionData.onboarding;
+            const [showSummary, setShowSummary] = useState(ob.completed && ob.stage >= 5);
             const [stage, setStage] = useState(ob.stage || 1);
             const [assetStep, setAssetStep] = useState(1);
             const [jurisdiction, setJurisdiction] = useState(() => {
@@ -2681,11 +2836,20 @@
                 ob.completed = true;
                 ob.stage = 5;
                 syncRoadmapToVault();
-                if (onComplete) onComplete();
-                else onNavigate('estate-discovery');
+                setShowSummary(true);
             };
 
             const progressPct = Math.round(((stage - 1) / 4) * 100);
+
+            if (showSummary) {
+                return (
+                    <SecureSetupSummary
+                        ob={ob}
+                        onNavigate={onNavigate}
+                        onDone={() => { if (onComplete) onComplete(); else onNavigate('dashboard'); }}
+                    />
+                );
+            }
 
             return (
                 <div className="max-w-2xl mx-auto">
@@ -3360,9 +3524,12 @@
 
                         {productionData.onboarding?.completed && (
                             <div className="mt-4 bg-white border border-gray-200 rounded-xl p-4 max-w-2xl card-shadow">
-                                <p className="text-sm font-semibold text-gray-900 mb-1">Estate Discovery Directory ready</p>
-                                <p className="text-xs text-gray-600 mb-3">Preview what your Navigator will see — clues only, never login screens.</p>
-                                <button type="button" onClick={() => onNavigate('estate-discovery')} className="px-4 py-2 border border-blue-900 text-blue-900 rounded-lg text-sm font-semibold hover:bg-blue-50">View estate roadmap</button>
+                                <p className="text-sm font-semibold text-gray-900 mb-1">Estate Roadmap ready</p>
+                                <p className="text-xs text-gray-600 mb-3">Review your Secure Setup summary or open the directory your Navigator will see.</p>
+                                <div className="flex flex-wrap gap-2">
+                                    <button type="button" onClick={() => onNavigate('onboarding')} className="px-4 py-2 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800">View setup summary</button>
+                                    <button type="button" onClick={() => onNavigate('estate-discovery')} className="px-4 py-2 border border-blue-900 text-blue-900 rounded-lg text-sm font-semibold hover:bg-blue-50">Estate Roadmap directory</button>
+                                </div>
                             </div>
                         )}
 
@@ -4174,12 +4341,61 @@
         };
 
         // Trigger Management Page
-        const TriggersPage = () => {
+        const TriggersPage = ({ onNavigate }) => {
+            const defaultCfg = {
+                missedCheckIns: true,
+                manualEmergency: true,
+                trustedContactConcern: true,
+                mfaRequired: true,
+                inactivityDays: 90,
+                events: []
+            };
+            if (!productionData.triggers) productionData.triggers = { ...defaultCfg };
+            const [cfg, setCfg] = useState({ ...defaultCfg, ...productionData.triggers });
+            const [savedMsg, setSavedMsg] = useState('');
+            const [testMsg, setTestMsg] = useState('');
+
+            useEffect(() => { try { lucide.createIcons(); } catch (e) {} }, [cfg, savedMsg, testMsg]);
+
+            const syncCfg = (next) => {
+                setCfg(next);
+                productionData.triggers = { ...productionData.triggers, ...next };
+            };
+
+            const toggleKey = (key) => syncCfg({ ...cfg, [key]: !cfg[key] });
+
+            const triggerTypes = [
+                { key: 'missedCheckIns', type: 'Missed Check-ins', desc: 'Automated detection after configured inactivity period' },
+                { key: 'manualEmergency', type: 'Manual Emergency Activation', desc: 'User-initiated immediate escalation' },
+                { key: 'trustedContactConcern', type: 'Trusted Contact Concern', desc: 'Concern submission by designated contacts' },
+                { key: 'mfaRequired', type: 'Multi-Factor Confirmation', desc: 'Required before any disclosure' }
+            ];
+
+            const saveConfig = () => {
+                productionData.triggers = { ...cfg };
+                setSavedMsg('Trigger settings saved.');
+                setTimeout(() => setSavedMsg(''), 3000);
+            };
+
+            const runTestTrigger = () => {
+                const evt = {
+                    id: Date.now(),
+                    at: new Date().toISOString(),
+                    type: 'Test (dry run)',
+                    status: 'Simulated — no disclosure released',
+                    note: 'Preview only. Open Disclosure Preview to review what would be shared.'
+                };
+                const events = [evt, ...(cfg.events || [])].slice(0, 20);
+                syncCfg({ ...cfg, events });
+                setTestMsg('Test trigger logged (simulation only — nothing was disclosed).');
+                setTimeout(() => setTestMsg(''), 5000);
+            };
+
             return (
                 <div>
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">Trigger Management</h1>
-                        <p className="text-gray-600">Configure conditional disclosure triggers and safeguards</p>
+                        <p className="text-gray-600">Configure conditional disclosure triggers and safeguards (Estate Vault — Premium &amp; Family)</p>
                     </div>
 
                     <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-6">
@@ -4192,26 +4408,33 @@
                         </div>
                     </div>
 
-                    {/* Trigger Types */}
+                    {savedMsg && <p className="mb-4 text-sm font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-2">{savedMsg}</p>}
+                    {testMsg && <p className="mb-4 text-sm font-semibold text-blue-800 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">{testMsg}</p>}
+
+                    <div className="bg-white rounded-xl card-shadow p-6 mb-6">
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Inactivity period before missed check-in trigger (days)</label>
+                        <input type="number" min="30" max="365" value={cfg.inactivityDays} onChange={(e) => syncCfg({ ...cfg, inactivityDays: Math.max(30, Math.min(365, Number(e.target.value) || 90)) })} className="w-32 px-3 py-2 border border-gray-300 rounded-lg mb-4" />
+                    </div>
+
                     <div className="bg-white rounded-xl card-shadow p-6 mb-6">
                         <h3 className="text-xl font-bold text-gray-900 mb-4">Trigger Types</h3>
                         <div className="space-y-3">
-                            {[
-                                { type: 'Missed Check-ins', desc: 'Automated detection after configured inactivity period', enabled: true },
-                                { type: 'Manual Emergency Activation', desc: 'User-initiated immediate escalation', enabled: true },
-                                { type: 'Trusted Contact Concern', desc: 'Concern submission by designated contacts', enabled: true },
-                                { type: 'Multi-Factor Confirmation', desc: 'Required before any disclosure', enabled: true }
-                            ].map((trigger, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                            {triggerTypes.map((trigger) => (
+                                <div key={trigger.key} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                                     <div>
                                         <p className="font-semibold text-gray-900">{trigger.type}</p>
                                         <p className="text-sm text-gray-600">{trigger.desc}</p>
                                     </div>
-                                    <div className={`w-12 h-6 rounded-full ${trigger.enabled ? 'bg-green-500' : 'bg-gray-300'} relative`}>
-                                        <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition ${trigger.enabled ? 'right-0.5' : 'left-0.5'}`}></div>
-                                    </div>
+                                    <button type="button" role="switch" aria-checked={!!cfg[trigger.key]} onClick={() => toggleKey(trigger.key)} className={`w-12 h-6 rounded-full relative transition ${cfg[trigger.key] ? 'bg-green-500' : 'bg-gray-300'}`}>
+                                        <span className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition ${cfg[trigger.key] ? 'right-0.5' : 'left-0.5'}`}></span>
+                                    </button>
                                 </div>
                             ))}
+                        </div>
+                        <div className="flex flex-wrap gap-3 mt-6">
+                            <button type="button" onClick={saveConfig} className="bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-800">Save trigger settings</button>
+                            <button type="button" onClick={runTestTrigger} className="border border-blue-900 text-blue-900 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50">Run test trigger (simulation)</button>
+                            {onNavigate && <button type="button" onClick={() => onNavigate('disclosure-preview')} className="text-blue-900 font-semibold hover:underline">Open Disclosure Preview →</button>}
                         </div>
                     </div>
 
@@ -4237,14 +4460,25 @@
                         </div>
                     </div>
 
-                    {/* Trigger Event Log */}
                     <div className="bg-white rounded-xl card-shadow p-6">
                         <h3 className="text-xl font-bold text-gray-900 mb-4">Trigger Event Log</h3>
-                        <div className="text-center py-12">
-                            <i data-lucide="check-circle" className="w-16 h-16 text-green-600 mx-auto mb-4"></i>
-                            <p className="text-lg font-semibold text-gray-900 mb-2">No Trigger Events Detected</p>
-                            <p className="text-gray-600">Your account is active and all signals are healthy</p>
-                        </div>
+                        {(cfg.events && cfg.events.length > 0) ? (
+                            <ul className="space-y-3">
+                                {cfg.events.map((ev) => (
+                                    <li key={ev.id} className="p-4 border border-gray-200 rounded-lg text-sm">
+                                        <p className="font-semibold text-gray-900">{ev.type} — <span className="text-green-700">{ev.status}</span></p>
+                                        <p className="text-gray-500 text-xs mt-1">{new Date(ev.at).toLocaleString()}</p>
+                                        {ev.note && <p className="text-gray-600 mt-1">{ev.note}</p>}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <div className="text-center py-12">
+                                <i data-lucide="check-circle" className="w-16 h-16 text-green-600 mx-auto mb-4"></i>
+                                <p className="text-lg font-semibold text-gray-900 mb-2">No Trigger Events Detected</p>
+                                <p className="text-gray-600">Your account is active and all signals are healthy</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             );
@@ -4588,7 +4822,8 @@
                 { id: 'onboarding', name: 'Secure Setup', icon: 'compass' },
                 { id: 'pricing', name: 'Pricing', icon: 'tag' },
                 { id: 'generate-will', name: 'Generate Will?', icon: 'file-signature' },
-                { id: 'affiliate-dashboard', name: 'Affiliate', icon: 'gift' },
+                { id: 'affiliate-dashboard', name: 'Affiliate Dashboard', icon: 'gift' },
+                { id: 'affiliate-program', name: 'Affiliate Program', icon: 'megaphone' },
                 { id: 'estate-planner', name: 'Estate Planner', icon: 'file-edit' },
                 { id: 'legal', name: 'Legal Documents', icon: 'file-text' },
                 { id: 'assets', name: 'Assets & Liabilities', icon: 'building' },
@@ -4811,11 +5046,11 @@
             }
 
             const gatePage = (pageId, PageComponent, props = {}) => {
+                const required = FEATURE_PLANS[pageId] || 'Basic';
                 if (!hasActiveSubscription()) {
-                    return <SubscribeRequiredScreen onNavigate={handleNavigate} onSubscribed={() => { setCurrentPage('dashboard'); handleSubscriptionChange(); }} />;
+                    return <SubscribeRequiredScreen onNavigate={handleNavigate} onSubscribed={() => { setCurrentPage('dashboard'); handleSubscriptionChange(); }} pendingPlanHint={required} />;
                 }
                 if (!canAccessFeature(pageId)) {
-                    const required = FEATURE_PLANS[pageId] || 'Basic';
                     const name = FEATURE_NAMES[pageId] || pageId;
                     return <UpgradePromptPage featureName={name} requiredPlan={required} onNavigate={handleNavigate} />;
                 }
@@ -4849,7 +5084,7 @@
                     case 'estate-planner':
                         return gatePage('estate-planner', EstatePlannerPage);
                     case 'triggers':
-                        return gatePage('triggers', TriggersPage);
+                        return gatePage('triggers', TriggersPage, { onNavigate: handleNavigate });
                     case 'disclosure-preview':
                         return gatePage('disclosure-preview', DisclosurePreviewPage);
                     case 'security-architecture':

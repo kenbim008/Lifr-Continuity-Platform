@@ -2588,8 +2588,12 @@
         const FINANCIAL_INSTITUTIONS = [
             'TD Waterhouse', 'TD Canada Trust', 'RBC', 'BMO', 'Scotiabank', 'CIBC', 'Wealthsimple', 'Questrade',
             'Computershare', 'Fidelity', 'Charles Schwab', 'Vanguard', 'Chase', 'Bank of America', 'Wells Fargo',
-            'Other (type below)'
+            'Other (describe below)'
         ];
+        const LEGAL_LOCATIONS = ['Home safe', 'Law firm', 'Bank safety deposit', 'Family member', 'Accountant office', 'Other (describe below)'];
+        const DIGITAL_PLATFORMS = ['Gmail / Google', 'Microsoft / Outlook', 'Apple iCloud', 'Facebook / Meta', 'LinkedIn', 'Crypto exchange (name only)', 'Password manager', 'Other (describe below)'];
+        const PHYSICAL_VALUABLES = ['Primary residence', 'Vehicle / registration', 'Jewelry or collectibles', 'Rental property', 'Safety deposit box', 'Other (describe below)'];
+        const OTHER_SELECT_VALUE = 'Other (describe below)';
 
         const OWNERSHIP_OPTIONS = ['Personal name', 'Joint with spouse', 'Joint with partner', 'Holding company / corporation', 'Trust', 'Other entity'];
 
@@ -2782,13 +2786,65 @@
                 institution: '',
                 customInstitution: '',
                 ownership: '',
+                ownershipOther: '',
                 locationClue: '',
                 locationTags: [],
                 emailSearchTerm: ''
             });
+            const [skippedCategories, setSkippedCategories] = useState(() => [...(ob.skippedCategories || [])]);
+            const [saveNotice, setSaveNotice] = useState('');
+            const [entriesTick, setEntriesTick] = useState(0);
             const [sensitiveBlock, setSensitiveBlock] = useState(false);
+            const bumpEntries = () => setEntriesTick((t) => t + 1);
 
-            useEffect(() => { try { lucide.createIcons(); } catch (e) {} }, [stage, assetStep, jurisdiction, digitalKeys, navigator]);
+            const institutionOptionsForCategory = (cat) => {
+                if (cat === 'Financial Accounts') return FINANCIAL_INSTITUTIONS;
+                if (cat === 'Legal Documents') return LEGAL_LOCATIONS;
+                if (cat === 'Digital Legacy') return DIGITAL_PLATFORMS;
+                if (cat === 'Physical Valuables') return PHYSICAL_VALUABLES;
+                return [];
+            };
+
+            const resolveInstitutionLabel = (d) => {
+                const isOther = d.institution === OTHER_SELECT_VALUE || d.institution === 'Other (type below)';
+                if (isOther) return (d.customInstitution || '').trim();
+                return (d.institution || d.customInstitution || '').trim();
+            };
+
+            const categoryProgress = ASSET_CATEGORY_TILES.map((tile) => {
+                const count = (ob.roadmapEntries || []).filter((e) => e.category === tile.id).length;
+                const skipped = skippedCategories.includes(tile.id);
+                return { ...tile, count, skipped, complete: count > 0 || skipped };
+            }); // entriesTick forces refresh when roadmapEntries mutates
+            void entriesTick;
+            const categoriesAddressedCount = categoryProgress.filter((c) => c.complete).length;
+            const allCategoriesAddressed = categoryProgress.every((c) => c.complete);
+
+            const resetDraft = () => setDraft({
+                category: '', institution: '', customInstitution: '', ownership: '', ownershipOther: '',
+                locationClue: '', locationTags: [], emailSearchTerm: ''
+            });
+
+            const markCategoryNotApplicable = (catId) => {
+                const next = [...new Set([...skippedCategories, catId])];
+                setSkippedCategories(next);
+                ob.skippedCategories = next;
+                bumpEntries();
+            };
+
+            const unmarkCategorySkipped = (catId) => {
+                const next = skippedCategories.filter((id) => id !== catId);
+                setSkippedCategories(next);
+                ob.skippedCategories = next;
+                bumpEntries();
+            };
+
+            const removeRoadmapEntry = (id) => {
+                ob.roadmapEntries = (ob.roadmapEntries || []).filter((e) => e.id !== id);
+                bumpEntries();
+            };
+
+            useEffect(() => { try { lucide.createIcons(); } catch (e) {} }, [stage, assetStep, jurisdiction, digitalKeys, navigator, skippedCategories, saveNotice, ob.roadmapEntries?.length]);
 
             const syncJurisdiction = (next) => {
                 setJurisdiction(next);
@@ -2802,34 +2858,57 @@
 
             const canProceedAsset = () => {
                 if (!draft.category) return false;
-                if (assetStep === 2 && !draft.institution && !draft.customInstitution) return false;
-                if (assetStep === 3 && !draft.ownership) return false;
+                if (assetStep === 2) {
+                    const inst = resolveInstitutionLabel(draft);
+                    if (!inst) return false;
+                    const w = looksLikeSensitiveData(inst);
+                    if (w) { setSensitiveBlock(true); return false; }
+                    return true;
+                }
+                if (assetStep === 3) {
+                    if (!draft.ownership) return false;
+                    if (draft.ownership === 'Other entity' && !(draft.ownershipOther || '').trim()) return false;
+                    return true;
+                }
                 if (assetStep === 4) {
-                    const clue = draft.locationClue || draft.locationTags.length;
-                    if (!clue) return false;
-                    const w = looksLikeSensitiveData(draft.locationClue) || looksLikeSensitiveData(draft.customInstitution) || looksLikeSensitiveData(draft.institution);
+                    const hasOtherTag = draft.locationTags.includes('other');
+                    const clue = (draft.locationClue || '').trim();
+                    const hasClue = clue || (draft.locationTags.filter((t) => t !== 'other').length > 0);
+                    if (!hasClue) return false;
+                    if (hasOtherTag && !clue) return false;
+                    const w = looksLikeSensitiveData(draft.locationClue) || looksLikeSensitiveData(draft.customInstitution) || looksLikeSensitiveData(resolveInstitutionLabel(draft));
                     if (w) { setSensitiveBlock(true); return false; }
                 }
                 return true;
             };
 
-            const saveAssetEntry = () => {
-                const inst = draft.institution === 'Other (type below)' ? draft.customInstitution : draft.institution;
+            const saveAssetEntry = (addAnotherSameCategory = false) => {
+                const inst = resolveInstitutionLabel(draft);
                 let clue = draft.locationClue;
                 if (draft.locationTags.includes('email_inbox') && draft.emailSearchTerm) {
                     clue = (clue ? clue + ' | ' : '') + "Email search: '" + draft.emailSearchTerm + "'";
                 }
+                const ownershipLabel = draft.ownership === 'Other entity' && draft.ownershipOther.trim()
+                    ? 'Other entity: ' + draft.ownershipOther.trim()
+                    : draft.ownership;
                 ob.roadmapEntries.push({
                     id: Date.now(),
                     category: draft.category,
                     institution: inst,
-                    ownership: draft.ownership,
+                    ownership: ownershipLabel,
                     locationClue: clue,
                     locationTags: [...draft.locationTags]
                 });
-                setDraft({ category: '', institution: '', customInstitution: '', ownership: '', locationClue: '', locationTags: [], emailSearchTerm: '' });
+                if (skippedCategories.includes(draft.category)) unmarkCategorySkipped(draft.category);
+                const savedCat = draft.category;
+                resetDraft();
                 setAssetStep(1);
                 setSensitiveBlock(false);
+                bumpEntries();
+                setSaveNotice(addAnotherSameCategory
+                    ? 'Item saved. Add another in ' + savedCat + ' or pick a different category.'
+                    : 'Item saved. You can add more items or continue when all four categories are mapped.');
+                setTimeout(() => setSaveNotice(''), 6000);
             };
 
             const finishOnboarding = () => {
@@ -2950,66 +3029,129 @@
 
                     {stage === 3 && (
                         <div className="bg-white rounded-xl card-shadow-lg p-8">
-                            <p className="text-xs text-blue-900 font-semibold mb-1">Interactive asset mapping — Step {assetStep} of 4</p>
+                            <p className="text-xs text-blue-900 font-semibold mb-1">
+                                {assetStep === 1
+                                    ? `Map all four categories — ${categoriesAddressedCount} of 4 complete`
+                                    : `Item details — step ${assetStep} of 4 (${draft.category})`}
+                            </p>
                             <h2 className="text-xl font-bold text-gray-900 mb-4">The &quot;Where&quot; Flow</h2>
+                            {saveNotice && (
+                                <p className="text-sm text-green-800 bg-green-50 border border-green-200 rounded-lg px-3 py-2 mb-4">{saveNotice}</p>
+                            )}
 
                             {assetStep === 1 && (
                                 <>
-                                    <p className="text-sm text-gray-600 mb-4">Choose a category. We only record where things are — not account numbers or balances.</p>
-                                    <div className="grid grid-cols-2 gap-3 mb-6">
-                                        {ASSET_CATEGORY_TILES.map((tile) => (
-                                            <button
-                                                key={tile.id}
-                                                type="button"
-                                                onClick={() => { setDraft({ ...draft, category: tile.id }); setAssetStep(2); }}
-                                                className={`p-4 rounded-xl border-2 text-left transition ${draft.category === tile.id ? 'border-blue-900 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
-                                            >
-                                                <i data-lucide={tile.icon} className="w-6 h-6 text-blue-900 mb-2"></i>
+                                    <p className="text-sm text-gray-600 mb-4">Map each category below (add one or more items per category). Select <strong>Other</strong> anytime to describe your own institution or item.</p>
+                                    <div className="grid grid-cols-2 gap-3 mb-4">
+                                        {categoryProgress.map((tile) => (
+                                            <div key={tile.id} className={`p-4 rounded-xl border-2 text-left ${tile.complete ? 'border-green-500 bg-green-50/50' : 'border-gray-200'}`}>
+                                                <div className="flex items-start justify-between gap-2 mb-2">
+                                                    <i data-lucide={tile.icon} className="w-6 h-6 text-blue-900 flex-shrink-0"></i>
+                                                    {tile.complete && (
+                                                        <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                                                            {tile.skipped ? 'N/A' : tile.count + ' saved'}
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <p className="font-semibold text-sm text-gray-900">{tile.id}</p>
-                                                <p className="text-xs text-gray-500 mt-1">{tile.desc}</p>
-                                            </button>
+                                                <p className="text-xs text-gray-500 mt-1 mb-3">{tile.desc}</p>
+                                                <div className="flex flex-col gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { resetDraft(); setDraft({ category: tile.id, institution: '', customInstitution: '', ownership: '', ownershipOther: '', locationClue: '', locationTags: [], emailSearchTerm: '' }); setAssetStep(2); }}
+                                                        className="w-full text-xs bg-blue-900 text-white py-2 rounded-lg font-semibold hover:bg-blue-800"
+                                                    >
+                                                        {tile.count > 0 ? 'Add another item' : 'Add item'}
+                                                    </button>
+                                                    {!tile.complete && (
+                                                        <button type="button" onClick={() => markCategoryNotApplicable(tile.id)} className="w-full text-xs text-gray-600 py-1.5 hover:text-blue-900 underline">
+                                                            Nothing to add here
+                                                        </button>
+                                                    )}
+                                                    {tile.skipped && tile.count === 0 && (
+                                                        <button type="button" onClick={() => unmarkCategorySkipped(tile.id)} className="w-full text-xs text-blue-900 py-1">
+                                                            Undo — I do have items
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
                                         ))}
                                     </div>
-                                    {ob.roadmapEntries.length > 0 && (
-                                        <p className="text-sm text-green-700 mb-4">{ob.roadmapEntries.length} roadmap item(s) saved.</p>
+
+                                    {(ob.roadmapEntries || []).length > 0 && (
+                                        <div className="mb-4 border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                            <p className="text-sm font-semibold text-gray-900 mb-2">Saved roadmap items ({ob.roadmapEntries.length})</p>
+                                            <ul className="space-y-2 max-h-40 overflow-y-auto">
+                                                {ob.roadmapEntries.map((e) => (
+                                                    <li key={e.id} className="flex items-start justify-between gap-2 text-sm bg-white border border-gray-100 rounded-lg px-3 py-2">
+                                                        <span><strong className="text-gray-800">{e.category}:</strong> {e.institution || '—'}</span>
+                                                        <button type="button" onClick={() => removeRoadmapEntry(e.id)} className="text-xs text-red-600 hover:underline flex-shrink-0">Remove</button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
                                     )}
+
+                                    <div className="flex flex-col sm:flex-row gap-3 mt-6 pt-4 border-t">
+                                        <button type="button" onClick={() => setStage(2)} className="flex-1 border py-2 rounded-lg">Back</button>
+                                        <button
+                                            type="button"
+                                            disabled={!allCategoriesAddressed}
+                                            onClick={() => { ob.stage = 4; setStage(4); setAssetStep(1); }}
+                                            className="flex-1 bg-blue-900 text-white py-2 rounded-lg font-semibold hover:bg-blue-800 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                        >
+                                            Continue to Digital Keys
+                                        </button>
+                                    </div>
+                                    {!allCategoriesAddressed && (
+                                        <p className="text-xs text-amber-800 mt-2 text-center">Complete all four categories (add an item or choose &quot;Nothing to add here&quot; for each).</p>
+                                    )}
+                                    <button type="button" onClick={() => { ob.stage = 4; setStage(4); }} className="w-full mt-3 text-sm text-gray-500 hover:text-blue-900 underline">
+                                        Skip entire mapping for now
+                                    </button>
                                 </>
                             )}
 
                             {assetStep === 2 && (
                                 <>
+                                    <p className="text-sm text-gray-600 mb-1"><strong>{draft.category}</strong></p>
                                     <p className="text-sm text-gray-600 mb-4">
                                         {draft.category === 'Financial Accounts' ? 'Where do you hold investments or stocks?' :
                                          draft.category === 'Legal Documents' ? 'Where is the original Will or POA held?' :
                                          draft.category === 'Digital Legacy' ? 'Which platform or service?' :
                                          'What valuable item should your executor know about?'}
                                     </p>
-                                    {(draft.category === 'Financial Accounts' || draft.category === 'Legal Documents') ? (
-                                        <>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">Institution or location type</label>
-                                            <select value={draft.institution} onChange={(e) => {
-                                                const nextInstitution = e.target.value;
-                                                setDraft({
-                                                    ...draft,
-                                                    institution: nextInstitution,
-                                                    customInstitution: nextInstitution !== 'Other (type below)' ? nextInstitution : draft.customInstitution
-                                                });
-                                            }} className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-3 cursor-pointer bg-white">
-                                                <option value="">Select or type below</option>
-                                                {(draft.category === 'Financial Accounts' ? FINANCIAL_INSTITUTIONS : ['Home safe', 'Law firm', 'Bank safety deposit', 'Family member', 'Other (type below)']).map((x) => (
-                                                    <option key={x} value={x}>{x}</option>
-                                                ))}
-                                            </select>
-                                            {draft.institution === 'Other (type below)' && (
-                                                <SensitiveField label="Custom institution (name only)" value={draft.customInstitution} onChange={(v) => setDraft({ ...draft, customInstitution: v })} placeholder="e.g. Local credit union branch name" hint="Bank name only — never account numbers." />
-                                            )}
-                                        </>
-                                    ) : (
-                                        <SensitiveField label="Name or description (no account numbers)" value={draft.customInstitution} onChange={(v) => setDraft({ ...draft, customInstitution: v, institution: v })} placeholder="e.g. Gmail, family cottage, coin collection" hint="Platform or item name only." />
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Select or describe</label>
+                                    <select value={draft.institution} onChange={(e) => {
+                                        const nextInstitution = e.target.value;
+                                        setDraft({
+                                            ...draft,
+                                            institution: nextInstitution,
+                                            customInstitution: (nextInstitution === OTHER_SELECT_VALUE || nextInstitution === 'Other (type below)') ? draft.customInstitution : ''
+                                        });
+                                    }} className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-3 cursor-pointer bg-white">
+                                        <option value="">Choose from list…</option>
+                                        {institutionOptionsForCategory(draft.category).map((x) => (
+                                            <option key={x} value={x}>{x}</option>
+                                        ))}
+                                    </select>
+                                    {(draft.institution === OTHER_SELECT_VALUE || draft.institution === 'Other (type below)' || !draft.institution) && (
+                                        <SensitiveField
+                                            label={draft.institution === OTHER_SELECT_VALUE || draft.institution === 'Other (type below)' ? 'Describe what "Other" is (name only)' : 'Or type name / description'}
+                                            value={draft.customInstitution}
+                                            onChange={(v) => setDraft({ ...draft, customInstitution: v, institution: draft.institution === OTHER_SELECT_VALUE || draft.institution === 'Other (type below)' ? draft.institution : '' })}
+                                            placeholder={
+                                                draft.category === 'Digital Legacy' ? 'e.g. TikTok, family website, crypto wallet brand' :
+                                                draft.category === 'Physical Valuables' ? 'e.g. Family cottage, art collection, boat' :
+                                                'e.g. Local credit union, specific law firm name'
+                                            }
+                                            hint="Describe the institution or item — never account numbers or passwords."
+                                        />
                                     )}
+                                    {sensitiveBlock && <p className="text-sm text-red-600 mb-2">Fix sensitive-looking text before continuing.</p>}
                                     <div className="flex gap-3 mt-4">
-                                        <button type="button" onClick={() => setAssetStep(1)} className="flex-1 border py-2 rounded-lg">Back</button>
-                                        <button type="button" disabled={!canProceedAsset()} onClick={() => setAssetStep(3)} className="flex-1 bg-blue-900 text-white py-2 rounded-lg disabled:bg-gray-300">Next</button>
+                                        <button type="button" onClick={() => { resetDraft(); setAssetStep(1); }} className="flex-1 border py-2 rounded-lg">Back to categories</button>
+                                        <button type="button" disabled={!canProceedAsset()} onClick={() => { setSensitiveBlock(false); setAssetStep(3); }} className="flex-1 bg-blue-900 text-white py-2 rounded-lg disabled:bg-gray-300">Next</button>
                                     </div>
                                 </>
                             )}
@@ -3017,6 +3159,7 @@
                             {assetStep === 3 && (
                                 <>
                                     <DataGuardBanner />
+                                    <p className="text-sm text-gray-600 mb-3"><strong>{draft.category}</strong> — {resolveInstitutionLabel(draft) || 'Item'}</p>
                                     <SensitiveField
                                         label="Under what legal name or entity are these held?"
                                         value={draft.ownership}
@@ -3028,10 +3171,19 @@
                                         <p className="text-sm font-semibold text-gray-700 mb-2">Quick select</p>
                                         <div className="flex flex-wrap gap-2">
                                             {OWNERSHIP_OPTIONS.map((o) => (
-                                                <button key={o} type="button" onClick={() => setDraft({ ...draft, ownership: o })} className={`text-xs px-3 py-1.5 rounded-full border ${draft.ownership === o ? 'bg-blue-900 text-white border-blue-900' : 'border-gray-300 text-gray-700'}`}>{o}</button>
+                                                <button key={o} type="button" onClick={() => setDraft({ ...draft, ownership: o, ownershipOther: o === 'Other entity' ? draft.ownershipOther : '' })} className={`text-xs px-3 py-1.5 rounded-full border ${draft.ownership === o ? 'bg-blue-900 text-white border-blue-900' : 'border-gray-300 text-gray-700'}`}>{o}</button>
                                             ))}
                                         </div>
                                     </div>
+                                    {draft.ownership === 'Other entity' && (
+                                        <SensitiveField
+                                            label="Describe the other entity"
+                                            value={draft.ownershipOther}
+                                            onChange={(v) => setDraft({ ...draft, ownershipOther: v })}
+                                            placeholder="e.g. Family trust, LLC name"
+                                            hint="Name only — not registration or account numbers."
+                                        />
+                                    )}
                                     <div className="flex gap-3">
                                         <button type="button" onClick={() => setAssetStep(2)} className="flex-1 border py-2 rounded-lg">Back</button>
                                         <button type="button" disabled={!canProceedAsset()} onClick={() => setAssetStep(4)} className="flex-1 bg-blue-900 text-white py-2 rounded-lg disabled:bg-gray-300">Next</button>
@@ -3041,6 +3193,7 @@
 
                             {assetStep === 4 && (
                                 <>
+                                    <p className="text-sm text-gray-600 mb-1"><strong>{draft.category}</strong> — {resolveInstitutionLabel(draft)}</p>
                                     <p className="text-sm text-gray-600 mb-4">If your executor needs proof this exists, where should they look?</p>
                                     <div className="space-y-2 mb-4">
                                         {LOCATION_TAGS.map((tag) => (
@@ -3064,27 +3217,20 @@
                                         <SensitiveField label="Email search term (not your password)" value={draft.emailSearchTerm} onChange={(v) => setDraft({ ...draft, emailSearchTerm: v })} placeholder="e.g. TD Waterhouse" hint="Words to search in inbox — not login credentials." />
                                     )}
                                     <SensitiveField
-                                        label="Location clue"
+                                        label={draft.locationTags.includes('other') ? 'Describe the "Other" location' : 'Location clue'}
                                         value={draft.locationClue}
                                         onChange={(v) => setDraft({ ...draft, locationClue: v })}
                                         placeholder="e.g. Black fireproof box, master bedroom closet, 2025 tax folder"
-                                        hint="Describe where proof lives — not what's on the document."
+                                        hint={draft.locationTags.includes('other') ? 'Required when Other is selected — describe where proof lives.' : 'Describe where proof lives — not what\'s on the document.'}
                                         multiline={true}
                                     />
                                     {sensitiveBlock && <p className="text-sm text-red-600 mb-2">Fix sensitive-looking text before saving.</p>}
-                                    <div className="flex flex-wrap gap-3 mt-4">
+                                    <div className="flex flex-col sm:flex-row flex-wrap gap-3 mt-4">
                                         <button type="button" onClick={() => setAssetStep(3)} className="border px-4 py-2 rounded-lg">Back</button>
-                                        <button type="button" disabled={!canProceedAsset()} onClick={saveAssetEntry} className="bg-green-700 text-white px-4 py-2 rounded-lg font-semibold disabled:bg-gray-300">Save item</button>
-                                        <button type="button" onClick={() => { ob.stage = 4; setStage(4); setAssetStep(1); }} className="bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold">Save &amp; next stage</button>
+                                        <button type="button" disabled={!canProceedAsset()} onClick={() => saveAssetEntry(false)} className="bg-green-700 text-white px-4 py-2 rounded-lg font-semibold disabled:bg-gray-300">Save item</button>
+                                        <button type="button" disabled={!canProceedAsset()} onClick={() => saveAssetEntry(true)} className="bg-blue-800 text-white px-4 py-2 rounded-lg font-semibold disabled:bg-gray-300">Save &amp; add another</button>
                                     </div>
                                 </>
-                            )}
-
-                            {assetStep === 1 && (
-                                <div className="flex gap-3 mt-6 pt-4 border-t">
-                                    <button type="button" onClick={() => setStage(2)} className="flex-1 border py-2 rounded-lg">Back</button>
-                                    <button type="button" onClick={() => { ob.stage = 4; setStage(4); }} className="flex-1 text-blue-900 font-semibold py-2">Skip mapping for now</button>
-                                </div>
                             )}
                         </div>
                     )}

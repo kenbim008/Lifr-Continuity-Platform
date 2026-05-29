@@ -25,6 +25,10 @@
         html {
             scroll-behavior: smooth;
         }
+        select {
+            cursor: pointer;
+            pointer-events: auto;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -155,11 +159,11 @@
 
         // Header locale bar: Country + Language (for global operation)
         const HeaderLocaleBar = ({ country, setCountry, language, setLanguage, t }) => (
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-3 flex-shrink-0 relative z-[60]">
                 <select
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="relative z-[60] text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
                     title="Country / Region"
                 >
                     {COUNTRY_LIST.map((c) => (
@@ -169,7 +173,7 @@
                 <select
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
-                    className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="relative z-[60] text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
                     title="Language"
                 >
                     {LANGUAGE_OPTIONS.map((l) => (
@@ -669,7 +673,7 @@
             return (
                 <>
                     {open && (
-                        <div className="fixed bottom-24 right-4 sm:right-6 z-[200] w-[min(calc(100vw-2rem),380px)] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[min(70vh,520px)]">
+                        <div className="fixed bottom-24 right-4 sm:right-6 z-40 w-[min(calc(100vw-2rem),380px)] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[min(70vh,520px)]">
                             <div className="bg-blue-900 text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
                                 <div className="flex items-center gap-2">
                                     <span className="relative flex h-2 w-2">
@@ -720,7 +724,7 @@
                     <button
                         type="button"
                         onClick={() => setOpen((v) => !v)}
-                        className={`fixed bottom-6 right-4 sm:right-6 z-[200] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition ${open ? 'bg-gray-700 hover:bg-gray-800' : 'bg-blue-900 hover:bg-blue-800'} text-white`}
+                        className={`fixed bottom-6 right-4 sm:right-6 z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition ${open ? 'bg-gray-700 hover:bg-gray-800' : 'bg-blue-900 hover:bg-blue-800'} text-white`}
                         aria-label={open ? 'Close support chat' : 'Open support chat'}
                         aria-expanded={open}
                     >
@@ -2572,10 +2576,29 @@
             }
         };
 
-        const OnboardingFlow = ({ onNavigate, onComplete }) => {
+        const OnboardingFlow = ({ onNavigate, onComplete, setCountry }) => {
             const ob = productionData.onboarding;
             const [stage, setStage] = useState(ob.stage || 1);
             const [assetStep, setAssetStep] = useState(1);
+            const [jurisdiction, setJurisdiction] = useState(() => {
+                const country = ob.jurisdiction.country || '';
+                let region = ob.jurisdiction.region || '';
+                const regs = REGION_LIST[country] || [];
+                if (country && !region && regs.length > 0) region = regs[0];
+                ob.jurisdiction.country = country;
+                ob.jurisdiction.region = region;
+                return { country, region };
+            });
+            const [digitalKeys, setDigitalKeys] = useState({
+                method: ob.digitalKeys.method || '',
+                emergencyKitLocation: ob.digitalKeys.emergencyKitLocation || '',
+                physicalStorageLocation: ob.digitalKeys.physicalStorageLocation || ''
+            });
+            const [navigator, setNavigator] = useState({
+                name: ob.navigator.name || '',
+                email: ob.navigator.email || '',
+                permissionTier: ob.navigator.permissionTier || 'conditional'
+            });
             const [draft, setDraft] = useState({
                 category: '',
                 institution: '',
@@ -2587,11 +2610,17 @@
             });
             const [sensitiveBlock, setSensitiveBlock] = useState(false);
 
-            useEffect(() => { try { lucide.createIcons(); } catch (e) {} }, [stage, assetStep]);
+            useEffect(() => { try { lucide.createIcons(); } catch (e) {} }, [stage, assetStep, jurisdiction, digitalKeys, navigator]);
 
-            const jurisdictionKey = getJurisdictionKey(ob.jurisdiction.country, ob.jurisdiction.region);
+            const syncJurisdiction = (next) => {
+                setJurisdiction(next);
+                ob.jurisdiction.country = next.country;
+                ob.jurisdiction.region = next.region;
+            };
+
+            const jurisdictionKey = getJurisdictionKey(jurisdiction.country, jurisdiction.region);
             const checklist = JURISDICTION_CHECKLISTS[jurisdictionKey] || JURISDICTION_CHECKLISTS.DEFAULT;
-            const regions = REGION_LIST[ob.jurisdiction.country] || [];
+            const regions = REGION_LIST[jurisdiction.country] || [];
 
             const canProceedAsset = () => {
                 if (!draft.category) return false;
@@ -2680,28 +2709,28 @@
                             <div className="mb-4">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">Country</label>
                                 <select
-                                    value={ob.jurisdiction.country}
+                                    value={jurisdiction.country}
                                     onChange={(e) => {
                                         const nextCountry = e.target.value;
                                         const nextRegions = REGION_LIST[nextCountry] || [];
-                                        ob.jurisdiction.country = nextCountry;
-                                        ob.jurisdiction.region = nextRegions.length > 0 ? nextRegions[0] : '';
+                                        const nextRegion = nextRegions.length > 0 ? nextRegions[0] : '';
+                                        syncJurisdiction({ country: nextCountry, region: nextRegion });
                                         if (setCountry) setCountry(nextCountry);
                                     }}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg cursor-pointer bg-white"
                                 >
                                     <option value="">Select country</option>
                                     {COUNTRY_LIST.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
                                 </select>
                             </div>
-                            {ob.jurisdiction.country && (
+                            {jurisdiction.country && (
                                 <div className="mb-4">
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Province or State</label>
                                     {regions.length > 0 ? (
                                         <select
-                                            value={ob.jurisdiction.region}
-                                            onChange={(e) => { ob.jurisdiction.region = e.target.value; }}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                            value={jurisdiction.region}
+                                            onChange={(e) => syncJurisdiction({ ...jurisdiction, region: e.target.value })}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg cursor-pointer bg-white"
                                         >
                                             <option value="">Select region</option>
                                             {regions.map((r) => <option key={r} value={r}>{r}</option>)}
@@ -2709,15 +2738,15 @@
                                     ) : (
                                         <SensitiveField
                                             label="Region"
-                                            value={ob.jurisdiction.region}
-                                            onChange={(v) => { ob.jurisdiction.region = v; }}
+                                            value={jurisdiction.region}
+                                            onChange={(v) => syncJurisdiction({ ...jurisdiction, region: v })}
                                             placeholder="e.g. Alberta, California"
                                             hint="Name only — not a postal code or full address unless you choose to add one later in Estate Planner."
                                         />
                                     )}
                                 </div>
                             )}
-                            {ob.jurisdiction.country && ob.jurisdiction.region && (
+                            {jurisdiction.country && jurisdiction.region && (
                                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
                                     <p className="text-sm font-semibold text-amber-900 mb-2">Localized checklist prepared</p>
                                     <ul className="text-xs text-amber-800 space-y-1 list-disc list-inside">
@@ -2727,7 +2756,7 @@
                             )}
                             <div className="flex gap-3">
                                 <button type="button" onClick={() => setStage(1)} className="flex-1 border border-gray-300 py-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-50">Back</button>
-                                <button type="button" disabled={!ob.jurisdiction.country || !ob.jurisdiction.region} onClick={() => { ob.stage = 3; setStage(3); }} className="flex-1 bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 disabled:bg-gray-300">Continue</button>
+                                <button type="button" disabled={!jurisdiction.country || !jurisdiction.region} onClick={() => { ob.stage = 3; setStage(3); }} className="flex-1 bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 disabled:bg-gray-300">Continue</button>
                             </div>
                         </div>
                     )}
@@ -2778,7 +2807,7 @@
                                                     institution: nextInstitution,
                                                     customInstitution: nextInstitution !== 'Other (type below)' ? nextInstitution : draft.customInstitution
                                                 });
-                                            }} className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-3">
+                                            }} className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-3 cursor-pointer bg-white">
                                                 <option value="">Select or type below</option>
                                                 {(draft.category === 'Financial Accounts' ? FINANCIAL_INSTITUTIONS : ['Home safe', 'Law firm', 'Bank safety deposit', 'Family member', 'Other (type below)']).map((x) => (
                                                     <option key={x} value={x}>{x}</option>
@@ -2879,30 +2908,30 @@
                             <p className="text-sm text-gray-600 mb-4">We are not a password vault. Tell us the <strong>route</strong> to your existing security system.</p>
                             <DataGuardBanner />
                             <div className="space-y-3 mb-6">
-                                <label className={`flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer ${ob.digitalKeys.method === 'manager' ? 'border-blue-900 bg-blue-50' : 'border-gray-200'}`}>
-                                    <input type="radio" name="dk" checked={ob.digitalKeys.method === 'manager'} onChange={() => { ob.digitalKeys.method = 'manager'; }} className="mt-1" />
+                                <label className={`flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer ${digitalKeys.method === 'manager' ? 'border-blue-900 bg-blue-50' : 'border-gray-200'}`}>
+                                    <input type="radio" name="dk" checked={digitalKeys.method === 'manager'} onChange={() => { const next = { ...digitalKeys, method: 'manager' }; setDigitalKeys(next); ob.digitalKeys.method = 'manager'; }} className="mt-1" />
                                     <span className="text-sm">I use a password manager (1Password, Apple Keychain, Bitwarden, etc.)</span>
                                 </label>
-                                <label className={`flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer ${ob.digitalKeys.method === 'written' ? 'border-blue-900 bg-blue-50' : 'border-gray-200'}`}>
-                                    <input type="radio" name="dk" checked={ob.digitalKeys.method === 'written'} onChange={() => { ob.digitalKeys.method = 'written'; }} className="mt-1" />
+                                <label className={`flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer ${digitalKeys.method === 'written' ? 'border-blue-900 bg-blue-50' : 'border-gray-200'}`}>
+                                    <input type="radio" name="dk" checked={digitalKeys.method === 'written'} onChange={() => { const next = { ...digitalKeys, method: 'written' }; setDigitalKeys(next); ob.digitalKeys.method = 'written'; }} className="mt-1" />
                                     <span className="text-sm">I keep them written down physically</span>
                                 </label>
                             </div>
-                            {ob.digitalKeys.method === 'manager' && (
+                            {digitalKeys.method === 'manager' && (
                                 <SensitiveField
                                     label="Where is your Emergency Access Kit or recovery key?"
-                                    value={ob.digitalKeys.emergencyKitLocation}
-                                    onChange={(v) => { ob.digitalKeys.emergencyKitLocation = v; }}
+                                    value={digitalKeys.emergencyKitLocation}
+                                    onChange={(v) => { setDigitalKeys({ ...digitalKeys, emergencyKitLocation: v }); ob.digitalKeys.emergencyKitLocation = v; }}
                                     placeholder="e.g. Printed sheet inside family album, living room shelf"
                                     hint="Location clue only — never the master password or recovery secret."
                                     multiline={true}
                                 />
                             )}
-                            {ob.digitalKeys.method === 'written' && (
+                            {digitalKeys.method === 'written' && (
                                 <SensitiveField
                                     label="Where is this book or file safely stored?"
-                                    value={ob.digitalKeys.physicalStorageLocation}
-                                    onChange={(v) => { ob.digitalKeys.physicalStorageLocation = v; }}
+                                    value={digitalKeys.physicalStorageLocation}
+                                    onChange={(v) => { setDigitalKeys({ ...digitalKeys, physicalStorageLocation: v }); ob.digitalKeys.physicalStorageLocation = v; }}
                                     placeholder="e.g. Locked desk drawer, home office"
                                     hint="Where to find the book — not the passwords themselves."
                                     multiline={true}
@@ -2910,7 +2939,7 @@
                             )}
                             <div className="flex gap-3 mt-6">
                                 <button type="button" onClick={() => setStage(3)} className="flex-1 border py-3 rounded-lg">Back</button>
-                                <button type="button" disabled={!ob.digitalKeys.method} onClick={() => { ob.stage = 5; setStage(5); }} className="flex-1 bg-blue-900 text-white py-3 rounded-lg font-semibold disabled:bg-gray-300">Save &amp; next</button>
+                                <button type="button" disabled={!digitalKeys.method} onClick={() => { ob.stage = 5; setStage(5); }} className="flex-1 bg-blue-900 text-white py-3 rounded-lg font-semibold disabled:bg-gray-300">Save &amp; next</button>
                             </div>
                         </div>
                     )}
@@ -2920,24 +2949,24 @@
                             <h2 className="text-xl font-bold text-gray-900 mb-2">Assign Your Navigator</h2>
                             <p className="text-sm text-gray-600 mb-4">The trusted person who may need your estate roadmap. Name and email only — no government IDs.</p>
                             <DataGuardBanner />
-                            <SensitiveField label="Navigator full name" value={ob.navigator.name} onChange={(v) => { ob.navigator.name = v; }} placeholder="e.g. Sarah Anderson" hint="Legal name helps matching — not required to match ID here." />
-                            <SensitiveField label="Navigator email" value={ob.navigator.email} onChange={(v) => { ob.navigator.email = v; }} placeholder="sarah@email.com" hint="Used for access requests and notifications." />
+                            <SensitiveField label="Navigator full name" value={navigator.name} onChange={(v) => { setNavigator({ ...navigator, name: v }); ob.navigator.name = v; }} placeholder="e.g. Sarah Anderson" hint="Legal name helps matching — not required to match ID here." />
+                            <SensitiveField label="Navigator email" value={navigator.email} onChange={(v) => { setNavigator({ ...navigator, email: v }); ob.navigator.email = v; }} placeholder="sarah@email.com" hint="Used for access requests and notifications." />
                             <p className="text-sm font-semibold text-gray-900 mt-4 mb-2">Permission tier</p>
                             <div className="space-y-3 mb-6">
-                                <label className={`block p-4 border-2 rounded-lg cursor-pointer ${ob.navigator.permissionTier === 'immediate' ? 'border-blue-900 bg-blue-50' : 'border-gray-200'}`}>
-                                    <input type="radio" name="tier" className="mr-2" checked={ob.navigator.permissionTier === 'immediate'} onChange={() => { ob.navigator.permissionTier = 'immediate'; }} />
+                                <label className={`block p-4 border-2 rounded-lg cursor-pointer ${navigator.permissionTier === 'immediate' ? 'border-blue-900 bg-blue-50' : 'border-gray-200'}`}>
+                                    <input type="radio" name="tier" className="mr-2" checked={navigator.permissionTier === 'immediate'} onChange={() => { setNavigator({ ...navigator, permissionTier: 'immediate' }); ob.navigator.permissionTier = 'immediate'; }} />
                                     <strong className="text-sm">Immediate access</strong>
                                     <p className="text-xs text-gray-600 mt-1 ml-6">Navigator can view the roadmap now (e.g. aging parents &amp; adult children).</p>
                                 </label>
-                                <label className={`block p-4 border-2 rounded-lg cursor-pointer ${ob.navigator.permissionTier === 'conditional' ? 'border-blue-900 bg-blue-50' : 'border-gray-200'}`}>
-                                    <input type="radio" name="tier" className="mr-2" checked={ob.navigator.permissionTier === 'conditional'} onChange={() => { ob.navigator.permissionTier = 'conditional'; }} />
+                                <label className={`block p-4 border-2 rounded-lg cursor-pointer ${navigator.permissionTier === 'conditional' ? 'border-blue-900 bg-blue-50' : 'border-gray-200'}`}>
+                                    <input type="radio" name="tier" className="mr-2" checked={navigator.permissionTier === 'conditional'} onChange={() => { setNavigator({ ...navigator, permissionTier: 'conditional' }); ob.navigator.permissionTier = 'conditional'; }} />
                                     <strong className="text-sm">Conditional access (The Switch)</strong>
                                     <p className="text-xs text-gray-600 mt-1 ml-6">Nothing visible until they request access — 7-day waiting period; you may deny or require secondary confirmation.</p>
                                 </label>
                             </div>
                             <div className="flex gap-3">
                                 <button type="button" onClick={() => setStage(4)} className="flex-1 border py-3 rounded-lg">Back</button>
-                                <button type="button" disabled={!ob.navigator.name.trim()} onClick={finishOnboarding} className="flex-1 bg-green-700 text-white py-3 rounded-lg font-semibold disabled:bg-gray-300">Complete roadmap</button>
+                                <button type="button" disabled={!navigator.name.trim()} onClick={finishOnboarding} className="flex-1 bg-green-700 text-white py-3 rounded-lg font-semibold disabled:bg-gray-300">Complete roadmap</button>
                             </div>
                         </div>
                     )}
@@ -4769,7 +4798,7 @@
             };
             const renderPage = () => {
                 if (currentPage === 'onboarding') {
-                    return <OnboardingFlow onNavigate={handleNavigate} onComplete={() => setCurrentPage('estate-discovery')} />;
+                    return <OnboardingFlow onNavigate={handleNavigate} onComplete={() => setCurrentPage('estate-discovery')} setCountry={setCountry} />;
                 }
                 if (currentPage === 'estate-discovery') {
                     return <EstateDiscoveryDirectory onNavigate={handleNavigate} />;

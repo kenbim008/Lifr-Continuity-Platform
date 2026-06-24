@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LegacyVault Admin Portal (Demo)</title>
+    <title>LifEscrow Admin Portal (Demo)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -17,6 +17,15 @@
     <div id="root"></div>
     <script type="text/babel">
         const { useState, useEffect } = React;
+
+        const BRAND_LIF_COLOR = '#214398';
+        const BRAND_ESCROW_COLOR = '#D97706';
+        const BrandWordmark = ({ className = '' }) => (
+            <span className={className}>
+                <span style={{ color: BRAND_LIF_COLOR }}>Lif</span>
+                <span style={{ color: BRAND_ESCROW_COLOR }}>Escrow</span>
+            </span>
+        );
 
         const DEMO_USERS = [
             { email: 'super@legacyvault.demo', password: 'demo123', role: 'super_admin', label: 'Super Admin', home: 'super' },
@@ -65,7 +74,7 @@
                                 <i data-lucide="shield" className="w-7 h-7 text-white"></i>
                             </div>
                             <div>
-                                <h1 className="text-xl font-bold text-slate-900">LegacyVault Admin</h1>
+                                <h1 className="text-xl font-bold text-slate-900"><BrandWordmark /> Admin</h1>
                                 <p className="text-sm text-slate-500">Demo backend portal</p>
                             </div>
                         </div>
@@ -108,7 +117,7 @@
                     <header className="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <i data-lucide="shield" className="w-6 h-6"></i>
-                            <span className="font-bold">LegacyVault Admin</span>
+                            <span className="font-bold"><BrandWordmark /> Admin</span>
                             <span className="text-xs bg-amber-500 text-slate-900 px-2 py-0.5 rounded-full font-semibold">DEMO</span>
                         </div>
                         <div className="flex items-center gap-4 text-sm">

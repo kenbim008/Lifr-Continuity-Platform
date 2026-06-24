@@ -88,8 +88,8 @@ text_demo = re.sub(
 
 # Title
 text_demo = text_demo.replace(
-    "<title>LegacyVault - Production</title>",
-    "<title>LegacyVault - Demo (Sample Data)</title>",
+    "<title>LifEscrow - Production</title>",
+    "<title>LifEscrow - Demo (Sample Data)</title>",
     1,
 )
 

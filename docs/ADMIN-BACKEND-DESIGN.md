@@ -1,4 +1,4 @@
-# LegacyVault — Backend & 3-Tier Admin Portal Design
+# LifEscrow — Backend & 3-Tier Admin Portal Design
 
 This document defines how the **backend** and **admin portal** should be structured for [Lifr Continuity Platform](https://lifr-continuity-platform.vercel.app), with **three admin levels**, separate URLs from the public app, and clear permissions.
 
@@ -264,7 +264,7 @@ Public app continues to use subscriber-scoped Supabase client + RLS.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ LegacyVault Admin · Super Admin          [Account] [Sign out]│
+│ LifEscrow Admin · Super Admin          [Account] [Sign out]│
 ├──────────┬──────────────────────────────────────────────────┤
 │ Overview │  MRR · Active subs · Churn · Storage · Triggers   │
 │ Admins   │  [Table: admin users + invite]                    │
@@ -279,7 +279,7 @@ Public app continues to use subscriber-scoped Supabase client + RLS.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ LegacyVault Admin · Operations           [Account] [Sign out]│
+│ LifEscrow Admin · Operations           [Account] [Sign out]│
 ├──────────┬──────────────────────────────────────────────────┤
 │ Overview │  Signups today · Failed payments · Open enquiries │
 │ Subscribers│ [Search] [Plan] [Status] → detail drawer        │
@@ -293,7 +293,7 @@ Public app continues to use subscriber-scoped Supabase client + RLS.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ LegacyVault Admin · Support              [Account] [Sign out]│
+│ LifEscrow Admin · Support              [Account] [Sign out]│
 ├──────────┬──────────────────────────────────────────────────┤
 │ My queue │  Will enquiries assigned to me                    │
 │ Search   │  Subscriber lookup (plan/status only)             │
@@ -367,4 +367,4 @@ Map existing UI to backend ownership:
 
 ---
 
-*Document version: 1.0 — for LegacyVault / Lifr Continuity Platform*
+*Document version: 1.0 — for LifEscrow / Lifr Continuity Platform*
